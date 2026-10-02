@@ -1,0 +1,15 @@
+# Esboços da sessão de design (as versões finais estão em docs/esbocos/)
+.superpowers/
+
+# Segredos e configuração local
+.env
+.env.*
+!.env.exemplo
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Vercel
+.vercel/

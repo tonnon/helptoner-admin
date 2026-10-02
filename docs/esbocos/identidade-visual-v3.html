@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Identidade visual · Helptoner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --azul: #0200FF;
+    --azul-escuro: #0100C4;
+    --azul-50: #F0F1FF;
+    --azul-100: #E0E2FF;
+    --vermelho: #FF0000;
+    --vermelho-texto: #D60000;
+    --vermelho-50: #FFF1F1;
+    --tinta: #0E1024;
+    --texto-2: #5A5F78;
+    --linha: #E6E8F1;
+    --fundo: #F5F6FB;
+    --cartao: #FFFFFF;
+    --ok: #0B8A5E;
+    --ok-50: #E8F7F0;
+    --alerta: #A15C07;
+    --alerta-50: #FFF6E5;
+    --raio: 14px;
+    --sombra: 0 1px 2px rgba(14,16,36,.06), 0 8px 24px rgba(14,16,36,.06);
+    --gradiente: linear-gradient(90deg, var(--vermelho) 0%, #8A00C8 50%, var(--azul) 100%);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: Inter, "Segoe UI", system-ui, sans-serif;
+    background: var(--fundo);
+    color: var(--tinta);
+    -webkit-font-smoothing: antialiased;
+  }
+  .pagina { max-width: 1180px; margin: 0 auto; padding: 28px 16px 64px; }
+  h1 { font-size: 26px; letter-spacing: -.02em; margin: 0 0 6px; }
+  .sub { color: var(--texto-2); margin: 0 0 28px; line-height: 1.5; max-width: 760px; }
+  h2 { font-size: 15px; text-transform: uppercase; letter-spacing: .08em; color: var(--texto-2); margin: 36px 0 14px; }
+
+  /* ---------- Paleta ---------- */
+  .identidade { display: grid; grid-template-columns: minmax(260px, 380px) 1fr; gap: 20px; align-items: stretch; }
+  .logo-card { background: #fff; border-radius: var(--raio); box-shadow: var(--sombra); padding: 20px; display: grid; place-items: center; }
+  .logo-card svg { width: 100%; height: auto; }
+  .cores { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
+  .cor { background: #fff; border-radius: var(--raio); box-shadow: var(--sombra); overflow: hidden; }
+  .cor .amostra { height: 64px; }
+  .cor .info { padding: 10px 12px 12px; font-size: 13px; line-height: 1.4; }
+  .cor b { display: block; font-size: 14px; }
+  .cor code { color: var(--texto-2); font-size: 12px; }
+
+  /* ---------- Controles da demonstração ---------- */
+  .controles { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+  .segmento { display: inline-flex; background: #fff; border: 1px solid var(--linha); border-radius: 999px; padding: 3px; }
+  .segmento button { border: 0; background: transparent; padding: 7px 14px; border-radius: 999px; font: 600 13px Inter, sans-serif; color: var(--texto-2); cursor: pointer; transition: background .2s, color .2s; }
+  .segmento button[aria-pressed="true"] { background: var(--azul); color: #fff; }
+  .btn-sec { border: 1px solid var(--linha); background: #fff; padding: 8px 14px; border-radius: 999px; font: 600 13px Inter, sans-serif; color: var(--tinta); cursor: pointer; display: inline-flex; gap: 6px; align-items: center; transition: border-color .2s, transform .1s; }
+  .btn-sec:hover { border-color: var(--azul); }
+  .btn-sec:active { transform: scale(.97); }
+  .dica { color: var(--texto-2); font-size: 13px; }
+
+  /* ---------- Moldura do app ---------- */
+  .palco { display: grid; place-items: center; }
+  .moldura {
+    width: 100%; height: 660px; background: var(--fundo);
+    border-radius: 18px; overflow: hidden; position: relative;
+    box-shadow: 0 0 0 1px var(--linha), 0 24px 60px rgba(14,16,36,.14);
+    transition: width .45s cubic-bezier(.2,.8,.2,1), height .45s cubic-bezier(.2,.8,.2,1), border-radius .45s;
+    container-type: inline-size; container-name: app;
+  }
+  .moldura.celular { width: 390px; height: 780px; border-radius: 36px; box-shadow: 0 0 0 10px #15172b, 0 30px 70px rgba(14,16,36,.3); }
+  .app { display: grid; grid-template-columns: 232px 1fr; height: 100%; }
+  .faixa { position: absolute; inset: 0 0 auto 0; height: 3px; background: var(--gradiente); z-index: 5; }
+
+  .i { width: 18px; height: 18px; flex: none; }
+
+  /* Menu lateral */
+  .menu { background: #fff; border-right: 1px solid var(--linha); padding: 22px 14px; display: flex; flex-direction: column; gap: 4px; }
+  .marca { font: italic 800 22px Inter, "Segoe UI", sans-serif; letter-spacing: -.01em; padding: 0 10px 18px; }
+  .marca .h { color: var(--vermelho); }
+  .marca .t { color: var(--azul); }
+  .logo-menu { display: block; width: 100%; max-width: 190px; height: auto; margin: 0 auto 4px; }
+  .logo-topo { display: block; height: 34px; width: auto; }
+  .marca small { display: block; text-align: center; font: 500 11px Inter, sans-serif; color: var(--texto-2); letter-spacing: .02em; margin-top: 2px; }
+  .item-menu { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 10px; color: var(--texto-2); font-size: 14px; font-weight: 500; position: relative; cursor: pointer; transition: background .2s, color .2s; }
+  .item-menu:hover { background: var(--fundo); color: var(--tinta); }
+  .item-menu.ativo { background: var(--azul-50); color: var(--azul); font-weight: 600; }
+  .item-menu.ativo::before { content: ""; position: absolute; left: -14px; top: 8px; bottom: 8px; width: 4px; border-radius: 0 4px 4px 0; background: var(--vermelho); }
+  .usuario { margin-top: auto; display: flex; gap: 10px; align-items: center; padding: 10px; border-top: 1px solid var(--linha); font-size: 13px; }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--gradiente); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 13px; }
+  .usuario span { color: var(--texto-2); display: block; font-size: 12px; }
+
+  /* Topo do celular */
+  .topo-celular { display: none; }
+
+  /* Conteúdo */
+  .principal { overflow: auto; padding: 22px 26px 26px; position: relative; scroll-behavior: smooth; }
+  .cabecalho { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+  .trilha { font-size: 13px; color: var(--texto-2); }
+  .cabecalho h3 { margin: 2px 0 0; font-size: 22px; letter-spacing: -.02em; }
+  .selo { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 600; transition: background .3s, color .3s; }
+  .selo.rascunho { background: var(--alerta-50); color: var(--alerta); }
+  .selo.confirmado { background: var(--ok-50); color: var(--ok); animation: pop .45s cubic-bezier(.2,1.4,.4,1); }
+  .ponto { width: 7px; height: 7px; border-radius: 50%; background: currentColor; position: relative; }
+  .selo.rascunho .ponto::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; background: currentColor; opacity: .35; animation: pulso 1.8s infinite; }
+
+  .grade { display: grid; grid-template-columns: 1fr 300px; gap: 18px; align-items: start; }
+  .cartao { background: var(--cartao); border-radius: var(--raio); box-shadow: var(--sombra); padding: 18px; }
+  .cartao + .cartao { margin-top: 16px; }
+  .rotulo { font-size: 12.5px; font-weight: 600; color: var(--texto-2); margin-bottom: 8px; display: block; }
+
+  .campo { display: flex; align-items: center; gap: 8px; border: 1.5px solid var(--linha); border-radius: 10px; padding: 10px 12px; background: #fff; transition: border-color .2s, box-shadow .2s; }
+  .campo:focus-within { border-color: var(--azul); box-shadow: 0 0 0 4px var(--azul-100); }
+  .campo input { border: 0; outline: 0; font: 500 14px Inter, sans-serif; width: 100%; color: var(--tinta); background: transparent; min-width: 0; }
+  .campo .i { color: var(--texto-2); }
+  .cliente-sel { display: flex; gap: 12px; align-items: center; margin-top: 12px; padding: 12px; border-radius: 12px; background: var(--fundo); }
+  .cliente-sel .ini { width: 38px; height: 38px; border-radius: 10px; background: var(--azul-100); color: var(--azul); display: grid; place-items: center; font-weight: 800; }
+  .cliente-sel b { font-size: 14px; display: block; }
+  .cliente-sel span { font-size: 12.5px; color: var(--texto-2); }
+
+  .linha-add { display: grid; grid-template-columns: 1fr 74px auto; gap: 8px; }
+  .qtd { justify-content: center; }
+  .qtd input { text-align: center; }
+
+  .btn { border: 0; border-radius: 10px; padding: 11px 16px; font: 700 14px Inter, sans-serif; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: background .2s, transform .1s, box-shadow .2s; white-space: nowrap; }
+  .btn:active { transform: scale(.97); }
+  .btn-pri { background: var(--azul); color: #fff; box-shadow: 0 6px 16px rgba(2,0,255,.25); }
+  .btn-pri:hover { background: var(--azul-escuro); }
+  .btn-pri:focus-visible { outline: 0; box-shadow: 0 0 0 4px var(--azul-100); }
+  .btn-cheio { width: 100%; padding: 14px; font-size: 15px; }
+  .btn .giro { display: none; width: 16px; height: 16px; border: 2.5px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: gira .7s linear infinite; }
+  .btn.carregando .giro { display: inline-block; }
+  .btn.carregando .txt-normal { display: none; }
+  .btn .txt-carregando { display: none; }
+  .btn.carregando .txt-carregando { display: inline; }
+  .btn.carregando { pointer-events: none; opacity: .9; }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 13.5px; }
+  th { text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--texto-2); font-weight: 600; padding: 8px 6px; border-bottom: 1px solid var(--linha); }
+  td { padding: 12px 6px; border-bottom: 1px solid var(--linha); vertical-align: middle; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .centro { text-align: center; }
+  td .cod { display: block; font-size: 12px; color: var(--texto-2); font-weight: 500; }
+  td .desc { font-weight: 600; }
+  .remover { border: 0; background: transparent; color: var(--texto-2); width: 30px; height: 30px; border-radius: 8px; cursor: pointer; display: grid; place-items: center; transition: background .2s, color .2s; }
+  .remover:hover { background: var(--vermelho-50); color: var(--vermelho-texto); }
+  tr.nova { animation: entra .55s cubic-bezier(.2,.8,.2,1) both; }
+  tr.nova td { animation: destaque 1.6s ease-out; }
+  tr.saindo { animation: sai .3s ease-in forwards; }
+  .vazio { text-align: center; color: var(--texto-2); padding: 26px 0; }
+
+  [hidden] { display: none !important; }
+
+  /* Busca com sugestões */
+  .busca { position: relative; }
+  .sugestoes { position: absolute; left: 0; right: 0; top: calc(100% + 6px); background: #fff; border-radius: 12px; box-shadow: 0 18px 44px rgba(14,16,36,.16), 0 0 0 1px var(--linha); padding: 6px; z-index: 20; display: none; max-height: 320px; overflow: auto; }
+  .sugestoes.aberta { display: block; animation: abre .18s ease-out; }
+  .sug { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 13.5px; }
+  .sug.ativa, .sug:not(.indisponivel):hover { background: var(--azul-50); }
+  .sug b { display: block; font-weight: 600; }
+  .sug small { color: var(--texto-2); font-size: 12px; }
+  .sug .dir { text-align: right; white-space: nowrap; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; font-variant-numeric: tabular-nums; }
+  .sug mark { background: #FFF1A8; color: inherit; border-radius: 3px; }
+  .sug.indisponivel { opacity: .55; cursor: not-allowed; }
+  .sug-carregando { padding: 10px 12px; }
+  .sug-vazia { padding: 16px; text-align: center; color: var(--texto-2); font-size: 13.5px; }
+  .tag-estoque { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--ok-50); color: var(--ok); }
+  .tag-estoque.baixo { background: var(--alerta-50); color: var(--alerta); }
+  .tag-estoque.zero { background: var(--vermelho-50); color: var(--vermelho-texto); }
+  .info-produto { font-size: 12.5px; color: var(--texto-2); margin-top: 8px; min-height: 18px; }
+  .info-produto b { color: var(--tinta); }
+  .msg { color: var(--vermelho-texto); font-size: 12.5px; font-weight: 500; min-height: 18px; margin-top: 4px; }
+  .cliente-sel.surge { animation: sobe .35s cubic-bezier(.2,.8,.2,1); }
+  .cliente-sel .btn-sec { margin-left: auto; padding: 6px 12px; }
+  .passos { display: inline-flex; align-items: center; border: 1px solid var(--linha); border-radius: 8px; overflow: hidden; background: #fff; }
+  .passos button { border: 0; background: transparent; width: 26px; height: 28px; cursor: pointer; font: 700 15px Inter, sans-serif; color: var(--texto-2); transition: background .15s, color .15s; }
+  .passos button:hover { background: var(--azul-50); color: var(--azul); }
+  .passos span { min-width: 28px; text-align: center; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .moldura.travado .linha-add, .moldura.travado .passos, .moldura.travado .remover, .moldura.travado .cliente-sel .btn-sec { pointer-events: none; opacity: .45; }
+  @keyframes abre { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+  /* Resumo */
+  .resumo { position: sticky; top: 0; overflow: hidden; }
+  .resumo::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 4px; background: var(--gradiente); }
+  .resumo h4 { margin: 4px 0 14px; font-size: 16px; }
+  .linha-val { display: flex; justify-content: space-between; font-size: 14px; padding: 6px 0; color: var(--texto-2); }
+  .linha-val b { color: var(--tinta); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .desconto { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin: 8px 0 4px; }
+  .desconto .segmento { border-radius: 10px; }
+  .desconto .segmento button { border-radius: 8px; padding: 7px 12px; }
+  .erro { color: var(--vermelho-texto); font-size: 12.5px; min-height: 18px; margin-top: 4px; }
+  .campo.invalido { border-color: var(--vermelho-texto); animation: treme .35s; }
+  .total { border-top: 1px dashed var(--linha); margin-top: 10px; padding-top: 14px; display: flex; justify-content: space-between; align-items: baseline; }
+  .total span { font-weight: 700; }
+  .total b { font-size: 28px; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .obs { margin: 14px 0; }
+  .obs textarea { width: 100%; border: 1.5px solid var(--linha); border-radius: 10px; padding: 10px 12px; font: 500 13.5px Inter, sans-serif; resize: none; height: 64px; outline: 0; transition: border-color .2s, box-shadow .2s; }
+  .obs textarea:focus { border-color: var(--azul); box-shadow: 0 0 0 4px var(--azul-100); }
+  .seguro { display: flex; gap: 6px; align-items: center; justify-content: center; color: var(--texto-2); font-size: 12px; margin-top: 10px; }
+
+  /* Barra fixa do celular */
+  .barra-celular { display: none; }
+
+  /* Esqueleto */
+  .esqueleto { display: none; }
+  .moldura.carregando .esqueleto { display: block; }
+  .moldura.carregando .conteudo { display: none; }
+  .osso { background: linear-gradient(90deg, #E9EBF3 0%, #F6F7FB 40%, #E9EBF3 80%); background-size: 300% 100%; animation: brilho 1.3s ease-in-out infinite; border-radius: 8px; }
+  .esq-grade { display: grid; grid-template-columns: 1fr 300px; gap: 18px; }
+
+  /* Revelação em cascata */
+  .moldura.revelar .fx { animation: sobe .5s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 80ms); }
+
+  /* Toast */
+  .toast { position: absolute; right: 18px; bottom: 18px; z-index: 10; background: var(--tinta); color: #fff; border-radius: 12px; padding: 12px 16px; display: flex; gap: 10px; align-items: center; font-size: 14px; box-shadow: 0 16px 40px rgba(14,16,36,.3); transform: translateY(140%); opacity: 0; transition: transform .45s cubic-bezier(.2,1.2,.4,1), opacity .3s; }
+  .toast.mostrar { transform: none; opacity: 1; }
+  .toast .ok { width: 26px; height: 26px; border-radius: 50%; background: var(--ok); display: grid; place-items: center; }
+  .toast .ok .i { width: 15px; height: 15px; }
+
+  /* ---------- Versão celular (pela largura da moldura) ---------- */
+  @container app (max-width: 760px) {
+    .app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+    .menu { display: none; }
+    .topo-celular { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px 12px; background: #fff; border-bottom: 1px solid var(--linha); }
+    .topo-celular .marca { padding: 0; font-size: 20px; }
+    .topo-celular .avatar { width: 32px; height: 32px; font-size: 12px; }
+    .principal { padding: 16px 14px 96px; }
+    .grade, .esq-grade { grid-template-columns: 1fr; }
+    .resumo { position: static; }
+    .resumo .btn-cheio { display: none; }
+    .linha-add { grid-template-columns: 1fr 64px; }
+    .linha-add .btn { grid-column: 1 / -1; }
+    .col-unit { display: none; }
+    .barra-celular { display: flex; position: absolute; left: 0; right: 0; bottom: 0; z-index: 6; background: rgba(255,255,255,.92); backdrop-filter: blur(10px); border-top: 1px solid var(--linha); padding: 12px 14px 18px; gap: 12px; align-items: center; }
+    .barra-celular div { flex: 1; }
+    .barra-celular span { font-size: 12px; color: var(--texto-2); display: block; }
+    .barra-celular b { font-size: 20px; font-variant-numeric: tabular-nums; }
+    .toast { left: 14px; right: 14px; bottom: 92px; }
+  }
+
+  /* ---------- Escolha ---------- */
+  .options { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-top: 8px; }
+  .option { background: #fff; border-radius: var(--raio); box-shadow: var(--sombra); padding: 16px 18px; cursor: pointer; border: 2px solid transparent; transition: border-color .2s, transform .15s; }
+  .option:hover { transform: translateY(-2px); }
+  .option.selected { border-color: var(--azul); }
+  .option b { display: block; margin-bottom: 4px; }
+  .option span { color: var(--texto-2); font-size: 14px; }
+
+  .notas { margin: 18px 0 0; padding-left: 18px; color: var(--texto-2); line-height: 1.7; font-size: 14px; }
+
+  @keyframes brilho { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+  @keyframes sobe { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @keyframes entra { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+  @keyframes destaque { 0% { background: var(--azul-50); } 100% { background: transparent; } }
+  @keyframes sai { to { opacity: 0; transform: translateX(24px); } }
+  @keyframes pulso { 0% { transform: scale(.6); opacity: .5; } 100% { transform: scale(2); opacity: 0; } }
+  @keyframes gira { to { transform: rotate(360deg); } }
+  @keyframes pop { 0% { transform: scale(.85); } 100% { transform: scale(1); } }
+  @keyframes treme { 0%,100% { transform: none; } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  }
+  @media (max-width: 760px) {
+    .identidade { grid-template-columns: 1fr; }
+    .moldura.celular { width: 100%; max-width: 390px; }
+  }
+</style>
+</head>
+<body>
+<div class="pagina">
+  <h1>Proposta de identidade visual</h1>
+  <p class="sub">Cores tiradas do seu logo, aplicadas à tela de novo pedido. A demonstração abaixo funciona de verdade: veja o carregamento, adicione e remova itens, mude o desconto, confirme o pedido e troque entre computador e celular.</p>
+
+  <h2>Cores do logo</h2>
+  <div class="identidade">
+    <div class="logo-card">
+      <img src="../assets/logo-helptoner.png" alt="Logo Helptoner" style="width:100%;height:auto;display:block">
+    </div>
+    <div class="cores">
+      <div class="cor"><div class="amostra" style="background:#0200FF"></div><div class="info"><b>Azul Toner</b><code>#0200FF</code><br>Botões principais, links, campo em foco</div></div>
+      <div class="cor"><div class="amostra" style="background:#FF0000"></div><div class="info"><b>Vermelho Help</b><code>#FF0000</code><br>Marca, menu ativo, detalhes de destaque</div></div>
+      <div class="cor"><div class="amostra" style="background:var(--gradiente)"></div><div class="info"><b>Degradê das setas</b><code>vermelho → azul</code><br>Faixa do topo e borda do resumo</div></div>
+      <div class="cor"><div class="amostra" style="background:#0E1024"></div><div class="info"><b>Tinta</b><code>#0E1024</code><br>Textos e valores</div></div>
+      <div class="cor"><div class="amostra" style="background:#F5F6FB;border-bottom:1px solid #E6E8F1"></div><div class="info"><b>Fundo</b><code>#F5F6FB</code><br>Fundo das telas, cartões em branco</div></div>
+      <div class="cor"><div class="amostra" style="background:linear-gradient(90deg,#0B8A5E 50%,#A15C07 50%)"></div><div class="info"><b>Estados</b><code>verde · âmbar</code><br>Confirmado · rascunho</div></div>
+    </div>
+  </div>
+
+  <h2>Demonstração ao vivo</h2>
+  <div class="controles">
+    <div class="segmento" role="group" aria-label="Tamanho da tela">
+      <button id="bt-pc" aria-pressed="true">Computador</button>
+      <button id="bt-cel" aria-pressed="false">Celular</button>
+    </div>
+    <button class="btn-sec" id="bt-recarregar">
+      <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+      Ver o carregamento de novo
+    </button>
+    <span class="dica">Teste: busque um cliente (ex.: “papel”), depois um produto (ex.: “hp” ou “TN”). Tente pedir mais do que o estoque, ou adicionar o mesmo produto duas vezes.</span>
+  </div>
+
+  <div class="palco">
+    <div class="moldura carregando" id="moldura">
+      <div class="faixa"></div>
+      <div class="app">
+        <aside class="menu">
+          <div class="marca"><img src="../assets/logo-helptoner.png" alt="Helptoner" class="logo-menu"><small>Pedidos de venda</small></div>
+          <div class="item-menu"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>Início</div>
+          <div class="item-menu ativo"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg>Pedidos</div>
+          <div class="item-menu"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clientes</div>
+          <div class="item-menu"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>Produtos</div>
+          <div class="item-menu"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>Estoque</div>
+          <div class="item-menu"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><circle cx="8" cy="12" r="2"/><path d="M13 10h5M13 14h4"/></svg>Funcionários</div>
+          <div class="usuario"><div class="avatar">LT</div><div>Lucas<span>Administrador</span></div></div>
+        </aside>
+
+        <div class="topo-celular">
+          <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <div class="marca"><img src="../assets/logo-helptoner.png" alt="Helptoner" class="logo-topo"></div>
+          <div class="avatar">LT</div>
+        </div>
+
+        <main class="principal" id="principal">
+          <!-- Esqueleto de carregamento -->
+          <div class="esqueleto" aria-hidden="true">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px">
+              <div><div class="osso" style="width:120px;height:12px"></div><div class="osso" style="width:190px;height:24px;margin-top:8px"></div></div>
+              <div class="osso" style="width:150px;height:28px;border-radius:999px"></div>
+            </div>
+            <div class="esq-grade">
+              <div>
+                <div class="cartao"><div class="osso" style="width:70px;height:12px"></div><div class="osso" style="height:44px;margin-top:10px"></div><div class="osso" style="height:62px;margin-top:12px;border-radius:12px"></div></div>
+                <div class="cartao"><div class="osso" style="width:90px;height:12px"></div><div class="osso" style="height:44px;margin-top:10px"></div>
+                  <div class="osso" style="height:14px;margin-top:22px"></div><div class="osso" style="height:14px;margin-top:18px;width:92%"></div><div class="osso" style="height:14px;margin-top:18px;width:84%"></div></div>
+              </div>
+              <div class="cartao"><div class="osso" style="width:90px;height:16px"></div><div class="osso" style="height:14px;margin-top:18px"></div><div class="osso" style="height:40px;margin-top:14px"></div><div class="osso" style="height:14px;margin-top:14px"></div><div class="osso" style="height:32px;margin-top:22px"></div><div class="osso" style="height:48px;margin-top:22px;border-radius:10px"></div></div>
+            </div>
+          </div>
+
+          <!-- Conteúdo real -->
+          <div class="conteudo">
+            <div class="cabecalho fx" style="--i:0">
+              <div><div class="trilha">Pedidos / Novo</div><h3>Novo pedido</h3></div>
+              <span class="selo rascunho" id="selo"><span class="ponto"></span><span id="selo-txt">Rascunho · salvo agora</span></span>
+            </div>
+            <div class="grade">
+              <div>
+                <section class="cartao fx" style="--i:1">
+                  <span class="rotulo">Cliente</span>
+                  <div class="busca" id="caixa-busca-cliente">
+                    <label class="campo"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input id="busca-cliente" placeholder="Buscar cliente por nome, CPF ou CNPJ" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="sug-cliente"></label>
+                    <div class="sugestoes" id="sug-cliente" role="listbox"></div>
+                  </div>
+                  <div class="cliente-sel" id="cliente-sel" hidden><div class="ini" id="cli-ini"></div><div><b id="cli-nome"></b><span id="cli-doc"></span></div><button class="btn-sec" id="bt-trocar">Trocar</button></div>
+                  <div class="msg" id="msg-cliente" role="alert"></div>
+                </section>
+                <section class="cartao fx" style="--i:2">
+                  <span class="rotulo">Itens do pedido</span>
+                  <div class="linha-add">
+                    <div class="busca">
+                      <label class="campo"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input id="busca-produto" placeholder="Buscar produto por código ou nome" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="sug-produto"></label>
+                      <div class="sugestoes" id="sug-produto" role="listbox"></div>
+                    </div>
+                    <label class="campo qtd"><input id="qtd" value="1" inputmode="numeric" aria-label="Quantidade"></label>
+                    <button class="btn btn-pri" id="bt-add"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg>Adicionar</button>
+                  </div>
+                  <div class="info-produto" id="info-produto"></div>
+                  <div class="msg" id="msg-produto" role="alert"></div>
+                  <table>
+                    <thead><tr><th>Produto</th><th class="centro">Qtd.</th><th class="num col-unit">Unit.</th><th class="num">Total</th><th></th></tr></thead>
+                    <tbody id="itens"></tbody>
+                  </table>
+                </section>
+              </div>
+
+              <aside class="cartao resumo fx" style="--i:3">
+                <h4>Resumo</h4>
+                <div class="linha-val">Subtotal <b id="subtotal">R$ 0,00</b></div>
+                <span class="rotulo" style="margin-top:10px">Desconto</span>
+                <div class="desconto">
+                  <label class="campo" id="campo-desc"><input id="desc" value="0" inputmode="decimal" aria-label="Desconto"></label>
+                  <div class="segmento" role="group" aria-label="Tipo de desconto">
+                    <button data-tipo="R$" aria-pressed="false">R$</button>
+                    <button data-tipo="%" aria-pressed="true">%</button>
+                  </div>
+                </div>
+                <div class="erro" id="erro-desc"></div>
+                <div class="linha-val">Desconto <b id="val-desc">− R$ 0,00</b></div>
+                <div class="total"><span>Total</span><b id="total">R$ 0,00</b></div>
+                <div class="obs"><span class="rotulo">Observações</span><textarea placeholder="Ex.: entregar na portaria"></textarea></div>
+                <button class="btn btn-pri btn-cheio bt-confirmar"><span class="giro"></span><span class="txt-normal">Confirmar pedido</span><span class="txt-carregando">Confirmando…</span></button>
+                <div class="seguro"><svg class="i" style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Estoque e total conferidos ao confirmar</div>
+              </aside>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      <div class="barra-celular">
+        <div><span>Total</span><b id="total-cel">R$ 0,00</b></div>
+        <button class="btn btn-pri bt-confirmar"><span class="giro"></span><span class="txt-normal">Confirmar</span><span class="txt-carregando">Confirmando…</span></button>
+      </div>
+
+      <div class="toast" id="toast" role="status">
+        <span class="ok"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+        <span id="toast-txt">Pedido nº 1.042 confirmado</span>
+      </div>
+    </div>
+  </div>
+
+  <ul class="notas">
+    <li>Base: a organização <b>B</b> (resumo ao lado), que vira uma coluna só no celular, com total e botão fixos embaixo. Se preferir a A, me avise.</li>
+    <li>Animações curtas (até meio segundo) e desligadas automaticamente para quem ativa “reduzir movimento” no sistema.</li>
+    <li>O azul é a cor das ações, porque branco sobre ele é bem legível. O vermelho puro fica para a marca e os destaques. Em textos de erro, uso um vermelho um pouco mais escuro para ficar legível.</li>
+  </ul>
+
+  <h2>O que achou?</h2>
+  <div class="options">
+    <div class="option" data-choice="aprovado" onclick="toggleSelect(this)"><b>Gostei, pode seguir</b><span>Usar esta identidade e este jeito de tela no sistema todo.</span></div>
+    <div class="option" data-choice="ajustar" onclick="toggleSelect(this)"><b>Quero ajustar algo</b><span>Vou dizer no chat o que mudar.</span></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+  const $ = (id) => document.getElementById(id);
+  const moldura = $('moldura');
+  const tbody = $('itens');
+
+  const PRODUTOS = [
+    { cod: 'CE285A', desc: 'Toner HP 85A Preto', unit: 189.90, estoque: 12 },
+    { cod: 'CF258A', desc: 'Toner HP 58A Preto', unit: 349.00, estoque: 4 },
+    { cod: 'W1105A', desc: 'Toner HP 105A Preto', unit: 159.00, estoque: 20 },
+    { cod: 'CF217A', desc: 'Toner HP 17A Preto', unit: 229.90, estoque: 0 },
+    { cod: 'TN-1060', desc: 'Toner Brother TN-1060', unit: 89.90, estoque: 35 },
+    { cod: 'TN-3442', desc: 'Toner Brother TN-3442', unit: 279.00, estoque: 6 },
+    { cod: 'DR-3440', desc: 'Cilindro Brother DR-3440', unit: 420.00, estoque: 3 },
+    { cod: 'MLT-D111S', desc: 'Toner Samsung D111S', unit: 139.50, estoque: 9 },
+    { cod: 'MLT-D101S', desc: 'Toner Samsung D101S', unit: 149.90, estoque: 2 },
+    { cod: '106R02773', desc: 'Toner Xerox Phaser 3020', unit: 119.00, estoque: 15 },
+    { cod: 'CRG-137', desc: 'Toner Canon 137', unit: 199.00, estoque: 7 },
+  ];
+  const CLIENTES = [
+    { nome: 'Papelaria Central Ltda', doc: 'CNPJ 12.345.678/0001-90', cidade: 'Campinas/SP' },
+    { nome: 'Escritório Contábil Andrade', doc: 'CNPJ 45.678.912/0001-34', cidade: 'Valinhos/SP' },
+    { nome: 'Colégio Novo Saber', doc: 'CNPJ 23.456.789/0001-10', cidade: 'Campinas/SP' },
+    { nome: 'Clínica Bem Viver', doc: 'CNPJ 34.567.891/0001-22', cidade: 'Sumaré/SP' },
+    { nome: 'Advocacia Ribeiro & Costa', doc: 'CNPJ 98.765.432/0001-10', cidade: 'Hortolândia/SP' },
+    { nome: 'Mariana Souza', doc: 'CPF 123.456.789-09', cidade: 'Campinas/SP' },
+  ];
+
+  let itens = [], cliente = null, produtoSel = null, tipoDesc = '%', confirmado = false;
+  const mostrado = { total: 0 };
+
+  const centavos = (v) => Math.round(v * 100) / 100;
+  const norm = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  function realce(texto, q) {
+    const i = norm(texto).indexOf(norm(q));
+    if (!q || i < 0) return esc(texto);
+    return esc(texto.slice(0, i)) + '<mark>' + esc(texto.slice(i, i + q.length)) + '</mark>' + esc(texto.slice(i + q.length));
+  }
+  const noPedido = (cod) => (itens.find((it) => it.cod === cod) || { qtd: 0 }).qtd;
+
+  function avisar(el, msg, campo) {
+    el.textContent = msg;
+    if (campo) { campo.classList.remove('invalido'); void campo.offsetWidth; campo.classList.add('invalido'); }
+  }
+  function limparAviso(el, campo) { el.textContent = ''; if (campo) campo.classList.remove('invalido'); }
+
+  /* ---------- Busca com sugestões (igual ao que o sistema real fará pelo servidor) ---------- */
+  function autocompletar({ input, lista, buscar, desenhar, indisponivel, escolher, aoDigitar }) {
+    let resultados = [], ativo = -1, timer = null;
+    const abrir = () => { lista.classList.add('aberta'); input.setAttribute('aria-expanded', 'true'); };
+    const fechar = () => { lista.classList.remove('aberta'); input.setAttribute('aria-expanded', 'false'); ativo = -1; };
+    const disponiveis = () => resultados.map((r, i) => (indisponivel && indisponivel(r) ? -1 : i)).filter((i) => i >= 0);
+    function pintar(q) {
+      if (!resultados.length) { lista.innerHTML = `<div class="sug-vazia">Nada encontrado para “${esc(q)}”.</div>`; return; }
+      lista.innerHTML = resultados.map((r, i) =>
+        `<div class="sug ${indisponivel && indisponivel(r) ? 'indisponivel' : ''} ${i === ativo ? 'ativa' : ''}" data-k="${i}" role="option">${desenhar(r, q)}</div>`).join('');
+    }
+    input.addEventListener('input', () => {
+      aoDigitar && aoDigitar();
+      const q = input.value.trim();
+      clearTimeout(timer);
+      if (!q) { fechar(); return; }
+      lista.innerHTML = [70, 60, 66].map((w) =>
+        `<div class="sug-carregando"><div class="osso" style="height:13px;width:${w}%"></div><div class="osso" style="height:11px;width:${w / 2}%;margin-top:7px"></div></div>`).join('');
+      abrir();
+      timer = setTimeout(() => {
+        resultados = buscar(q).slice(0, 6);
+        ativo = disponiveis()[0] ?? -1;
+        pintar(q);
+      }, 300);
+    });
+    input.addEventListener('keydown', (e) => {
+      if (!lista.classList.contains('aberta')) return;
+      const disp = disponiveis();
+      const pos = disp.indexOf(ativo);
+      if (e.key === 'ArrowDown') { e.preventDefault(); ativo = disp[Math.min(disp.length - 1, pos + 1)] ?? -1; pintar(input.value.trim()); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); ativo = disp[Math.max(0, pos - 1)] ?? -1; pintar(input.value.trim()); }
+      else if (e.key === 'Enter') { e.preventDefault(); if (ativo >= 0) { escolher(resultados[ativo]); fechar(); } }
+      else if (e.key === 'Escape') { fechar(); }
+    });
+    lista.addEventListener('mousedown', (e) => {
+      const el = e.target.closest('.sug'); if (!el || el.classList.contains('indisponivel')) { e.preventDefault(); return; }
+      e.preventDefault(); escolher(resultados[+el.dataset.k]); fechar();
+    });
+    input.addEventListener('blur', () => setTimeout(fechar, 120));
+  }
+
+  /* ---------- Cliente ---------- */
+  const buscaCliente = $('busca-cliente');
+  autocompletar({
+    input: buscaCliente,
+    lista: $('sug-cliente'),
+    buscar: (q) => {
+      const nq = norm(q), dig = q.replace(/\D/g, '');
+      return CLIENTES.filter((c) => norm(c.nome).includes(nq) || (dig.length >= 2 && c.doc.replace(/\D/g, '').includes(dig)));
+    },
+    desenhar: (c, q) => `<div><b>${realce(c.nome, q)}</b><small>${realce(c.doc, q)}</small></div><div class="dir"><small>${esc(c.cidade)}</small></div>`,
+    escolher: (c) => {
+      cliente = c;
+      $('cli-ini').textContent = c.nome.split(' ').filter((p) => p.length > 2).slice(0, 2).map((p) => p[0]).join('').toUpperCase();
+      $('cli-nome').textContent = c.nome;
+      $('cli-doc').textContent = `${c.doc} · ${c.cidade}`;
+      $('caixa-busca-cliente').hidden = true;
+      $('cliente-sel').hidden = false;
+      $('cliente-sel').classList.remove('surge'); void $('cliente-sel').offsetWidth; $('cliente-sel').classList.add('surge');
+      limparAviso($('msg-cliente'));
+      buscaProduto.focus();
+    },
+  });
+  $('bt-trocar').addEventListener('click', () => {
+    if (confirmado) return;
+    cliente = null;
+    $('cliente-sel').hidden = true;
+    $('caixa-busca-cliente').hidden = false;
+    buscaCliente.value = '';
+    buscaCliente.focus();
+  });
+
+  /* ---------- Produto ---------- */
+  const buscaProduto = $('busca-produto');
+  const qtdInput = $('qtd');
+  const campoBusca = buscaProduto.closest('.campo');
+  const campoQtd = qtdInput.closest('.campo');
+  const msgProduto = $('msg-produto');
+
+  function mostrarInfo() {
+    if (!produtoSel) { $('info-produto').innerHTML = ''; return; }
+    const ja = noPedido(produtoSel.cod);
+    $('info-produto').innerHTML = `<b>${brl.format(produtoSel.unit)}</b> cada · <b>${produtoSel.estoque}</b> em estoque` + (ja ? ` · ${ja} já no pedido` : '');
+  }
+
+  autocompletar({
+    input: buscaProduto,
+    lista: $('sug-produto'),
+    buscar: (q) => PRODUTOS.filter((p) => norm(p.cod).includes(norm(q)) || norm(p.desc).includes(norm(q))),
+    indisponivel: (p) => p.estoque - noPedido(p.cod) <= 0,
+    desenhar: (p, q) => {
+      const disp = p.estoque - noPedido(p.cod);
+      const tag = p.estoque === 0 ? '<span class="tag-estoque zero">Sem estoque</span>'
+        : disp <= 0 ? '<span class="tag-estoque zero">Todo no pedido</span>'
+        : `<span class="tag-estoque ${disp <= 3 ? 'baixo' : ''}">${disp} disponíveis</span>`;
+      return `<div><b>${realce(p.desc, q)}</b><small>${realce(p.cod, q)}</small></div><div class="dir"><b>${brl.format(p.unit)}</b>${tag}</div>`;
+    },
+    aoDigitar: () => { produtoSel = null; mostrarInfo(); limparAviso(msgProduto, campoBusca); },
+    escolher: (p) => {
+      produtoSel = p;
+      buscaProduto.value = `${p.cod} · ${p.desc}`;
+      mostrarInfo();
+      limparAviso(msgProduto, campoBusca);
+      qtdInput.focus(); qtdInput.select();
+    },
+  });
+
+  function adicionar() {
+    if (confirmado) return;
+    if (!produtoSel) { avisar(msgProduto, 'Escolha um produto na lista de sugestões.', campoBusca); buscaProduto.focus(); return; }
+    const txt = qtdInput.value.trim();
+    const q = /^\d+$/.test(txt) ? parseInt(txt, 10) : 0;
+    if (q <= 0) { avisar(msgProduto, 'Informe uma quantidade inteira maior que zero.', campoQtd); qtdInput.focus(); qtdInput.select(); return; }
+    const ja = noPedido(produtoSel.cod);
+    if (q + ja > produtoSel.estoque) {
+      const resto = produtoSel.estoque - ja;
+      avisar(msgProduto, `Estoque insuficiente: ${produtoSel.estoque} em estoque` + (ja ? `, ${ja} já no pedido (dá para adicionar mais ${resto})` : '') + '.', campoQtd);
+      qtdInput.focus(); qtdInput.select(); return;
+    }
+    const existente = itens.findIndex((it) => it.cod === produtoSel.cod);
+    if (existente >= 0) { itens[existente].qtd += q; render(existente); }
+    else { itens.push({ ...produtoSel, qtd: q }); render(itens.length - 1); }
+    limparAviso(msgProduto, campoQtd);
+    produtoSel = null; mostrarInfo();
+    buscaProduto.value = ''; qtdInput.value = '1';
+    buscaProduto.focus();
+  }
+  $('bt-add').addEventListener('click', adicionar);
+  qtdInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); adicionar(); } });
+  qtdInput.addEventListener('input', () => limparAviso(msgProduto, campoQtd));
+
+  /* ---------- Itens ---------- */
+  function render(destaque) {
+    if (!itens.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="vazio">Nenhum item ainda. Busque um produto pelo código ou nome.</td></tr>';
+    } else {
+      tbody.innerHTML = itens.map((it, i) => `
+        <tr class="${i === destaque ? 'nova' : ''}" data-i="${i}">
+          <td><span class="desc">${esc(it.desc)}</span><span class="cod">${esc(it.cod)}</span></td>
+          <td class="centro"><span class="passos"><button class="menos" aria-label="Diminuir">−</button><span>${it.qtd}</span><button class="mais" aria-label="Aumentar">+</button></span></td>
+          <td class="num col-unit">${brl.format(it.unit)}</td>
+          <td class="num"><b>${brl.format(centavos(it.qtd * it.unit))}</b></td>
+          <td class="centro"><button class="remover" title="Remover" aria-label="Remover ${esc(it.desc)}"><svg class="i" style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></td>
+        </tr>`).join('');
+    }
+    mostrarInfo();
+    recalcular();
+  }
+
+  tbody.addEventListener('click', (e) => {
+    if (confirmado) return;
+    const tr = e.target.closest('tr[data-i]'); if (!tr) return;
+    const i = +tr.dataset.i, it = itens[i];
+    if (e.target.closest('.remover')) {
+      tr.classList.add('saindo');
+      setTimeout(() => { itens.splice(i, 1); render(); }, 280);
+    } else if (e.target.closest('.mais')) {
+      if (it.qtd + 1 > it.estoque) { avisar(msgProduto, `Estoque insuficiente para ${it.cod}: ${it.estoque} em estoque.`); return; }
+      it.qtd++; limparAviso(msgProduto); render(i);
+    } else if (e.target.closest('.menos')) {
+      if (it.qtd > 1) { it.qtd--; limparAviso(msgProduto); render(i); }
+    }
+  });
+
+  /* ---------- Totais ---------- */
+  function recalcular() {
+    const sub = centavos(itens.reduce((s, it) => s + it.qtd * it.unit, 0));
+    const campo = $('campo-desc');
+    const bruto = parseFloat(String($('desc').value).replace(/\./g, '').replace(',', '.')) || 0;
+    let desc = tipoDesc === '%' ? centavos(sub * bruto / 100) : centavos(bruto);
+    let msg = '';
+    if (bruto < 0) msg = 'O desconto não pode ser negativo.';
+    else if (tipoDesc === '%' && bruto > 100) msg = 'O desconto não pode passar de 100%.';
+    else if (desc > sub && sub > 0) msg = 'O desconto não pode passar do subtotal.';
+    if (msg) { if (!campo.classList.contains('invalido')) avisar($('erro-desc'), msg, campo); else $('erro-desc').textContent = msg; desc = 0; }
+    else limparAviso($('erro-desc'), campo);
+    if (desc > sub) desc = sub;
+    $('subtotal').textContent = brl.format(sub);
+    $('val-desc').textContent = '− ' + brl.format(desc);
+    animarTotal(centavos(sub - desc));
+  }
+
+  function animarTotal(alvo) {
+    const de = mostrado.total, ini = performance.now(), dur = 520;
+    const els = [$('total'), $('total-cel')];
+    cancelAnimationFrame(mostrado.raf);
+    const passo = (t) => {
+      const p = Math.min(1, (t - ini) / dur), e = 1 - Math.pow(1 - p, 3);
+      els.forEach((el) => (el.textContent = brl.format(de + (alvo - de) * e)));
+      if (p < 1) mostrado.raf = requestAnimationFrame(passo); else mostrado.total = alvo;
+    };
+    mostrado.raf = requestAnimationFrame(passo);
+  }
+
+  $('desc').addEventListener('input', recalcular);
+  document.querySelectorAll('.desconto .segmento button').forEach((b) => b.addEventListener('click', () => {
+    tipoDesc = b.dataset.tipo;
+    document.querySelectorAll('.desconto .segmento button').forEach((x) => x.setAttribute('aria-pressed', x === b));
+    recalcular();
+  }));
+
+  /* ---------- Confirmar ---------- */
+  document.querySelectorAll('.bt-confirmar').forEach((bt) => bt.addEventListener('click', () => {
+    if (confirmado) return;
+    if (!cliente) { avisar($('msg-cliente'), 'Escolha o cliente antes de confirmar.', buscaCliente.closest('.campo')); buscaCliente.focus(); return; }
+    if (!itens.length) { avisar(msgProduto, 'Adicione pelo menos um produto.', campoBusca); buscaProduto.focus(); return; }
+    if ($('erro-desc').textContent) { $('desc').focus(); return; }
+    const botoes = document.querySelectorAll('.bt-confirmar');
+    botoes.forEach((x) => x.classList.add('carregando'));
+    setTimeout(() => {
+      botoes.forEach((x) => x.classList.remove('carregando'));
+      confirmado = true;
+      moldura.classList.add('travado');
+      $('selo').className = 'selo confirmado';
+      $('selo-txt').textContent = 'Confirmado · nº 1.042';
+      const toast = $('toast');
+      toast.classList.add('mostrar');
+      setTimeout(() => toast.classList.remove('mostrar'), 3200);
+    }, 1100);
+  }));
+
+  /* ---------- Carregamento ---------- */
+  function carregar() {
+    moldura.classList.remove('revelar', 'travado');
+    moldura.classList.add('carregando');
+    itens = []; cliente = null; produtoSel = null; confirmado = false; mostrado.total = 0;
+    tipoDesc = '%'; $('desc').value = '0';
+    document.querySelectorAll('.desconto .segmento button').forEach((x) => x.setAttribute('aria-pressed', x.dataset.tipo === '%'));
+    $('selo').className = 'selo rascunho';
+    $('selo-txt').textContent = 'Rascunho · salvo agora';
+    $('cliente-sel').hidden = true; $('caixa-busca-cliente').hidden = false;
+    buscaCliente.value = ''; buscaProduto.value = ''; qtdInput.value = '1';
+    ['msg-cliente', 'msg-produto', 'erro-desc'].forEach((id) => ($(id).textContent = ''));
+    document.querySelectorAll('.campo.invalido').forEach((c) => c.classList.remove('invalido'));
+    setTimeout(() => {
+      moldura.classList.remove('carregando');
+      void moldura.offsetWidth;
+      moldura.classList.add('revelar');
+      render();
+      setTimeout(() => buscaCliente.focus({ preventScroll: true }), 450);
+    }, 1500);
+  }
+  $('bt-recarregar').addEventListener('click', carregar);
+
+  const btPc = $('bt-pc'), btCel = $('bt-cel');
+  btPc.addEventListener('click', () => { moldura.classList.remove('celular'); btPc.setAttribute('aria-pressed', true); btCel.setAttribute('aria-pressed', false); });
+  btCel.addEventListener('click', () => { moldura.classList.add('celular'); btCel.setAttribute('aria-pressed', true); btPc.setAttribute('aria-pressed', false); });
+
+  carregar();
+})();
+
+</script>
+</body>
+</html>

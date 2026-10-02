@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Telas do sistema · Helptoner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --azul: #0200FF; --azul-50: #F0F1FF; --azul-100: #E0E2FF;
+    --vermelho: #FF0000; --vermelho-texto: #D60000; --vermelho-50: #FFF1F1;
+    --tinta: #0E1024; --texto-2: #5A5F78; --linha: #E6E8F1; --fundo: #F5F6FB;
+    --ok: #0B8A5E; --ok-50: #E8F7F0; --alerta: #A15C07; --alerta-50: #FFF6E5;
+    --sombra: 0 1px 2px rgba(14,16,36,.06), 0 8px 24px rgba(14,16,36,.06);
+    --gradiente: linear-gradient(90deg, #FF0000 0%, #8A00C8 50%, #0200FF 100%);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Inter, "Segoe UI", system-ui, sans-serif; background: var(--fundo); color: var(--tinta); -webkit-font-smoothing: antialiased; }
+  .pagina { max-width: 1240px; margin: 0 auto; padding: 28px 16px 64px; }
+  h1 { font-size: 26px; letter-spacing: -.02em; margin: 0 0 6px; }
+  .sub { color: var(--texto-2); margin: 0 0 24px; line-height: 1.5; max-width: 820px; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--texto-2); margin: 34px 0 12px; }
+
+  .galeria { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 18px; }
+  .tela { background: #fff; border-radius: 16px; box-shadow: var(--sombra); overflow: hidden; display: flex; flex-direction: column; }
+  .previa { background: var(--fundo); border-bottom: 1px solid var(--linha); padding: 14px; height: 250px; position: relative; overflow: hidden; }
+  .previa::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; background: var(--gradiente); }
+  .desc { padding: 14px 16px 16px; font-size: 13.5px; line-height: 1.55; }
+  .desc h3 { margin: 0 0 6px; font-size: 16px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .desc ul { margin: 6px 0 0; padding-left: 18px; color: var(--texto-2); }
+  .quem { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; letter-spacing: .02em; }
+  .quem.todos { background: var(--azul-50); color: var(--azul); }
+  .quem.admin { background: var(--vermelho-50); color: var(--vermelho-texto); }
+
+  /* Peças de mini tela */
+  .m { font-size: 10.5px; }
+  .m-card { background: #fff; border-radius: 10px; box-shadow: var(--sombra); padding: 10px; }
+  .m-row { display: flex; gap: 6px; align-items: center; }
+  .m-h { font-weight: 800; font-size: 13px; letter-spacing: -.01em; }
+  .m-mut { color: var(--texto-2); }
+  .m-in { border: 1.5px solid var(--linha); border-radius: 7px; padding: 6px 8px; color: var(--texto-2); background: #fff; flex: 1; }
+  .m-btn { background: var(--azul); color: #fff; border-radius: 7px; padding: 6px 10px; font-weight: 700; white-space: nowrap; text-align: center; }
+  .m-btn.sec { background: #fff; color: var(--tinta); border: 1px solid var(--linha); }
+  .m-btn.perigo { background: #fff; color: var(--vermelho-texto); border: 1px solid #F3C4C4; }
+  .m-chip { padding: 2px 7px; border-radius: 999px; font-weight: 700; font-size: 9.5px; white-space: nowrap; }
+  .ok { background: var(--ok-50); color: var(--ok); } .al { background: var(--alerta-50); color: var(--alerta); } .ca { background: var(--vermelho-50); color: var(--vermelho-texto); } .az { background: var(--azul-50); color: var(--azul); }
+  .m-tab { width: 100%; border-collapse: collapse; }
+  .m-tab td, .m-tab th { padding: 5px 4px; border-bottom: 1px solid var(--linha); text-align: left; }
+  .m-tab th { color: var(--texto-2); font-weight: 600; font-size: 9px; text-transform: uppercase; letter-spacing: .05em; }
+  .m-tab .n { text-align: right; font-variant-numeric: tabular-nums; }
+  .m-kpi { flex: 1; background: #fff; border-radius: 10px; box-shadow: var(--sombra); padding: 9px; }
+  .m-kpi b { display: block; font-size: 15px; margin-top: 2px; }
+  .m-dialog { position: absolute; inset: 0; background: rgba(14,16,36,.35); display: grid; place-items: center; }
+  .m-dialog .m-card { width: 78%; }
+  .digitos { display: flex; gap: 5px; justify-content: center; margin: 8px 0; }
+  .digitos span { width: 24px; height: 30px; border: 1.5px solid var(--linha); border-radius: 6px; display: grid; place-items: center; font-weight: 800; font-size: 13px; }
+  .digitos span.f { border-color: var(--azul); box-shadow: 0 0 0 3px var(--azul-100); }
+  .qr { width: 54px; height: 54px; background:
+      conic-gradient(from 90deg at 30% 30%, #0E1024 25%, transparent 0) 0 0/12px 12px,
+      conic-gradient(from 90deg at 60% 60%, #0E1024 25%, transparent 0) 0 0/9px 9px; border: 4px solid #fff; outline: 1px solid var(--linha); border-radius: 4px; }
+  .lado { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; height: 100%; }
+
+  .padroes { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+  .padrao { background: #fff; border-radius: 14px; box-shadow: var(--sombra); padding: 14px 16px; font-size: 13.5px; line-height: 1.5; }
+  .padrao b { display: block; margin-bottom: 3px; }
+  .padrao span { color: var(--texto-2); }
+
+  .decisoes { background: #fff; border-radius: 14px; box-shadow: var(--sombra); padding: 16px 20px; line-height: 1.6; font-size: 14px; }
+  .decisoes ol { margin: 6px 0 0; padding-left: 20px; }
+  @media (max-width: 420px) { .galeria { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="pagina">
+  <h1>As outras telas do sistema</h1>
+  <p class="sub">Todas seguem a identidade e o padrão da tela de pedido que você aprovou: menu lateral (topo no celular), busca com sugestões, carregamento com esqueleto e avisos animados. Abaixo, um esboço simplificado de cada tela e quem tem acesso.</p>
+
+  <h2>Acesso</h2>
+  <div class="galeria">
+    <div class="tela">
+      <div class="previa m">
+        <div class="lado">
+          <div class="m-card" style="display:flex;flex-direction:column;gap:7px;justify-content:center">
+            <img src="../assets/logo-helptoner.png" alt="" style="width:110px;margin:0 auto 4px">
+            <div class="m-mut">E-mail</div><div class="m-in">lucas@helptoner.com.br</div>
+            <div class="m-mut">Senha</div><div class="m-in">••••••••••••</div>
+            <div class="m-btn">Entrar</div>
+          </div>
+          <div class="m-card" style="display:flex;flex-direction:column;justify-content:center;text-align:center">
+            <div class="m-h">Verificação em duas etapas</div>
+            <div class="m-mut" style="margin-top:4px">Digite o código do app autenticador</div>
+            <div class="digitos"><span>4</span><span>8</span><span>1</span><span class="f">|</span><span></span><span></span></div>
+            <div class="m-mut">Perdeu o celular? <b style="color:var(--azul)">Use um código de recuperação</b></div>
+          </div>
+        </div>
+      </div>
+      <div class="desc">
+        <h3>Login + verificação em duas etapas <span class="quem todos">Todos</span></h3>
+        <ul>
+          <li>E-mail e senha, depois o código de 6 dígitos do aplicativo autenticador.</li>
+          <li>Bloqueio temporário após várias tentativas erradas, com aviso claro.</li>
+          <li>Não existe "criar conta": só o administrador cadastra.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tela">
+      <div class="previa m">
+        <div class="m-card" style="height:100%;display:flex;flex-direction:column;gap:8px">
+          <div class="m-h">Primeiro acesso</div>
+          <div class="m-row"><span class="m-chip ok">1 · Nova senha ✓</span><span class="m-chip az">2 · Autenticador</span><span class="m-chip" style="background:var(--fundo);color:var(--texto-2)">3 · Códigos de recuperação</span></div>
+          <div class="m-row" style="gap:12px;align-items:flex-start;margin-top:4px">
+            <div class="qr"></div>
+            <div class="m-mut" style="line-height:1.5">1. Abra o Google ou Microsoft Authenticator<br>2. Escaneie o QR code<br>3. Digite o código gerado</div>
+          </div>
+          <div class="digitos" style="justify-content:flex-start"><span>2</span><span>9</span><span>0</span><span>7</span><span>1</span><span class="f">|</span></div>
+          <div class="m-btn" style="align-self:flex-start">Ativar e continuar</div>
+        </div>
+      </div>
+      <div class="desc">
+        <h3>Primeiro acesso e Minha conta <span class="quem todos">Todos</span></h3>
+        <ul>
+          <li>No primeiro login: troca da senha temporária, configuração do autenticador e entrega dos códigos de recuperação.</li>
+          <li>Em "Minha conta": trocar senha e gerar novos códigos.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <h2>Dia a dia</h2>
+  <div class="galeria">
+    <div class="tela">
+      <div class="previa m">
+        <div class="m-row" style="justify-content:space-between;margin-bottom:8px"><div class="m-h">Olá, Lucas</div><div class="m-btn">+ Novo pedido</div></div>
+        <div class="m-row" style="margin-bottom:8px"><div class="m-kpi"><span class="m-mut">Pedidos em outubro</span><b>38</b></div><div class="m-kpi"><span class="m-mut">Vendido em outubro</span><b>R$ 41.230,90</b></div></div>
+        <div class="m-card">
+          <div style="font-weight:700;margin-bottom:4px">Rascunhos em aberto</div>
+          <table class="m-tab"><tr><td>Colégio Novo Saber</td><td class="m-mut">3 itens</td><td class="n">R$ 1.204,00</td><td class="n" style="color:var(--azul);font-weight:700">Continuar</td></tr>
+          <tr><td>Clínica Bem Viver</td><td class="m-mut">1 item</td><td class="n">R$ 189,90</td><td class="n" style="color:var(--azul);font-weight:700">Continuar</td></tr></table>
+          <div style="font-weight:700;margin:8px 0 4px">Últimos pedidos</div>
+          <table class="m-tab"><tr><td>nº 1.042</td><td>Papelaria Central</td><td class="n">R$ 2.293,65</td><td><span class="m-chip ok">Confirmado</span></td></tr></table>
+        </div>
+      </div>
+      <div class="desc">
+        <h3>Início <span class="quem todos">Todos</span></h3>
+        <ul>
+          <li>Atalho para novo pedido e rascunhos em aberto para continuar de onde parou.</li>
+          <li>Últimos pedidos e dois números do mês (quantidade e valor vendido).</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tela">
+      <div class="previa m">
+        <div class="m-row" style="justify-content:space-between;margin-bottom:8px"><div class="m-h">Pedidos</div><div class="m-btn">+ Novo pedido</div></div>
+        <div class="m-row" style="margin-bottom:8px"><div class="m-in">🔍 Nº do pedido ou cliente</div><span class="m-chip az">Status: todos ▾</span><span class="m-chip az">Outubro ▾</span></div>
+        <div class="m-card">
+          <table class="m-tab">
+            <tr><th>Nº</th><th>Data</th><th>Cliente</th><th>Emitido por</th><th class="n">Total</th><th>Status</th></tr>
+            <tr><td><b>1.042</b></td><td>02/10</td><td>Papelaria Central</td><td>Lucas</td><td class="n">R$ 2.293,65</td><td><span class="m-chip ok">Confirmado</span></td></tr>
+            <tr><td><b>1.041</b></td><td>01/10</td><td>Contábil Andrade</td><td>Pai</td><td class="n">R$ 879,00</td><td><span class="m-chip ok">Confirmado</span></td></tr>
+            <tr><td><b>1.040</b></td><td>30/09</td><td>Mariana Souza</td><td>Lucas</td><td class="n">R$ 189,90</td><td><span class="m-chip ca">Cancelado</span></td></tr>
+            <tr><td class="m-mut">—</td><td>02/10</td><td>Colégio Novo Saber</td><td>Lucas</td><td class="n">R$ 1.204,00</td><td><span class="m-chip al">Rascunho</span></td></tr>
+          </table>
+          <div class="m-mut" style="text-align:right;margin-top:6px">1–20 de 38 · ‹ ›</div>
+        </div>
+      </div>
+      <div class="desc">
+        <h3>Lista de pedidos <span class="quem todos">Todos</span></h3>
+        <ul>
+          <li>Busca por número ou cliente; filtros por status e período.</li>
+          <li>Mostra quem emitiu cada pedido. No celular, cada linha vira um cartão.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tela">
+      <div class="previa m">
+        <div class="m-row" style="justify-content:space-between;margin-bottom:8px">
+          <div><div class="m-mut">Pedidos / 1.042</div><div class="m-h">Pedido nº 1.042 <span class="m-chip ok">Confirmado</span></div></div>
+          <div class="m-row"><div class="m-btn sec">⟳ Repetir pedido</div><div class="m-btn">⤓ PDF</div><div class="m-btn perigo">Cancelar</div></div>
+        </div>
+        <div class="m-card">
+          <div class="m-mut">Papelaria Central Ltda · CNPJ 12.345.678/0001-90 · emitido por Lucas em 02/10/2026 14:35</div>
+          <table class="m-tab" style="margin-top:6px"><tr><td>Toner HP 85A Preto</td><td>12</td><td class="n">R$ 2.278,80</td></tr><tr><td>Toner Brother TN-1060</td><td>3</td><td class="n">R$ 269,70</td></tr><tr><td class="m-mut">Desconto 10%</td><td></td><td class="n">− R$ 254,85</td></tr><tr><td><b>Total</b></td><td></td><td class="n"><b>R$ 2.293,65</b></td></tr></table>
+        </div>
+        <div class="m-dialog" style="top:58%;"><div class="m-card" style="width:72%"><b>Cancelar pedido nº 1.042?</b><div class="m-mut" style="margin:4px 0">O estoque dos 2 produtos volta. Motivo:</div><div class="m-in">Cliente desistiu</div><div class="m-row" style="justify-content:flex-end;margin-top:6px"><div class="m-btn sec">Voltar</div><div class="m-btn" style="background:var(--vermelho-texto)">Cancelar pedido</div></div></div></div>
+      </div>
+      <div class="desc">
+        <h3>Detalhe do pedido <span class="quem todos">Todos</span> <span class="quem admin">Cancelar: Administrador</span></h3>
+        <ul>
+          <li>Dados completos, histórico (quem emitiu, quem cancelou e por quê) e PDF com o logo.</li>
+          <li>Cancelar pede confirmação e motivo, e devolve o estoque.</li>
+          <li><b>Sugestão:</b> "Repetir pedido" cria um rascunho igual, útil para clientes que compram sempre os mesmos toners.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <h2>Cadastros e estoque</h2>
+  <div class="galeria">
+    <div class="tela">
+      <div class="previa m">
+        <div class="lado">
+          <div class="m-card">
+            <div class="m-row" style="justify-content:space-between;margin-bottom:6px"><b>Clientes</b><div class="m-btn">+ Novo</div></div>
+            <div class="m-in" style="margin-bottom:6px">🔍 Nome, CPF ou CNPJ</div>
+            <table class="m-tab"><tr><td>Papelaria Central</td><td class="m-mut">Campinas</td></tr><tr><td>Contábil Andrade</td><td class="m-mut">Valinhos</td></tr><tr><td>Mariana Souza</td><td class="m-mut">Campinas</td></tr><tr><td class="m-mut">Gráfica Antiga <span class="m-chip" style="background:var(--fundo)">Inativo</span></td><td></td></tr></table>
+          </div>
+          <div class="m-card" style="display:flex;flex-direction:column;gap:5px">
+            <b>Novo cliente</b>
+            <div class="m-row"><span class="m-chip az">Empresa</span><span class="m-chip" style="background:var(--fundo)">Pessoa</span></div>
+            <div class="m-in" style="flex:none;border-color:var(--vermelho-texto)">12.345.678/0001-99</div>
+            <div style="color:var(--vermelho-texto);font-size:9.5px">CNPJ inválido: confira os dígitos.</div>
+            <div class="m-in" style="flex:none">Razão social</div>
+            <div class="m-row"><div class="m-in">CEP</div><div class="m-in">Cidade/UF</div></div>
+            <div class="m-btn" style="align-self:flex-end">Salvar</div>
+          </div>
+        </div>
+      </div>
+      <div class="desc">
+        <h3>Clientes <span class="quem todos">Todos</span></h3>
+        <ul>
+          <li>Pessoa ou empresa; CPF/CNPJ com máscara, validação na hora e sem duplicidade.</li>
+          <li>Telefone, e-mail e endereço completo (sai no PDF). Inativar em vez de excluir.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tela">
+      <div class="previa m">
+        <div class="m-row" style="justify-content:space-between;margin-bottom:8px"><div class="m-h">Produtos</div><div class="m-btn">+ Novo produto</div></div>
+        <div class="m-row" style="margin-bottom:8px"><div class="m-in">🔍 Código, nome ou marca</div><span class="m-chip az">Marca: todas ▾</span></div>
+        <div class="m-card">
+          <table class="m-tab">
+            <tr><th>Código</th><th>Produto</th><th>Marca</th><th class="n">Preço</th><th>Estoque</th></tr>
+            <tr><td><b>CE285A</b></td><td>Toner HP 85A Preto</td><td>HP</td><td class="n">R$ 189,90</td><td><span class="m-chip ok">12</span></td></tr>
+            <tr><td><b>DR-3440</b></td><td>Cilindro Brother</td><td>Brother</td><td class="n">R$ 420,00</td><td><span class="m-chip al">3</span></td></tr>
+            <tr><td><b>CF217A</b></td><td>Toner HP 17A Preto</td><td>HP</td><td class="n">R$ 229,90</td><td><span class="m-chip ca">0</span></td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="desc">
+        <h3>Produtos <span class="quem todos">Consulta: todos</span> <span class="quem admin">Editar: Administrador</span></h3>
+        <ul>
+          <li>Código, descrição, marca e preço. Mudar o preço fica registrado no histórico.</li>
+          <li>O estoque não se edita aqui: só por entrada ou ajuste, para manter o histórico.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tela">
+      <div class="previa m">
+        <div class="m-row" style="justify-content:space-between;margin-bottom:8px"><div class="m-h">Estoque</div><div class="m-row"><div class="m-btn sec">Ajuste</div><div class="m-btn">+ Entrada</div></div></div>
+        <div class="m-card">
+          <table class="m-tab">
+            <tr><th>Data</th><th>Produto</th><th>Tipo</th><th class="n">Qtd.</th><th>Por</th></tr>
+            <tr><td>02/10 14:35</td><td>CE285A</td><td><span class="m-chip ca">Saída · pedido 1.042</span></td><td class="n">−12</td><td>Lucas</td></tr>
+            <tr><td>02/10 09:10</td><td>CE285A</td><td><span class="m-chip ok">Entrada · NF 8812</span></td><td class="n">+20</td><td>Pai</td></tr>
+            <tr><td>30/09 17:02</td><td>DR-3440</td><td><span class="m-chip az">Devolução · pedido 1.040</span></td><td class="n">+1</td><td>Lucas</td></tr>
+            <tr><td>29/09 11:45</td><td>TN-1060</td><td><span class="m-chip al">Ajuste · avaria</span></td><td class="n">−1</td><td>Pai</td></tr>
+          </table>
+        </div>
+        <div class="m-dialog" style="top:52%"><div class="m-card" style="width:70%"><b>Entrada de estoque</b><div class="m-row" style="margin:6px 0"><div class="m-in">🔍 CE285A · Toner HP 85A</div><div class="m-in" style="flex:.3">20</div></div><div class="m-in" style="flex:none">Observação: NF 8812</div><div class="m-row" style="justify-content:flex-end;margin-top:6px"><div class="m-btn">Registrar</div></div></div></div>
+      </div>
+      <div class="desc">
+        <h3>Estoque <span class="quem todos">Consulta: todos</span> <span class="quem admin">Entrada e ajuste: Administrador</span></h3>
+        <ul>
+          <li>Histórico de todos os movimentos, com filtro por produto e período.</li>
+          <li>Entrada (compra) e ajuste (perda, avaria, contagem) sempre pedem motivo.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <h2>Administração</h2>
+  <div class="galeria">
+    <div class="tela">
+      <div class="previa m">
+        <div class="m-row" style="justify-content:space-between;margin-bottom:8px"><div class="m-h">Funcionários</div><div class="m-btn">+ Novo funcionário</div></div>
+        <div class="m-card">
+          <table class="m-tab">
+            <tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>2FA</th><th>Situação</th></tr>
+            <tr><td><b>Lucas</b></td><td>lucas@…</td><td><span class="m-chip ca">Administrador</span></td><td><span class="m-chip ok">Ativo</span></td><td><span class="m-chip ok">Ativo</span></td></tr>
+            <tr><td><b>Pai</b></td><td>pai@…</td><td><span class="m-chip ca">Administrador</span></td><td><span class="m-chip ok">Ativo</span></td><td><span class="m-chip ok">Ativo</span></td></tr>
+            <tr><td><b>Carla</b></td><td>carla@…</td><td><span class="m-chip az">Vendedor</span></td><td><span class="m-chip al">Pendente</span></td><td><span class="m-chip ok">Ativo</span></td></tr>
+          </table>
+          <div class="m-row" style="margin-top:8px;justify-content:flex-end"><div class="m-btn sec">Redefinir senha</div><div class="m-btn sec">Zerar 2FA</div><div class="m-btn perigo">Desativar</div></div>
+        </div>
+      </div>
+      <div class="desc">
+        <h3>Funcionários <span class="quem admin">Administrador</span></h3>
+        <ul>
+          <li>Cadastrar com nome, e-mail e perfil; o sistema gera a senha temporária para você repassar.</li>
+          <li>Redefinir senha, zerar o 2FA (celular perdido) e desativar.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tela">
+      <div class="previa m">
+        <div class="m-row" style="justify-content:space-between;margin-bottom:8px"><div class="m-h">Histórico de alterações</div><span class="m-chip az">Tudo ▾</span></div>
+        <div class="m-card">
+          <table class="m-tab">
+            <tr><th>Quando</th><th>Quem</th><th>O quê</th></tr>
+            <tr><td>02/10 15:01</td><td>Pai</td><td>Produto CE285A: preço <s>R$ 179,90</s> → R$ 189,90</td></tr>
+            <tr><td>02/10 14:40</td><td>Lucas</td><td>Cliente Papelaria Central: telefone alterado</td></tr>
+            <tr><td>02/10 08:02</td><td>Carla</td><td><span class="m-chip ok">Login</span> Chrome no Windows</td></tr>
+            <tr><td>01/10 22:13</td><td class="m-mut">—</td><td><span class="m-chip ca">Login recusado</span> carla@… (senha errada, 3ª vez)</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="desc">
+        <h3>Histórico de alterações <span class="quem admin">Administrador</span></h3>
+        <ul>
+          <li>Quem mudou o quê e quando em clientes, produtos e funcionários, com valor anterior e novo.</li>
+          <li>Logins com e sem sucesso.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <h2>Padrões em todas as telas</h2>
+  <div class="padroes">
+    <div class="padrao"><b>Esqueleto ao carregar</b><span>Listas e formulários mostram blocos animados enquanto os dados chegam.</span></div>
+    <div class="padrao"><b>Avisos que somem sozinhos</b><span>"Cliente salvo", "Pedido confirmado", no canto da tela.</span></div>
+    <div class="padrao"><b>Confirmação para ações sérias</b><span>Cancelar pedido, desativar funcionário e ajustar estoque pedem confirmação.</span></div>
+    <div class="padrao"><b>Telas vazias com orientação</b><span>"Nenhum cliente ainda. Cadastre o primeiro."</span></div>
+    <div class="padrao"><b>Celular</b><span>Menu vira topo; tabelas viram cartões; botões principais ficam fixos embaixo.</span></div>
+    <div class="padrao"><b>Teclado</b><span>Busca e seleção pelas setas e Enter; campos com foco bem visível.</span></div>
+  </div>
+</div>
+</body>
+</html>

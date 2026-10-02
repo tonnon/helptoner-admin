@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relatórios · Helptoner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --azul: #0200FF; --azul-50: #F0F1FF; --azul-100: #E0E2FF;
+    --vermelho: #FF0000; --vermelho-texto: #D60000; --vermelho-50: #FFF1F1;
+    --tinta: #0E1024; --texto-2: #5A5F78; --mudo: #858AA0; --linha: #E6E8F1; --fundo: #F5F6FB;
+    --ok: #0B8A5E; --ok-50: #E8F7F0; --alerta: #A15C07; --alerta-50: #FFF6E5;
+    --sombra: 0 1px 2px rgba(14,16,36,.06), 0 8px 24px rgba(14,16,36,.06);
+    --gradiente: linear-gradient(90deg, #FF0000 0%, #8A00C8 50%, #0200FF 100%);
+    /* Séries do gráfico (validadas: azul da marca + laranja) */
+    --serie-1: #0200FF;
+    --serie-2: #eb6834;
+    --grade: #ECEEF4;
+    --eixo: #C9CCD8;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Inter, "Segoe UI", system-ui, sans-serif; background: var(--fundo); color: var(--tinta); -webkit-font-smoothing: antialiased; }
+  .pagina { max-width: 1180px; margin: 0 auto; padding: 0 16px 64px; }
+  .faixa { height: 3px; background: var(--gradiente); }
+  .topo { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; padding: 24px 0 14px; }
+  .trilha { font-size: 13px; color: var(--texto-2); }
+  h1 { margin: 2px 0 0; font-size: 26px; letter-spacing: -.02em; }
+  .abas { display: flex; gap: 4px; border-bottom: 1px solid var(--linha); margin-bottom: 16px; overflow-x: auto; }
+  .aba { padding: 10px 14px; font-size: 14px; font-weight: 600; color: var(--texto-2); border-bottom: 2.5px solid transparent; white-space: nowrap; cursor: pointer; }
+  .aba.ativa { color: var(--azul); border-bottom-color: var(--azul); }
+
+  /* Filtros: uma linha acima de tudo */
+  .filtros { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 18px; }
+  .filtro { position: relative; }
+  .filtro > button, .btn-sec { border: 1px solid var(--linha); background: #fff; border-radius: 10px; padding: 9px 13px; font: 600 13.5px Inter, sans-serif; color: var(--tinta); cursor: pointer; display: inline-flex; gap: 8px; align-items: center; }
+  .filtro > button span { color: var(--texto-2); font-weight: 500; }
+  .menu-filtro { position: absolute; top: calc(100% + 6px); left: 0; z-index: 30; background: #fff; border-radius: 12px; box-shadow: 0 18px 44px rgba(14,16,36,.16), 0 0 0 1px var(--linha); padding: 6px; min-width: 220px; display: none; }
+  .menu-filtro.aberto { display: block; }
+  .opcao { display: flex; gap: 8px; align-items: center; padding: 9px 10px; border-radius: 8px; font-size: 13.5px; cursor: pointer; }
+  .opcao:hover { background: var(--fundo); }
+  .opcao .chk { width: 16px; font-weight: 800; color: var(--azul); }
+  .opcao.rodape { border-top: 1px solid var(--linha); margin-top: 4px; border-radius: 0 0 8px 8px; color: var(--texto-2); }
+  .exportar { margin-left: auto; display: flex; gap: 8px; }
+  .btn-sec:hover { border-color: var(--azul); }
+
+  .conteudo { transition: opacity .25s; }
+  .conteudo.recarregando { opacity: .45; pointer-events: none; }
+
+  /* Indicadores */
+  .indicadores { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .ind { background: #fff; border-radius: 14px; box-shadow: var(--sombra); padding: 14px 16px; min-width: 0; }
+  .ind .rot { font-size: 13px; color: var(--texto-2); }
+  .ind .val { font-size: clamp(20px, 1.9vw, 23px); font-weight: 700; letter-spacing: -.02em; margin: 4px 0 6px; white-space: nowrap; }
+  .ind.principal .val { font-size: clamp(22px, 2.2vw, 26px); }
+  .delta { font-size: 12.5px; font-weight: 600; display: flex; flex-wrap: wrap; gap: 2px 4px; align-items: center; }
+  .delta.sobe { color: var(--ok); }
+  .delta.desce { color: var(--vermelho-texto); }
+  .delta small { color: var(--texto-2); font-weight: 500; flex-basis: 100%; }
+
+  .cartao { background: #fff; border-radius: 14px; box-shadow: var(--sombra); padding: 18px; margin-bottom: 16px; position: relative; }
+  .cab-cartao { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+  .cab-cartao h2 { margin: 0; font-size: 16px; }
+  .cab-cartao p { margin: 3px 0 0; font-size: 13px; color: var(--texto-2); }
+  .legenda { display: flex; gap: 16px; font-size: 13px; color: var(--texto-2); align-items: center; }
+  .legenda i { display: inline-block; width: 16px; height: 2px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+  .alternar { display: inline-flex; border: 1px solid var(--linha); border-radius: 9px; padding: 2px; }
+  .alternar button { border: 0; background: transparent; padding: 5px 10px; border-radius: 7px; font: 600 12.5px Inter, sans-serif; color: var(--texto-2); cursor: pointer; }
+  .alternar button[aria-pressed="true"] { background: var(--azul-50); color: var(--azul); }
+
+  svg text { font-family: Inter, sans-serif; }
+  .tick { fill: var(--mudo); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+  .rotulo-fim { fill: var(--tinta); font-size: 12.5px; font-weight: 600; }
+  .rotulo-fim-sub { fill: var(--texto-2); font-size: 11.5px; }
+  .dica { position: absolute; pointer-events: none; background: #fff; border-radius: 10px; box-shadow: 0 12px 32px rgba(14,16,36,.18), 0 0 0 1px var(--linha); padding: 10px 12px; font-size: 13px; min-width: 190px; opacity: 0; transition: opacity .12s; z-index: 5; }
+  .dica.visivel { opacity: 1; }
+  .dica .tit { color: var(--texto-2); font-size: 12px; margin-bottom: 6px; }
+  .dica .lin { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+  .dica .lin i { width: 12px; height: 2px; border-radius: 2px; flex: none; }
+  .dica .lin b { font-variant-numeric: tabular-nums; }
+  .dica .lin span { color: var(--texto-2); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--texto-2); font-weight: 600; padding: 8px 6px; border-bottom: 1px solid var(--linha); }
+  td { padding: 11px 6px; border-bottom: 1px solid var(--linha); }
+  .n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .duas { display: grid; grid-template-columns: 1.15fr 1fr; gap: 16px; }
+  .duas .cartao { margin-bottom: 0; }
+  .chip { font-size: 11.5px; font-weight: 700; padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
+  .chip.al { background: var(--alerta-50); color: var(--alerta); }
+  .link { color: var(--azul); font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .toast { position: fixed; right: 20px; bottom: 20px; background: var(--tinta); color: #fff; border-radius: 12px; padding: 12px 16px; font-size: 14px; box-shadow: 0 16px 40px rgba(14,16,36,.3); transform: translateY(140%); opacity: 0; transition: transform .45s cubic-bezier(.2,1.2,.4,1), opacity .3s; z-index: 50; }
+  .toast.mostrar { transform: none; opacity: 1; }
+  .notas { color: var(--texto-2); font-size: 13.5px; line-height: 1.7; padding-left: 18px; }
+  @media (max-width: 860px) { .duas { grid-template-columns: 1fr; } .exportar { margin-left: 0; } }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration: .01ms !important; } }
+</style>
+</head>
+<body>
+<div class="faixa"></div>
+<div class="pagina">
+  <div class="topo">
+    <div><div class="trilha">Relatórios</div><h1>Resumo de vendas</h1></div>
+  </div>
+  <div class="abas">
+    <div class="aba ativa">Resumo</div><div class="aba">Vendas por período</div><div class="aba">Clientes</div><div class="aba">Produtos e marcas</div><div class="aba">Funcionários</div><div class="aba">Estoque</div><div class="aba">Cancelamentos</div>
+  </div>
+
+  <div class="filtros">
+    <div class="filtro">
+      <button id="bt-periodo">Período: <span id="periodo-txt">Últimos 12 meses</span> ▾</button>
+      <div class="menu-filtro" id="menu-periodo">
+        <div class="opcao" data-p="3m"><span class="chk"></span>Últimos 3 meses</div>
+        <div class="opcao" data-p="ano"><span class="chk"></span>2026 até agora</div>
+        <div class="opcao" data-p="12m"><span class="chk">✓</span>Últimos 12 meses</div>
+        <div class="opcao rodape"><span class="chk"></span>Escolher datas…</div>
+      </div>
+    </div>
+    <div class="filtro"><button>Agrupar por: <span>Mês</span> ▾</button></div>
+    <div class="filtro"><button>Funcionário: <span>Todos</span> ▾</button></div>
+    <div class="exportar">
+      <button class="btn-sec" data-arq="resumo-vendas.xlsx">⤓ Excel</button>
+      <button class="btn-sec" data-arq="resumo-vendas.pdf">⤓ PDF</button>
+    </div>
+  </div>
+
+  <div class="conteudo" id="conteudo">
+    <div class="indicadores" id="indicadores"></div>
+
+    <section class="cartao" id="cartao-linha">
+      <div class="cab-cartao">
+        <div><h2>Faturamento líquido e lucro bruto por mês</h2><p id="sub-linha">Valores após descontos. Lucro = faturamento − custo médio dos produtos vendidos.</p></div>
+        <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+          <div class="legenda"><span><i style="background:var(--serie-1)"></i>Faturamento líquido</span><span><i style="background:var(--serie-2)"></i>Lucro bruto</span></div>
+          <div class="alternar"><button aria-pressed="true" data-v="grafico">Gráfico</button><button aria-pressed="false" data-v="tabela">Tabela</button></div>
+        </div>
+      </div>
+      <div id="area-linha" style="position:relative"></div>
+      <div id="tabela-linha" hidden></div>
+      <div class="dica" id="dica-linha"></div>
+    </section>
+
+    <div class="duas">
+      <section class="cartao">
+        <div class="cab-cartao"><div><h2>Produtos que mais faturaram</h2><p>Faturamento líquido no período. Passe o mouse para ver lucro e margem.</p></div></div>
+        <div id="area-barras" style="position:relative"></div>
+        <div class="dica" id="dica-barras"></div>
+      </section>
+      <section class="cartao">
+        <div class="cab-cartao"><div><h2>Clientes sem comprar há mais de 60 dias</h2><p>Bons candidatos para oferecer recompra de toner.</p></div></div>
+        <table>
+          <tr><th>Cliente</th><th>Último pedido</th><th>Costuma comprar</th><th></th></tr>
+          <tr><td><b>Advocacia Ribeiro &amp; Costa</b></td><td>28/06 <span class="chip al">96 dias</span></td><td>CE285A</td><td class="link">Repetir pedido</td></tr>
+          <tr><td><b>Colégio Novo Saber</b></td><td>01/07 <span class="chip al">93 dias</span></td><td>TN-3442, DR-3440</td><td class="link">Repetir pedido</td></tr>
+          <tr><td><b>Clínica Bem Viver</b></td><td>12/07 <span class="chip al">82 dias</span></td><td>TN-1060</td><td class="link">Repetir pedido</td></tr>
+        </table>
+      </section>
+    </div>
+
+    <ul class="notas">
+      <li>Esta é a aba <b>Resumo</b>. As outras abas detalham cada assunto com tabelas completas, ordenação e os mesmos filtros.</li>
+      <li>Ao trocar o período (teste no filtro), os números se atualizam mantendo a tela no lugar, sem piscar.</li>
+      <li>Lucro e custo aparecem só para o Administrador. Cada gráfico tem a versão em tabela, e tudo exporta para Excel e PDF.</li>
+    </ul>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+  const pct = new Intl.NumberFormat('pt-BR', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const compacto = (v) => v >= 1000 ? 'R$ ' + (v / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' mil' : brl.format(v);
+  const $ = (id) => document.getElementById(id);
+
+  const MESES = ['out/25','nov/25','dez/25','jan/26','fev/26','mar/26','abr/26','mai/26','jun/26','jul/26','ago/26','set/26'];
+  const FAT = [31240.00, 33980.50, 29870.20, 30560.00, 32410.80, 36720.40, 35190.00, 38450.60, 37010.30, 39880.00, 40120.70, 41230.90];
+  const LUC = [9684.40, 10533.95, 8662.36, 9473.60, 10047.35, 11383.32, 10557.00, 11920.69, 11103.09, 12363.80, 12036.21, 12369.27];
+  const PED = [31, 34, 29, 30, 32, 35, 33, 37, 35, 38, 37, 38];
+  const PERIODOS = {
+    '3m': { nome: 'Últimos 3 meses', ini: 9, ant: { fat: 110650.90, luc: 33580.78, ped: 105 }, comp: 'vs 3 meses anteriores' },
+    '12m': { nome: 'Últimos 12 meses', ini: 0, ant: { fat: 381240.10, luc: 113010.40, ped: 368 }, comp: 'vs 12 meses anteriores' },
+    'ano': { nome: '2026 até agora', ini: 3, ant: { fat: 289730.50, luc: 87110.20, ped: 280 }, comp: 'vs mesmo período de 2025' },
+  };
+  let periodo = '12m';
+
+  /* ---------- Indicadores ---------- */
+  function indicadores() {
+    const p = PERIODOS[periodo];
+    const fat = FAT.slice(p.ini).reduce((a, b) => a + b, 0);
+    const luc = LUC.slice(p.ini).reduce((a, b) => a + b, 0);
+    const ped = PED.slice(p.ini).reduce((a, b) => a + b, 0);
+    const margem = luc / fat, margemAnt = p.ant.luc / p.ant.fat;
+    const delta = (atual, ant, tipo) => {
+      const d = tipo === 'pp' ? (atual - ant) * 100 : (atual / ant - 1) * 100;
+      const sobe = d >= 0;
+      const txt = tipo === 'pp' ? `${Math.abs(d).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} p.p.` : tipo === 'abs' ? `${Math.abs(atual - ant)}` : `${Math.abs(d).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`;
+      return `<span class="delta ${sobe ? 'sobe' : 'desce'}">${sobe ? '▲' : '▼'} ${sobe ? 'subiu' : 'caiu'} ${txt} <small>${p.comp}</small></span>`;
+    };
+    const tiles = [
+      ['principal', 'Faturamento líquido', brl.format(fat), delta(fat, p.ant.fat)],
+      ['', 'Lucro bruto', brl.format(luc), delta(luc, p.ant.luc)],
+      ['', 'Margem bruta', pct.format(margem), delta(margem, margemAnt, 'pp')],
+      ['', 'Pedidos confirmados', ped.toLocaleString('pt-BR'), delta(ped, p.ant.ped, 'abs')],
+      ['', 'Valor médio por pedido', brl.format(fat / ped), delta(fat / ped, p.ant.fat / p.ant.ped)],
+    ];
+    $('indicadores').innerHTML = tiles.map(([c, r, v, d]) => `<div class="ind ${c}"><div class="rot">${r}</div><div class="val">${v}</div>${d}</div>`).join('');
+  }
+
+  /* ---------- Gráfico de linhas (um eixo, mesma unidade) ---------- */
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = (tag, attrs, pai) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); pai && pai.appendChild(e); return e; };
+
+  function grafico() {
+    const p = PERIODOS[periodo];
+    const meses = MESES.slice(p.ini), fat = FAT.slice(p.ini), luc = LUC.slice(p.ini);
+    const area = $('area-linha'); area.innerHTML = '';
+    const W = area.clientWidth, H = 300, m = { t: 14, r: W < 520 ? 106 : 132, b: 30, l: W < 520 ? 54 : 62 };
+    const svg = el('svg', { width: W, height: H, viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'Faturamento líquido e lucro bruto por mês' }, area);
+    const maxY = 50000, passos = [0, 10000, 20000, 30000, 40000, 50000];
+    const x = (i) => m.l + (meses.length === 1 ? 0 : i * (W - m.l - m.r) / (meses.length - 1));
+    const y = (v) => m.t + (1 - v / maxY) * (H - m.t - m.b);
+    passos.forEach((v) => {
+      el('line', { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), stroke: v === 0 ? 'var(--eixo)' : 'var(--grade)', 'stroke-width': 1 }, svg);
+      const t = el('text', { x: m.l - 10, y: y(v) + 4, 'text-anchor': 'end', class: 'tick' }, svg); const estreito = W < 520;
+      t.textContent = v === 0 ? (estreito ? '0' : 'R$ 0') : `${estreito ? '' : 'R$ '}${v / 1000} mil`;
+    });
+    meses.forEach((mes, i) => {
+      const cada = Math.ceil(meses.length / Math.max(2, Math.floor((W - m.l - m.r) / 58)));
+      if ((meses.length - 1 - i) % cada !== 0) return;
+      const t = el('text', { x: x(i), y: H - 8, 'text-anchor': 'middle', class: 'tick' }, svg); t.textContent = mes;
+    });
+    const caminho = (vals) => vals.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join('');
+    el('path', { d: caminho(fat) + `L${x(fat.length - 1)},${y(0)}L${x(0)},${y(0)}Z`, fill: 'var(--serie-1)', 'fill-opacity': .08 }, svg);
+    const series = [[fat, 'var(--serie-1)', 'Faturamento'], [luc, 'var(--serie-2)', 'Lucro']];
+    series.forEach(([vals, cor]) => el('path', { d: caminho(vals), fill: 'none', stroke: cor, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, svg));
+    // Pontos finais com anel e rótulos diretos no fim
+    series.forEach(([vals, cor, nome]) => {
+      const i = vals.length - 1;
+      el('circle', { cx: x(i), cy: y(vals[i]), r: 4, fill: cor, stroke: '#fff', 'stroke-width': 2 }, svg);
+      const t1 = el('text', { x: x(i) + 12, y: y(vals[i]) - 2, class: 'rotulo-fim' }, svg); t1.textContent = compacto(vals[i]);
+      const t2 = el('text', { x: x(i) + 12, y: y(vals[i]) + 13, class: 'rotulo-fim-sub' }, svg); t2.textContent = W < 520 ? nome : nome + ' · ' + meses[i];
+    });
+    // Camada de interação: mira vertical + dica com as duas séries
+    const mira = el('line', { y1: m.t, y2: H - m.b, stroke: 'var(--eixo)', 'stroke-width': 1, opacity: 0 }, svg);
+    const marcas = series.map(([, cor]) => el('circle', { r: 5, fill: cor, stroke: '#fff', 'stroke-width': 2, opacity: 0 }, svg));
+    const alvo = el('rect', { x: m.l - 10, y: m.t, width: W - m.l - m.r + 20, height: H - m.t - m.b, fill: 'transparent', tabindex: 0, 'aria-label': 'Explorar valores por mês' }, svg);
+    const dica = $('dica-linha');
+    const mostrar = (i) => {
+      mira.setAttribute('x1', x(i)); mira.setAttribute('x2', x(i)); mira.setAttribute('opacity', 1);
+      marcas.forEach((c, k) => { c.setAttribute('cx', x(i)); c.setAttribute('cy', y(series[k][0][i])); c.setAttribute('opacity', 1); });
+      dica.replaceChildren();
+      const tit = document.createElement('div'); tit.className = 'tit'; tit.textContent = meses[i]; dica.appendChild(tit);
+      [[fat[i], 'var(--serie-1)', 'Faturamento líquido'], [luc[i], 'var(--serie-2)', 'Lucro bruto'], [null, null, `Margem ${pct.format(luc[i] / fat[i])}`]].forEach(([v, cor, nome]) => {
+        const l = document.createElement('div'); l.className = 'lin';
+        if (cor) { const k = document.createElement('i'); k.style.background = cor; l.appendChild(k); const b = document.createElement('b'); b.textContent = brl.format(v); l.appendChild(b); }
+        const s = document.createElement('span'); s.textContent = nome; l.appendChild(s); dica.appendChild(l);
+      });
+      const cx = x(i) + 18, sobra = W - cx - 210;
+      dica.style.left = (sobra < 0 ? x(i) - 210 : cx) + 'px';
+      dica.style.top = (area.offsetTop + 10) + 'px';
+      dica.classList.add('visivel');
+    };
+    const esconder = () => { mira.setAttribute('opacity', 0); marcas.forEach((c) => c.setAttribute('opacity', 0)); dica.classList.remove('visivel'); };
+    let atual = meses.length - 1;
+    alvo.addEventListener('pointermove', (e) => {
+      const r = svg.getBoundingClientRect(); const px = e.clientX - r.left;
+      atual = Math.max(0, Math.min(meses.length - 1, Math.round((px - m.l) / ((W - m.l - m.r) / Math.max(1, meses.length - 1)))));
+      mostrar(atual);
+    });
+    alvo.addEventListener('pointerleave', esconder);
+    alvo.addEventListener('focus', () => mostrar(atual));
+    alvo.addEventListener('blur', esconder);
+    alvo.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') { atual = Math.min(meses.length - 1, atual + 1); mostrar(atual); }
+      if (e.key === 'ArrowLeft') { atual = Math.max(0, atual - 1); mostrar(atual); }
+    });
+
+    // Tabela equivalente
+    $('tabela-linha').innerHTML = '<table><tr><th>Mês</th><th class="n">Faturamento líquido</th><th class="n">Lucro bruto</th><th class="n">Margem</th><th class="n">Pedidos</th></tr>' +
+      meses.map((mes, i) => `<tr><td>${mes}</td><td class="n">${brl.format(fat[i])}</td><td class="n">${brl.format(luc[i])}</td><td class="n">${pct.format(luc[i] / fat[i])}</td><td class="n">${PED[p.ini + i]}</td></tr>`).join('') + '</table>';
+  }
+
+  /* ---------- Barras horizontais: uma série, uma cor ---------- */
+  const PRODUTOS = [
+    ['Toner HP 85A Preto', 'CE285A', 78238.80, 23471.64, 412],
+    ['Toner HP 105A Preto', 'W1105A', 47382.00, 15162.24, 298],
+    ['Toner Brother TN-1060', 'TN-1060', 40904.50, 13089.44, 455],
+    ['Toner HP 58A Preto', 'CF258A', 33504.00, 9381.12, 96],
+    ['Toner Brother TN-3442', 'TN-3442', 28458.00, 8252.82, 102],
+    ['Cilindro Brother DR-3440', 'DR-3440', 17220.00, 4477.20, 41],
+  ];
+  function barras() {
+    const area = $('area-barras'); area.innerHTML = '';
+    const W = area.clientWidth, linha = 40, H = PRODUTOS.length * linha + 6, rot = Math.min(170, W * .42), dir = 92;
+    const svg = el('svg', { width: W, height: H, viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'Produtos que mais faturaram' }, area);
+    const max = Math.max(...PRODUTOS.map((p) => p[2]));
+    const largura = (v) => (W - rot - dir) * v / max;
+    el('line', { x1: rot, x2: rot, y1: 0, y2: H, stroke: 'var(--eixo)', 'stroke-width': 1 }, svg);
+    const dica = $('dica-barras');
+    PRODUTOS.forEach(([nome, cod, fat, luc, qtd], i) => {
+      const yc = i * linha + linha / 2 + 2, h = 18, w = largura(fat);
+      const t = el('text', { x: rot - 10, y: yc + 4, 'text-anchor': 'end', class: 'tick', style: 'fill:var(--tinta);font-size:12.5px' }, svg); t.textContent = cod;
+      // 4px de arredondamento só na ponta; reta na base
+      el('path', { d: `M${rot},${yc - h / 2}H${rot + w - 4}Q${rot + w},${yc - h / 2} ${rot + w},${yc - h / 2 + 4}V${yc + h / 2 - 4}Q${rot + w},${yc + h / 2} ${rot + w - 4},${yc + h / 2}H${rot}Z`, fill: 'var(--serie-1)', class: 'barra' }, svg);
+      const v = el('text', { x: rot + w + 8, y: yc + 4, class: 'tick', style: 'fill:var(--tinta);font-weight:600' }, svg); v.textContent = compacto(fat);
+      const alvo = el('rect', { x: 0, y: i * linha, width: W, height: linha, fill: 'transparent', tabindex: 0 }, svg);
+      const mostrar = () => {
+        svg.querySelectorAll('.barra').forEach((b, k) => b.setAttribute('fill-opacity', k === i ? 1 : .35));
+        dica.replaceChildren();
+        const tit = document.createElement('div'); tit.className = 'tit'; tit.textContent = `${cod} · ${nome}`; dica.appendChild(tit);
+        [[brl.format(fat), 'faturamento líquido'], [brl.format(luc), `lucro bruto · margem ${pct.format(luc / fat)}`], [qtd.toLocaleString('pt-BR'), 'unidades vendidas']].forEach(([b, s]) => {
+          const l = document.createElement('div'); l.className = 'lin';
+          const bb = document.createElement('b'); bb.textContent = b; const ss = document.createElement('span'); ss.textContent = s;
+          l.append(bb, ss); dica.appendChild(l);
+        });
+        dica.style.left = Math.min(rot + w + 12, W - 230) + 'px';
+        dica.style.top = (area.offsetTop + i * linha + linha) + 'px';
+        dica.classList.add('visivel');
+      };
+      const esconder = () => { svg.querySelectorAll('.barra').forEach((b) => b.setAttribute('fill-opacity', 1)); dica.classList.remove('visivel'); };
+      alvo.addEventListener('pointerenter', mostrar); alvo.addEventListener('focus', mostrar);
+      alvo.addEventListener('pointerleave', esconder); alvo.addEventListener('blur', esconder);
+    });
+  }
+
+  /* ---------- Filtro de período: recarrega mantendo a tela ---------- */
+  const menu = $('menu-periodo');
+  $('bt-periodo').addEventListener('click', (e) => { e.stopPropagation(); menu.classList.toggle('aberto'); });
+  document.addEventListener('click', () => menu.classList.remove('aberto'));
+  menu.querySelectorAll('.opcao[data-p]').forEach((o) => o.addEventListener('click', () => {
+    const p = PERIODOS[o.dataset.p] ? o.dataset.p : periodo;
+    menu.querySelectorAll('.chk').forEach((c) => (c.textContent = ''));
+    o.querySelector('.chk').textContent = '✓';
+    $('periodo-txt').textContent = o.textContent.trim();
+    const c = $('conteudo'); c.classList.add('recarregando');
+    setTimeout(() => { periodo = p; indicadores(); grafico(); c.classList.remove('recarregando'); }, 650);
+  }));
+
+  document.querySelectorAll('.alternar button').forEach((b) => b.addEventListener('click', () => {
+    document.querySelectorAll('.alternar button').forEach((x) => x.setAttribute('aria-pressed', x === b));
+    const tabela = b.dataset.v === 'tabela';
+    $('area-linha').hidden = tabela; $('tabela-linha').hidden = !tabela;
+  }));
+
+  document.querySelectorAll('.exportar button').forEach((b) => b.addEventListener('click', () => {
+    const t = $('toast'); t.textContent = 'Gerando ' + b.dataset.arq + '…'; t.classList.add('mostrar');
+    setTimeout(() => { t.textContent = '✓ ' + b.dataset.arq + ' baixado'; }, 900);
+    setTimeout(() => t.classList.remove('mostrar'), 2600);
+  }));
+
+  indicadores(); grafico(); barras();
+  let espera; window.addEventListener('resize', () => { clearTimeout(espera); espera = setTimeout(() => { grafico(); barras(); }, 150); });
+})();
+</script>
+</body>
+</html>
