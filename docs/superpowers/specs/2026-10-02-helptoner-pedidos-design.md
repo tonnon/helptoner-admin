@@ -1,7 +1,7 @@
 # Sistema de Pedidos Helptoner: especificação de design
 
-- **Data:** 02/10/2026
-- **Status:** aguardando revisão
+- **Data:** 02/10/2026 (atualizada em 03/10/2026: custo zero; Vercel gratuita com o Render como plano B)
+- **Status:** aprovada por Lucas em 03/10/2026
 - **Substitui:** `Desktop/app.py` (aplicativo desktop em Tkinter + SQLite)
 - **Esboços visuais aprovados:** `docs/esbocos/` (abrem direto no navegador)
   - `identidade-visual-v3.html`: identidade e tela de novo pedido
@@ -31,7 +31,8 @@ Também faltam operações básicas: não dá para editar cadastros, repor estoq
 
 **Restrições:**
 - desenvolvido e mantido por uma pessoa só (com apoio do Claude), sem equipe;
-- precisa rodar na **Vercel**;
+- **custo zero**: todo serviço usado precisa ser gratuito;
+- roda na **Vercel**, no plano gratuito (Hobby), com o Render gratuito como plano B (decisão 20);
 - a prioridade é a melhor qualidade e segurança possíveis;
 - o uso é comercial.
 
@@ -73,11 +74,13 @@ Também faltam operações básicas: não dá para editar cadastros, repor estoq
 
 - **Confirmação** é uma operação única no banco: ou tudo é gravado, ou nada é. A sequência é:
   1. travar as linhas dos produtos do pedido, em ordem de `id`, para evitar travamento cruzado entre duas confirmações;
-  2. conferir o estoque de cada produto;
-  3. gerar o número do pedido;
-  4. gravar o custo de cada item;
-  5. registrar os movimentos de saída;
-  6. gravar os totais e mudar o status.
+  2. conferir se o cliente e todos os produtos continuam ativos (ver 3.7 e 3.8);
+  3. conferir se o preço de cada item continua igual ao do cadastro (ver 3.2);
+  4. conferir o estoque de cada produto;
+  5. gerar o número do pedido;
+  6. gravar o custo de cada item;
+  7. registrar os movimentos de saída;
+  8. gravar os totais e mudar o status.
 - **Número do pedido:** sequencial, único e sem buracos. É gerado por um contador numa linha travada durante a confirmação; rascunhos abandonados não consomem número. Aparece como "nº 1.042".
 - **Data:** é a data e hora da confirmação, gravada em UTC e exibida no fuso de Brasília (America/Sao_Paulo). Não pode ser editada.
 - **Pedido confirmado** não pode ser editado nem excluído. Para corrigir, cancela e emite outro.
@@ -91,7 +94,8 @@ Também faltam operações básicas: não dá para editar cadastros, repor estoq
 - **Mesmo produto adicionado de novo:** soma na mesma linha. Existe uma restrição de unicidade para o par (pedido, produto).
 - **Estoque no rascunho:** a conferência considera o total do produto no pedido. Ela aparece como aviso no rascunho e é obrigatória na confirmação.
 - **Preço:** vem do cadastro do produto e não pode ser alterado no pedido.
-- **Dados copiados para o item:** código, descrição e preço unitário são copiados ao adicionar. O custo unitário é copiado na confirmação. Mudanças posteriores no produto não alteram pedidos.
+- **Preço alterado durante o rascunho:** na confirmação, se o preço de algum produto mudou desde que o item entrou no rascunho, o pedido não é confirmado. O sistema atualiza o item para o preço atual, recalcula os totais, mostra o que mudou e pede para confirmar de novo. Assim, nenhum pedido é confirmado com preço desatualizado nem com um total que o usuário não viu.
+- **Dados copiados para o item:** código, descrição e preço unitário são copiados ao adicionar. O custo unitário é copiado na confirmação. Depois da confirmação, mudanças no produto não alteram o pedido.
 
 ### 3.3 Desconto
 
@@ -115,6 +119,8 @@ Também faltam operações básicas: não dá para editar cadastros, repor estoq
 | Ajuste (+ ou −) | Perda, avaria, contagem | Administrador | Quantidade e motivo |
 
 - Cada movimento guarda o estoque e o custo médio resultantes, para poder auditar.
+- O **estoque inicial** é lançado uma vez só por produto, quando ele ainda não tem nenhum movimento.
+- O **ajuste positivo** só é aceito se o produto já recebeu um estoque inicial ou uma entrada. Sem isso, a quantidade entraria com custo zero e inflaria o lucro.
 
 ### 3.5 Custo médio
 
@@ -140,7 +146,7 @@ Também faltam operações básicas: não dá para editar cadastros, repor estoq
 - **Obrigatórios:** tipo, documento e nome ou razão social.
 - **Opcionais:** telefone, e-mail, endereço completo (CEP, logradouro, número, complemento, bairro, cidade e UF) e observações.
 - **Código:** gerado automaticamente.
-- **Exclusão:** clientes são inativados, nunca excluídos. Inativos não aparecem na busca do pedido.
+- **Exclusão:** clientes são inativados, nunca excluídos. Inativos não aparecem na busca do pedido. Um rascunho cujo cliente foi inativado não pode ser confirmado, e a tela explica o motivo.
 
 ### 3.8 Produtos
 
@@ -149,7 +155,7 @@ Também faltam operações básicas: não dá para editar cadastros, repor estoq
 - **Somente leitura:**
   - o **estoque**, que só muda por movimentos;
   - o **custo médio**, que só o Administrador vê.
-- **Exclusão:** produtos são inativados, nunca excluídos.
+- **Exclusão:** produtos são inativados, nunca excluídos. Um rascunho com produto inativado não pode ser confirmado: a tela explica o motivo, e o item pode ser removido do rascunho.
 
 ## 4. Usuários e segurança
 
@@ -182,7 +188,7 @@ Também faltam operações básicas: não dá para editar cadastros, repor estoq
 - **Login:**
   - e-mail e senha, seguidos do código de 6 dígitos;
   - **verificação em duas etapas obrigatória para todos**;
-  - limite de tentativas erradas por conta e por IP, que bloqueia temporariamente com aviso claro.
+  - limite de tentativas erradas por conta e por IP, que bloqueia temporariamente com aviso claro. A contagem fica no PostgreSQL (cache do Django no banco), para valer entre os processos do servidor e continuar depois de um reinício. O IP é o do usuário, lido do cabeçalho confiável da hospedagem, sem aceitar valor forjado pelo navegador.
 - **Senhas:**
   - no mínimo 12 caracteres;
   - recusa de senhas comuns e parecidas com os dados do usuário;
@@ -203,7 +209,7 @@ Também faltam operações básicas: não dá para editar cadastros, repor estoq
   - **CSP nativa do Django 6**, sem scripts nem estilos inline e sem `eval`. O HTMX roda com `allowEval: false` e `includeIndicatorStyles: false`, sem atributos `hx-on`;
   - `X-Frame-Options: DENY`, `Referrer-Policy`, `nosniff` e COOP.
 - **Painel administrativo do Django:** fica num endereço não padrão, só para o superusuário, e passa pelo mesmo login com verificação em duas etapas. É usado só para manutenção.
-- **Segredos** (chave do Django, banco e Sentry) ficam nas variáveis de ambiente da Vercel, nunca no código. O arquivo `.env.local` fica no `.gitignore`.
+- **Segredos** (chave do Django, banco e Sentry) ficam nas variáveis de ambiente da Vercel e nos segredos do GitHub Actions, nunca no código. O arquivo `.env.local` fica no `.gitignore`.
 - **Arquivos externos:** nenhum script ou fonte vem de site de terceiros; HTMX, fontes Inter e CSS são servidos pelo próprio sistema.
 - **Auditoria:**
   - `django-simple-history` em clientes, produtos e usuários, com valor anterior e novo;
@@ -212,7 +218,7 @@ Também faltam operações básicas: não dá para editar cadastros, repor estoq
 - **LGPD (básico):**
   - dados pessoais só para usuários logados;
   - banco criptografado no armazenamento e na transmissão;
-  - dados hospedados no Brasil (Neon em São Paulo);
+  - dados hospedados no Brasil (Vercel em `gru1` e Neon em São Paulo). No plano B (Render), os dados iriam para os EUA (ver 5.5);
   - os alertas de erro não levam dados pessoais.
 - `python manage.py check --deploy` sem alertas é condição para publicar.
 
@@ -223,8 +229,8 @@ Também faltam operações básicas: não dá para editar cadastros, repor estoq
 | Parte | Escolha |
 |---|---|
 | Linguagem e framework | Python 3.14 + **Django 6.1**. Migrar para o **6.2, de suporte longo**, em abril de 2027 |
-| Banco | **PostgreSQL 18** no **Neon**, região **São Paulo** (`aws-sa-east-1`), ligado pelo Marketplace da Vercel |
-| Hospedagem | **Vercel Pro**, com suporte nativo a Django e função na região `gru1` (São Paulo) |
+| Banco | **PostgreSQL 18** no **Neon**, plano gratuito, região **São Paulo** (`aws-sa-east-1`). Conta própria no Neon, criada direto no site dele e não pelo Marketplace da Vercel, para o banco não depender da conta da Vercel. Computação fixa em 0,25 CU |
+| Hospedagem | **Vercel Hobby** (gratuito), com suporte nativo a Django, uv e Python 3.14, e função na região `gru1` (São Paulo; o Hobby permite uma região). Os termos restringem o Hobby a uso não comercial: risco aceito (decisão 20), com o Render gratuito como plano B (5.5) |
 | Telas | Templates do Django com template partials + **HTMX 2** (arquivo local) + um pouco de JavaScript próprio |
 | Visual | **Tailwind CSS 4**, compilado pelo executável standalone, sem Node.js. O CSS gerado vai no repositório |
 | Login e 2FA | **django-allauth**, com o módulo de verificação em duas etapas (`mfa`) |
@@ -237,7 +243,7 @@ Também faltam operações básicas: não dá para editar cadastros, repor estoq
 | Pacotes | **uv**, com `pyproject.toml` e `uv.lock` (versões fixas e conferência de integridade) |
 | Testes | pytest + pytest-django; **Playwright** para fluxos completos no navegador |
 | Qualidade | ruff (estilo e formatação) e pip-audit (falhas de segurança conhecidas nos pacotes) |
-| Erros e monitoramento | **Sentry** (plano gratuito) e **UptimeRobot** (plano gratuito) |
+| Erros e monitoramento | **Sentry** (plano gratuito) e **cron-job.org** (gratuito) |
 
 ### 5.2 Como as peças se conectam
 
@@ -246,15 +252,19 @@ Navegador ──HTTPS──► Vercel (gru1)
                       ├─ CDN: CSS, JS, fontes e logo
                       └─ Função Python: Django ──TLS (conexão com pooler)──► Neon PostgreSQL 18 (sa-east-1)
                                          └──► Sentry (erros, sem dados pessoais)
+
+cron-job.org ──a cada 5 min──► /saude/ (avisa por e-mail se o sistema não responder)
 ```
 
-- **Configuração do banco:** usa a conexão com pooler do Neon, `CONN_MAX_AGE = 0` e `DISABLE_SERVER_SIDE_CURSORS = True`.
+- **Configuração do banco:** usa a conexão com pooler do Neon, `CONN_MAX_AGE = 0` e `DISABLE_SERVER_SIDE_CURSORS = True`. Com conexões curtas, o Neon desliga quando ninguém usa, e o consumo fica dentro da cota gratuita.
+- **Cache do Django:** no PostgreSQL (`DatabaseCache`), usado pelo limite de tentativas de login (ver 4.2). As funções da Vercel não compartilham memória entre si, então um cache na memória não serviria.
+- **Atrás do proxy da Vercel:** `SECURE_PROXY_SSL_HEADER`, `ALLOWED_HOSTS` e `CSRF_TRUSTED_ORIGINS` configurados com o endereço do sistema.
 - **Nada é gravado em disco.** Os arquivos PDF e Excel são gerados na memória e enviados direto ao navegador.
 
 ### 5.3 Organização do código
 
 ```
-helptoner-pedidos/
+helptoner-admin/
 ├── manage.py
 ├── pyproject.toml / uv.lock
 ├── vercel.json                  # região gru1, duração máxima da função
@@ -283,6 +293,16 @@ helptoner-pedidos/
 | Local (Windows) | PostgreSQL 18 instalado no Windows | Desenvolvimento e testes |
 | Prévia (Vercel Preview) | Cópia separada no Neon (branch) | Ver mudanças antes de publicar. Nunca usa dados reais |
 | Produção | Neon, branch principal | Uso real |
+
+### 5.5 Plano B: Render
+
+Se a Vercel pausar o projeto ou mudar as regras, o sistema vai para o Render gratuito sem ser reescrito, porque não guarda nada no servidor e segue a configuração padrão do Django. Conferido em 03/10/2026:
+
+- **Termos:** o Render não proíbe uso comercial no plano gratuito.
+- **Serviço:** serviço web gratuito com Docker (Python 3.14, uv e Gunicorn), e o WhiteNoise servindo os arquivos estáticos. Máquina de 512 MB e 0,1 CPU, com 750 horas grátis por mês.
+- **Região:** o Render não tem servidor no Brasil. O mais próximo fica na Virgínia (EUA), e o Neon precisa ir para lá também, copiado com `pg_dump` e restaurado: com o banco em São Paulo, cada consulta atravessaria o continente. Os dados passariam a ficar nos EUA. A LGPD permite a transferência internacional nos casos do art. 33; antes de migrar, conferir os termos de proteção de dados (DPA) do Render e do Neon e registrar o fundamento.
+- **Sono:** o serviço dorme depois de 15 minutos sem acesso e leva cerca de 1 minuto para acordar. Para evitar isso, o cron-job.org pode acessá-lo a cada 10 minutos no horário da loja. Os termos do Render proíbem "contornar restrições de uso", então isso fica numa zona cinzenta; se o Render reclamar, os acessos são desligados.
+- **Reinícios:** o Render pode reiniciar o serviço gratuito a qualquer momento. Nada se perde, porque o rascunho é salvo a cada mudança e a confirmação grava tudo ou nada.
 
 ## 6. Telas e identidade visual
 
@@ -388,7 +408,10 @@ Cada regra recebe o teste **antes** do código. Os testes rodam no PostgreSQL, i
   - numeração única e sem buracos;
   - divisão do desconto entre os itens e o lucro resultante;
   - validação de CPF e CNPJ;
-  - "Repetir pedido" com preços atuais.
+  - "Repetir pedido" com preços atuais;
+  - confirmação com preço alterado: atualiza o rascunho e não confirma;
+  - confirmação recusada com cliente ou produto inativo;
+  - estoque inicial uma vez só por produto, e ajuste positivo recusado em produto sem custo.
 - **Permissões:**
   - todas as URLs exigem login;
   - todas as ações exclusivas do Administrador devolvem 403 para o Vendedor;
@@ -398,7 +421,9 @@ Cada regra recebe o teste **antes** do código. Os testes rodam no PostgreSQL, i
   - `check --deploy` sem alertas;
   - os cabeçalhos (CSP, HSTS, frame) estão presentes;
   - o painel administrativo exige a verificação em duas etapas;
-  - o primeiro acesso não pode ser pulado.
+  - o primeiro acesso não pode ser pulado;
+  - o limite de tentativas de login usa o cache no PostgreSQL;
+  - `/saude/` responde sem consultar o banco.
 - **Relatórios:** números conferidos com um conjunto de pedidos conhecido. A exportação para Excel e PDF gera arquivos válidos.
 - **Fluxos completos (Playwright):**
   - login com verificação em duas etapas;
@@ -409,31 +434,33 @@ Cada regra recebe o teste **antes** do código. Os testes rodam no PostgreSQL, i
 ## 10. Operação
 
 - **Repositório:** privado no GitHub. O `.gitignore` exclui `.superpowers/` (esboços) e `.env.local` (segredos).
-- **A cada envio de código**, o GitHub Actions roda: ruff, testes (com PostgreSQL), pip-audit e `check --deploy`.
+- **A cada envio de código**, o GitHub Actions roda: ruff, testes (com PostgreSQL), pip-audit e `check --deploy`, dentro da cota gratuita de minutos do GitHub para repositório privado.
 - **Publicação em produção:** é uma ação manual, o botão "Publicar" no GitHub Actions, que executa nesta ordem:
   1. testes;
   2. **backup** do banco;
   3. `migrate`;
   4. publicação na Vercel pela linha de comando da Vercel.
 
-  As prévias continuam automáticas, sempre com o banco de prévia.
+  A publicação automática em produção fica desligada: só o botão publica. As prévias continuam automáticas, sempre com o banco de prévia.
 - **Backups:**
-  - restauração para um momento recente, recurso do próprio Neon;
-  - cópia criptografada todas as noites (`pg_dump`) guardada por 30 dias;
+  - restauração para um momento das últimas 6 horas, recurso do próprio Neon (limite do plano gratuito);
+  - cópia criptografada todas as noites (`pg_dump`), guardada como artefato do GitHub Actions por 30 dias, dentro da cota gratuita de armazenamento;
   - teste de restauração automático uma vez por mês.
 - **Monitoramento:**
-  - UptimeRobot verifica a página `/saude/` a cada 5 minutos e avisa por e-mail;
+  - o cron-job.org acessa `/saude/` a cada 5 minutos e avisa por e-mail se o sistema não responder;
+  - `/saude/` responde sem consultar o banco, para não gastar a cota do Neon;
   - Sentry avisa por e-mail quando há erro.
 - **Atualizações:**
   - o Dependabot abre propostas de atualização semanais;
   - as atualizações de segurança do Django são aplicadas assim que saem;
   - a migração para o Django 6.2 (suporte longo) acontece em abril de 2027.
-- **Endereço:** começa com o endereço `*.vercel.app`. Se vocês tiverem o domínio `helptoner.com.br`, depois passa para `pedidos.helptoner.com.br`.
+- **Endereço:** começa com o endereço `*.vercel.app`. A Helptoner já tem o domínio `helptoner.com.br`; depois passa para `pedidos.helptoner.com.br`.
 - **Documentação** (`docs/operacao.md`): como rodar localmente, publicar, restaurar backup, criar o primeiro administrador e trocar segredos.
-- **Custos previstos:**
-  - Vercel Pro: US$ 20/mês, 1 assento;
-  - Neon: plano gratuito para começar; avaliar o plano pago se precisar de mais histórico de restauração ou de mais capacidade;
-  - Sentry e UptimeRobot: gratuitos.
+- **Custo: zero.** Vercel Hobby, Neon, Sentry, cron-job.org e GitHub (repositório privado e Actions) nos planos gratuitos. Dos termos consultados em 03/10/2026, só o da Vercel Hobby proíbe uso comercial (risco aceito, decisão 20). Limites a acompanhar:
+  - Vercel Hobby: 4 horas de CPU ativa, 1 milhão de execuções e 100 GB de transferência por mês;
+  - Neon: 1 GB de dados e 100 CU-horas de computação por mês;
+  - Sentry: 5 mil erros por mês;
+  - GitHub Actions: minutos e armazenamento da cota gratuita.
 
 ## 11. Modelo de dados (resumo)
 
@@ -455,8 +482,10 @@ Valores em dinheiro usam `DecimalField`. Datas são gravadas com fuso horário (
 
 | Risco | Como reduzir |
 |---|---|
-| Suporte a Django na Vercel é recente (abril de 2026) | O app não guarda nada no servidor e segue a configuração padrão do Django, então pode ir para outra hospedagem (Railway, Render ou Docker) sem reescrever |
+| Uso comercial no plano gratuito da Vercel contraria os termos dela; a Vercel pode pausar o projeto | Risco aceito por Lucas (decisão 20). O banco fica numa conta própria do Neon, fora da Vercel. Se a Vercel pausar, o sistema vai para o Render (plano B, 5.5) |
+| Suporte a Django na Vercel é recente (abril de 2026) | O app não guarda nada no servidor e segue a configuração padrão do Django, então pode ir para outra hospedagem (Render, Railway ou Docker) sem reescrever |
 | Primeira tela lenta depois de um tempo sem uso | Função na região São Paulo, poucos pacotes e importações enxutas; medir após a publicação |
+| Estourar as cotas gratuitas (Vercel, Neon, GitHub) | Neon fixo em 0,25 CU, conexões curtas e `/saude/` sem banco; acompanhar o consumo no primeiro mês |
 | Manutenção por uma pessoa só | Testes automáticos, publicação com um botão, guia de operação e atualizações automáticas |
 | Perda de dados | Backups em duas camadas, teste mensal de restauração e backup antes de cada publicação |
 | Celular do 2FA perdido | Códigos de recuperação; o Administrador pode zerar a verificação em duas etapas de outro usuário. Os dois administradores cobrem um ao outro |
@@ -467,20 +496,30 @@ Valores em dinheiro usam `DecimalField`. Datas são gravadas com fuso horário (
 |---|---|---|
 | 1 | Sistema web no lugar do desktop | Usuário |
 | 2 | Django (Python) em vez de Next.js, pelo critério de qualidade e segurança | Comparação aprovada |
-| 3 | Hospedagem na Vercel (plano Pro, uso comercial) | Usuário |
+| 3 | Hospedagem na Vercel (plano Pro, uso comercial). **Substituída pela 20** | Usuário |
 | 4 | Ciclo rascunho → confirmado → cancelado; confirmado não se edita | Parte 1 |
 | 5 | Desconto no pedido, em R$ ou %, limitado ao subtotal | Parte 1 |
 | 6 | Preço não editável no pedido; quantidade inteira; venda sem estoque bloqueada | Parte 1 |
 | 7 | Código de produto digitado; código de cliente automático | Parte 1 |
 | 8 | Perfis Administrador e Vendedor; o Administrador faz tudo o que o Vendedor faz | Parte 2 |
 | 9 | Verificação em duas etapas obrigatória para todos; Vendedor vê todos os pedidos; sem e-mail na primeira versão; sessão de 2 h | Parte 2 |
-| 10 | GitHub privado; pasta `Desktop\projects\helptoner-pedidos`; PostgreSQL local no Windows | Parte 3 |
+| 10 | GitHub privado (`helptoner-admin`); pasta `Desktop\projects\helptoner-admin`; PostgreSQL local no Windows | Parte 3 (nome corrigido em 03/10/2026) |
 | 11 | Identidade com o logo PNG oficial; layout com resumo ao lado; animações e esqueleto | Parte 4 |
 | 12 | Busca com sugestões; mesmo produto soma na linha; ajuste com − / + | Parte 4 |
 | 13 | Início com números do mês; "Repetir pedido" na primeira versão | Parte 4 |
 | 14 | Relatórios completos na primeira versão, só para o Administrador | Parte 4 |
 | 15 | Lucro e margem com custo por entrada e custo médio automático (opção A) | Parte 4 |
-| 16 | Sentry e UptimeRobot gratuitos; publicação manual com backup antes; endereço `*.vercel.app` no início | Parte 5 |
+| 16 | Sentry gratuito; publicação manual com backup antes; endereço `*.vercel.app` no início. UptimeRobot **substituído pela 20** | Parte 5 (publicação manual confirmada por Lucas em 03/10/2026) |
 | 17 | Rascunho editável só por quem criou ou pelo Administrador | Parte 5 |
-| 18 | Números do Início: empresa para o Administrador; os próprios para o Vendedor | **Nova, definida nesta especificação: confirmar** |
-| 19 | "Repetir pedido" usa os preços atuais | **Nova, definida nesta especificação: confirmar** |
+| 18 | Números do Início: empresa para o Administrador; os próprios para o Vendedor | Nova nesta especificação; confirmada por Lucas (03/10/2026) |
+| 19 | "Repetir pedido" usa os preços atuais | Nova nesta especificação; confirmada por Lucas (03/10/2026) |
+| 20 | Custo zero: todo serviço gratuito. Hospedagem na **Vercel Hobby** (gratuita), mesmo com os termos restringindo o Hobby a uso não comercial: risco aceito por Lucas, com o Render gratuito como plano B (5.5). Neon em conta própria, fora da Vercel. Monitoramento com cron-job.org, porque o UptimeRobot gratuito proíbe uso comercial. Também avaliados: Google Cloud Run (exige cartão) e Coolify (exige administrar servidor; o servidor gratuito da Oracle exige cartão e desliga máquina parada) | Usuário (03/10/2026) |
+| 21 | Contagem do limite de tentativas de login no PostgreSQL (cache do Django no banco) | Revisão técnica (03/10/2026) |
+| 22 | Backups noturnos guardados como artefatos do GitHub Actions por 30 dias | Revisão de 03/10/2026, aprovada por Lucas |
+| 23 | Preço alterado durante o rascunho: a confirmação atualiza o item para o preço atual e pede para confirmar de novo | Revisão de 03/10/2026, aprovada por Lucas |
+| 24 | Cliente ou produto inativado: o rascunho não pode ser confirmado, e a tela explica o motivo | Revisão de 03/10/2026, aprovada por Lucas |
+| 25 | Estoque inicial uma vez só por produto; ajuste positivo só depois de um estoque inicial ou de uma entrada | Revisão de 03/10/2026, aprovada por Lucas |
+
+## 14. Pontos em aberto (revisão final)
+
+Nenhum ponto em aberto. Resolvidos em 03/10/2026: decisões 18, 19, 22, 23, 24 e 25 e a publicação manual pelo botão "Publicar".
