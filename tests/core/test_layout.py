@@ -62,7 +62,7 @@ def test_menu_so_e_montado_se_o_template_usar(rf, vendedor, django_assert_num_qu
     with django_assert_num_queries(0):
         contexto = navegacao(request)
     with django_assert_num_queries(1):  # os grupos do usuário
-        assert [link.nome for link in contexto["menu"]] == ["Início"]
+        assert [link.nome for link in contexto["menu"]] == ["Início", "Clientes"]
     assert contexto["menu_ativo"] == "core:inicio"
     assert contexto["url_minha_conta"] == "/minha-conta/"
 

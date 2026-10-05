@@ -1,3 +1,4 @@
+import itertools
 import os
 import subprocess
 import sys
@@ -11,6 +12,8 @@ from allauth.mfa.recovery_codes.internal.auth import RecoveryCodes
 from allauth.mfa.totp.internal.auth import TOTP, generate_totp_secret, hotp_value
 from django.contrib.auth.models import Group
 
+from apps.cadastros.documentos import digitos_verificadores_cnpj, digitos_verificadores_cpf
+from apps.cadastros.models import Cliente
 from apps.contas.models import VENDEDOR, Usuario
 
 RAIZ = Path(__file__).resolve().parent.parent
@@ -80,3 +83,21 @@ def codigo_totp(usuario) -> str:
     """O código de 6 dígitos do momento para o TOTP já ativo do usuário."""
     totp = Authenticator.objects.get(user=usuario, type=Authenticator.Type.TOTP)
     return totp_agora(get_mfa_adapter().decrypt(totp.data["secret"]))
+
+
+_proximo_documento = itertools.count(1)
+
+
+def criar_cliente(
+    nome: str = "Papelaria Central Ltda", *, tipo: str = "PJ", documento=None, **campos
+):
+    """Cria um cliente. Sem `documento`, gera um CPF ou CNPJ válido e único."""
+    if documento is None:
+        n = next(_proximo_documento)
+        if tipo == "PF":
+            base = f"{n:09d}"
+            documento = base + digitos_verificadores_cpf(base)
+        else:
+            base = f"{n:012d}"
+            documento = base + digitos_verificadores_cnpj(base)
+    return Cliente.objects.create(nome=nome, tipo=tipo, documento=documento, **campos)

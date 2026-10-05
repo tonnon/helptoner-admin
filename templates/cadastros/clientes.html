@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load cadastros %}
+{% comment %}
+Clientes (todos os perfis), como em docs/esbocos/telas.html. Padrão P18: a página abre com o
+esqueleto e o HTMX busca o pedaço "resultados" na mesma URL. A busca roda enquanto se digita.
+{% endcomment %}
+{% block titulo %}Clientes - Helptoner Pedidos{% endblock %}
+{% block conteudo %}
+  <div class="fx flex flex-wrap items-center justify-between gap-3">
+    <h1>Clientes</h1>
+    <a href="{% url 'cadastros:cliente_novo' %}" class="btn-pri">+ Novo cliente</a>
+  </div>
+  <form method="get" action="{% url 'cadastros:clientes' %}" class="fx fx-1 mt-4 flex flex-wrap items-center gap-x-5 gap-y-2" role="search"
+        hx-get="{% url 'cadastros:clientes' %}" hx-trigger="input changed delay:300ms, submit" hx-target="#resultados" hx-push-url="true">
+    <div class="campo w-full sm:max-w-sm">
+      <input type="search" name="q" value="{{ request.GET.q }}" maxlength="100" placeholder="Nome, CPF ou CNPJ" aria-label="Buscar cliente por nome, CPF ou CNPJ" autocomplete="off">
+    </div>
+    <label class="flex items-center gap-2 text-sm text-texto-2">
+      <input type="checkbox" name="inativos" value="1"{% if request.GET.inativos == "1" %} checked{% endif %}>
+      Mostrar inativos
+    </label>
+  </form>
+  <div id="resultados" class="mt-4" hx-get="{{ request.get_full_path }}" hx-trigger="load">
+    {% include "componentes/esqueleto_linhas.html" with linhas=5 %}
+  </div>
+{% endblock %}
+
+{% partialdef resultados %}
+{% if pagina.paginator.count %}
+  <div class="cartao fx">
+    <table class="tabela-responsiva">
+      <thead>
+        <tr><th>Nome</th><th>CPF/CNPJ</th><th>Cidade/UF</th><th>Telefone</th><th>Situação</th></tr>
+      </thead>
+      <tbody>
+        {% for cliente in pagina %}
+          <tr>
+            <td data-rotulo="Nome"><a href="{% url 'cadastros:cliente_editar' cliente.pk %}" class="font-semibold hover:text-azul hover:underline">{{ cliente.nome }}</a></td>
+            <td data-rotulo="CPF/CNPJ" class="num">{{ cliente.documento|documento:cliente.tipo }}</td>
+            <td data-rotulo="Cidade/UF">{{ cliente.cidade }}{% if cliente.cidade and cliente.uf %}/{% endif %}{{ cliente.uf }}</td>
+            <td data-rotulo="Telefone">{{ cliente.telefone }}</td>
+            <td data-rotulo="Situação">{% if cliente.ativo %}<span class="etiqueta-verde">Ativo</span>{% else %}<span class="etiqueta-cinza">Inativo</span>{% endif %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "componentes/paginacao.html" %}
+{% elif q %}
+  <div class="cartao fx">{% include "componentes/vazio.html" with mensagem="Nenhum cliente encontrado." %}</div>
+{% else %}
+  <div class="cartao fx">{% url 'cadastros:cliente_novo' as url_novo %}{% include "componentes/vazio.html" with mensagem="Nenhum cliente ainda. Cadastre o primeiro." acao_url=url_novo acao_texto="Novo cliente" %}</div>
+{% endif %}
+{% endpartialdef %}

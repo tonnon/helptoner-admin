@@ -48,6 +48,7 @@ urlpatterns = [
     ),
     path("contas/", include("allauth.urls")),
     path("", include("apps.contas.urls")),
+    path("", include("apps.cadastros.urls")),
     path("", include("apps.core.urls")),
 ]
 
