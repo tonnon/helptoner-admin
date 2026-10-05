@@ -37,7 +37,7 @@ def criar_usuario(
     """Cria um usuário no perfil dado. Com `pronto`, ele já trocou a senha e recebeu os códigos."""
     email = email or f"usuario-{uuid.uuid4().hex[:12]}@helptoner.com.br"
     usuario = Usuario.objects.create_user(email, nome, senha)
-    usuario.groups.add(Group.objects.get(name=perfil))
+    usuario.groups.add(Group.objects.get_or_create(name=perfil)[0])
     if pronto:
         usuario.deve_trocar_senha = False
         usuario.codigos_recuperacao_entregues = True

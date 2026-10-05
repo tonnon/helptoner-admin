@@ -54,3 +54,15 @@ def test_regras_de_senha(db, senha, aceita):
 def test_historico_do_usuario_nao_guarda_senha(db):
     campos = {f.name for f in Usuario.history.model._meta.fields}
     assert "password" not in campos and "last_login" not in campos
+
+
+def test_perfis_sao_criados_sob_demanda_quando_os_grupos_faltam(db):
+    from apps.contas.models import ADMINISTRADOR
+    from tests.apoio import criar_usuario
+
+    Group.objects.all().delete()
+    u = criar_usuario(ADMINISTRADOR, email="x@helptoner.com.br")
+    assert u.eh_administrador
+    Group.objects.all().delete()
+    s = Usuario.objects.create_superuser("y@helptoner.com.br", "Y", "senha-forte-1234")
+    assert s.groups.filter(name=ADMINISTRADOR).exists()

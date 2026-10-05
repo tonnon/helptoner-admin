@@ -31,7 +31,7 @@ class UsuarioManager(BaseUserManager):
         if not extra["is_staff"] or not extra["is_superuser"]:
             raise ValueError("O superusuário precisa de is_staff=True e is_superuser=True.")
         usuario = self._criar(email, nome, password, **extra)
-        usuario.groups.add(Group.objects.get(name=ADMINISTRADOR))
+        usuario.groups.add(Group.objects.get_or_create(name=ADMINISTRADOR)[0])
         return usuario
 
 
