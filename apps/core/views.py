@@ -1,6 +1,15 @@
+import logging
+import secrets
+
 from django.contrib.auth.decorators import login_not_required
-from django.http import JsonResponse
+from django.http import Http404, HttpResponse, JsonResponse
+from django.shortcuts import render
 from django.views.decorators.http import require_GET
+
+from .htmx import eh_htmx
+
+log_seguranca = logging.getLogger("helptoner.seguranca")
+log_erros = logging.getLogger("helptoner.erros")
 
 
 @login_not_required
@@ -8,3 +17,47 @@ from django.views.decorators.http import require_GET
 def saude(request):
     """Página de saúde: não toca em usuário, sessão nem banco."""
     return JsonResponse({"status": "ok"})
+
+
+def inicio(request):
+    """Página inicial provisória (a tela real chega na Tarefa 21)."""
+    return render(request, "core/inicio.html")
+
+
+@login_not_required
+def rota_bloqueada(request, *args, **kwargs):
+    """Rota desligada de propósito: responde 404 como se não existisse."""
+    raise Http404
+
+
+def erro_403(request, exception=None):
+    usuario = getattr(request, "user", None)
+    log_seguranca.warning(
+        "acesso negado usuario=%s caminho=%s",
+        getattr(usuario, "pk", None),
+        request.path,
+    )
+    return render(request, "403.html", status=403)
+
+
+def erro_404(request, exception=None):
+    return render(request, "404.html", status=404)
+
+
+def erro_500(request):
+    codigo = secrets.token_hex(4)
+    log_erros.error("erro interno codigo=%s caminho=%s", codigo, request.path, exc_info=True)
+    return render(request, "500.html", {"codigo": codigo}, status=500)
+
+
+def falha_csrf(request, reason=""):
+    if eh_htmx(request):
+        resposta = HttpResponse(status=403)
+        resposta["HX-Refresh"] = "true"
+        return resposta
+    return render(
+        request,
+        "403.html",
+        {"mensagem": "Sua sessão foi renovada. Recarregue a página e tente de novo."},
+        status=403,
+    )
