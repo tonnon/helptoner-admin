@@ -13,7 +13,7 @@ from allauth.mfa.totp.internal.auth import TOTP, generate_totp_secret, hotp_valu
 from django.contrib.auth.models import Group
 
 from apps.cadastros.documentos import digitos_verificadores_cnpj, digitos_verificadores_cpf
-from apps.cadastros.models import Cliente
+from apps.cadastros.models import Cliente, Produto
 from apps.contas.models import VENDEDOR, Usuario
 
 RAIZ = Path(__file__).resolve().parent.parent
@@ -101,3 +101,17 @@ def criar_cliente(
             base = f"{n:012d}"
             documento = base + digitos_verificadores_cnpj(base)
     return Cliente.objects.create(nome=nome, tipo=tipo, documento=documento, **campos)
+
+
+def criar_produto(
+    codigo: str = "CE285A",
+    *,
+    descricao: str = "Toner HP 85A Preto",
+    marca: str = "HP",
+    preco: str = "189.90",
+    ativo: bool = True,
+) -> Produto:
+    """Cria um produto com estoque 0 e custo médio 0 (esses dois só mudam por movimento)."""
+    return Produto.objects.create(
+        codigo=codigo, descricao=descricao, marca=marca, preco=preco, ativo=ativo
+    )

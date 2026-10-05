@@ -15,6 +15,14 @@ ROTAS_SO_ADMIN += [
     ("post", "/funcionarios/1/desativar/"),
 ]
 
+ROTAS_SO_ADMIN += [
+    ("get", "/produtos/novo/"),
+    ("post", "/produtos/novo/"),
+    ("post", "/produtos/1/"),
+    ("post", "/produtos/1/inativar/"),
+    ("post", "/produtos/1/reativar/"),
+]
+
 
 @pytest.mark.parametrize(("metodo", "url"), ROTAS_SO_ADMIN)
 def test_vendedor_recebe_403(client_vendedor, metodo, url):

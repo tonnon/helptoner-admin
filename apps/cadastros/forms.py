@@ -1,8 +1,10 @@
 from django import forms
 from django.core.exceptions import ValidationError
 
+from apps.core.dinheiro import CENTAVO, ler_decimal_br
+
 from .documentos import normalizar_documento, validar_documento
-from .models import Cliente
+from .models import Cliente, Produto
 
 
 def mensagem_documento_repetido(outro) -> str:
@@ -65,3 +67,33 @@ class ClienteForm(forms.ModelForm):
 
     def validate_unique(self):
         """A unicidade do documento já foi conferida em clean(), com a mensagem do sistema."""
+
+
+class ProdutoForm(forms.ModelForm):
+    # Texto livre: o preço é lido à brasileira ("1.234,56").
+    preco = forms.CharField(label="Preço (R$)", max_length=20)
+
+    class Meta:
+        model = Produto
+        fields = ["codigo", "descricao", "marca", "preco"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["codigo"].widget.attrs.update({"autocomplete": "off", "autofocus": True})
+        self.fields["preco"].widget.attrs["inputmode"] = "decimal"
+        if self.instance.pk:
+            self.initial["preco"] = f"{self.instance.preco:.2f}".replace(".", ",")
+
+    def clean_codigo(self):
+        return self.cleaned_data["codigo"].strip().upper()
+
+    def clean_preco(self):
+        try:
+            preco = ler_decimal_br(self.cleaned_data["preco"])
+        except ValueError:
+            raise ValidationError("Preço inválido: use o formato 189,90.") from None
+        if preco < 0:
+            raise ValidationError("O preço não pode ser negativo.")
+        if preco != preco.quantize(CENTAVO) or preco >= 10**10:
+            raise ValidationError("Preço inválido: use no máximo 2 casas depois da vírgula.")
+        return preco

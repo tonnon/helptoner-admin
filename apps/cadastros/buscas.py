@@ -1,9 +1,9 @@
 import re
 
-from django.db.models import Q, QuerySet
+from django.db.models import F, Func, Q, QuerySet, Value
 
 from .documentos import normalizar_documento
-from .models import Cliente
+from .models import Cliente, Produto
 
 TAMANHO_MAXIMO = 100
 MINIMO_DOCUMENTO = 3
@@ -31,3 +31,36 @@ def buscar_clientes(
     if limite is not None:
         clientes = clientes[:limite]
     return clientes
+
+
+def buscar_produtos(
+    texto: str, *, incluir_inativos: bool = False, limite: int | None = None
+) -> QuerySet[Produto]:
+    """Produtos por código (também sem pontuação: "tn1060" acha "TN-1060"), descrição ou marca."""
+    texto = normalizar_busca(texto)
+    produtos = Produto.objects.all()
+    if not incluir_inativos:
+        produtos = produtos.filter(ativo=True)
+    if texto:
+        filtro = (
+            Q(codigo__icontains=texto)
+            | Q(descricao__unaccent__icontains=texto)
+            | Q(marca__unaccent__icontains=texto)
+        )
+        codigo = re.sub(r"[^A-Z0-9]", "", texto.upper())
+        if codigo:
+            produtos = produtos.annotate(
+                codigo_limpo=Func(
+                    F("codigo"),
+                    Value("[^A-Z0-9]"),
+                    Value(""),
+                    Value("g"),
+                    function="regexp_replace",
+                )
+            )
+            filtro |= Q(codigo_limpo__contains=codigo)
+        produtos = produtos.filter(filtro)
+    produtos = produtos.order_by("codigo")
+    if limite is not None:
+        produtos = produtos[:limite]
+    return produtos

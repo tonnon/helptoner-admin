@@ -87,3 +87,45 @@ class Cliente(models.Model):
                 erros["cep"] = "CEP inválido: informe os 8 dígitos."
         if erros:
             raise ValidationError(erros)
+
+
+class Produto(models.Model):
+    codigo = models.CharField(
+        "Código",
+        max_length=30,
+        unique=True,
+        error_messages={"unique": "Já existe um produto com este código."},
+    )
+    descricao = models.CharField("Descrição", max_length=200)
+    marca = models.CharField("Marca", max_length=60)
+    preco = models.DecimalField("Preço", max_digits=12, decimal_places=2)
+    # Só os movimentos de estoque (Tarefa 12) mudam estes dois campos.
+    custo_medio = models.DecimalField(
+        "Custo médio", max_digits=14, decimal_places=4, default=0, editable=False
+    )
+    estoque = models.IntegerField("Estoque", default=0, editable=False)
+    ativo = models.BooleanField("Ativo", default=True)
+    criado_em = models.DateTimeField("Criado em", auto_now_add=True)
+    atualizado_em = models.DateTimeField("Atualizado em", auto_now=True)
+
+    history = HistoricalRecords(excluded_fields=["estoque", "custo_medio", "atualizado_em"])
+
+    class Meta:
+        ordering = ["codigo"]
+        verbose_name = "produto"
+        verbose_name_plural = "produtos"
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(estoque__gte=0), name="produto_estoque_nao_negativo"
+            ),
+            models.CheckConstraint(
+                condition=models.Q(preco__gte=0), name="produto_preco_nao_negativo"
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.codigo} - {self.descricao}"
+
+    def save(self, *args, **kwargs):
+        self.codigo = (self.codigo or "").strip().upper()
+        super().save(*args, **kwargs)
