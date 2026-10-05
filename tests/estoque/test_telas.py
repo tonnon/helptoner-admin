@@ -1,9 +1,12 @@
 from datetime import timedelta
 
 import pytest
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 
 from apps.core.datas import hoje
-from tests.apoio import com_estoque, criar_produto
+from apps.pedidos.models import ContadorPedido
+from tests.apoio import com_estoque, criar_produto, montar_pedido_confirmado
 
 
 def test_registrar_entrada_pela_tela(client_admin):
@@ -114,3 +117,22 @@ def test_historico_mostra_detalhe_e_custo_so_ao_administrador(client_admin, clie
     assert "70,00" not in html_vendedor and "60,00" not in html_vendedor
     assert "+ Entrada" not in client_vendedor.get("/estoque/").content.decode()
     assert "+ Entrada" in client_admin.get("/estoque/").content.decode()
+
+
+def test_historico_mostra_o_numero_do_pedido_na_saida(client_vendedor, vendedor):
+    prod = com_estoque(criar_produto(), 20)
+    ContadorPedido.objects.update(ultimo_numero=1041)
+    montar_pedido_confirmado(vendedor, itens=[(prod, 2)])
+    cab = {"HX-Request": "true"}
+
+    def consultas():
+        with CaptureQueriesContext(connection) as feitas:
+            html = client_vendedor.get("/estoque/", headers=cab).content.decode()
+        return html, len(feitas)
+
+    html, com_uma_saida = consultas()
+    assert "Saída · pedido nº 1.042" in html and "−2" in html
+    montar_pedido_confirmado(vendedor, itens=[(prod, 1)])
+    montar_pedido_confirmado(vendedor, itens=[(prod, 3)])
+    html, com_tres_saidas = consultas()
+    assert "Saída · pedido nº 1.044" in html and com_tres_saidas == com_uma_saida

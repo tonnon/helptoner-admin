@@ -1,4 +1,5 @@
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from django.db import transaction
 
@@ -8,6 +9,9 @@ from apps.core.erros import EstoqueInsuficiente, RegraDeNegocio
 from apps.core.permissoes import exigir_administrador
 
 from .models import MovimentoEstoque
+
+if TYPE_CHECKING:
+    from apps.pedidos.models import Pedido
 
 Tipo = MovimentoEstoque.Tipo
 
@@ -123,6 +127,23 @@ def registrar_entrada(
             usuario=usuario,
             motivo=observacao,
         )
+
+
+def registrar_saida_pedido(
+    *, produto: Produto, quantidade: int, pedido: Pedido, usuario
+) -> MovimentoEstoque:
+    """Saída por pedido, feita pela confirmação, que já travou o produto e conferiu o estoque.
+
+    O custo médio não muda; o movimento grava o custo médio do momento (§3.5).
+    """
+    return _aplicar_movimento(
+        produto,
+        tipo=Tipo.SAIDA,
+        quantidade=quantidade,
+        custo_unitario=produto.custo_medio,
+        usuario=usuario,
+        pedido=pedido,
+    )
 
 
 def registrar_ajuste(*, produto_id: int, delta: int, motivo: str, usuario) -> MovimentoEstoque:

@@ -53,7 +53,7 @@ só é desenhado para o Administrador (o Vendedor não recebe esse dado no HTML)
             <td data-rotulo="Data">{{ m.criado_em|data_hora_br }}</td>
             <td data-rotulo="Produto"><span class="font-semibold">{{ m.produto.codigo }}</span></td>
             <td data-rotulo="Tipo">
-              {% if m.tipo == "saida" %}<span class="etiqueta-vermelho">Saída por pedido</span>
+              {% if m.tipo == "saida" %}<span class="etiqueta-vermelho">Saída · pedido {{ m.pedido.numero|pedido_numero }}</span>
               {% elif m.tipo == "devolucao" %}<span class="etiqueta-azul">Devolução por cancelamento</span>
               {% elif m.tipo == "entrada" %}<span class="etiqueta-verde">Entrada{% if m.motivo %} · {{ m.motivo }}{% endif %}</span>
               {% elif m.tipo == "inicial" %}<span class="etiqueta-cinza">Estoque inicial</span>

@@ -167,6 +167,35 @@ def montar_rascunho(usuario, *, cliente=None, itens=(), desconto=None):
     return Pedido.objects.get(pk=pedido.pk)
 
 
+def montar_pedido_confirmado(usuario, *, cliente=None, itens, desconto=None):
+    """Monta o rascunho pelos serviços e o confirma. Sem `cliente`, usa um de `criar_cliente()`."""
+    from apps.pedidos.services import confirmar_pedido
+
+    if cliente is None:
+        cliente = criar_cliente()
+    rascunho = montar_rascunho(usuario, cliente=cliente, itens=itens, desconto=desconto)
+    return confirmar_pedido(rascunho.pk, usuario)
+
+
+def esperar_conexao_presa(espera: float = 10) -> None:
+    """Espera outra conexão ficar presa numa trava que a conexão desta thread segura.
+
+    Garante, nos testes de concorrência, que a disputa pela trava aconteceu de verdade. Se ninguém
+    ficar preso em `espera` segundos, falha em vez de deixar o teste parado.
+    """
+    limite = time.monotonic() + espera
+    with connection.cursor() as cursor:
+        while time.monotonic() < limite:
+            cursor.execute(
+                "SELECT EXISTS (SELECT 1 FROM pg_locks"
+                " WHERE NOT granted AND pg_backend_pid() = ANY(pg_blocking_pids(pid)))"
+            )
+            if cursor.fetchone()[0]:
+                return
+            time.sleep(0.01)
+    raise AssertionError(f"Nenhuma outra conexão ficou presa nas travas em {espera} s.")
+
+
 def rodar_juntos(*funcoes, espera: float = 30) -> list[object]:
     """Roda cada função numa thread, todas liberadas ao mesmo tempo por uma barreira.
 

@@ -49,7 +49,7 @@ def historico(request):
         }
         return render(request, "estoque/historico.html", contexto)
     de, ate = intervalo_de_datas(inicio, fim)
-    lista = MovimentoEstoque.objects.select_related("produto", "usuario").filter(
+    lista = MovimentoEstoque.objects.select_related("produto", "usuario", "pedido").filter(
         criado_em__gte=de, criado_em__lt=ate
     )
     if produto:

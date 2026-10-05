@@ -1,4 +1,4 @@
-"""Regras do pedido em rascunho (§3.1 a §3.3).
+"""Regras do pedido: rascunho e confirmação (§3.1 a §3.3).
 
 Toda edição abre uma transação e trava a linha do pedido (`_rascunho_para_editar`). Assim, duas
 abas mexendo no mesmo rascunho são atendidas uma depois da outra. Ordem das travas, que vale
@@ -6,19 +6,29 @@ também para a confirmação e o cancelamento: pedido, depois produtos em ordem 
 contador.
 """
 
+from dataclasses import dataclass
 from decimal import Decimal
 
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
+from django.utils import timezone
 
 from apps.cadastros.models import Cliente, Produto
 from apps.core.dinheiro import arredondar
 from apps.core.erros import EstoqueInsuficiente, RegraDeNegocio
 from apps.core.formatacao import inteiro_br
 from apps.core.permissoes import eh_administrador
+from apps.estoque.services import registrar_saida_pedido
 
-from .calculos import DESCONTO_PERCENTUAL, DESCONTO_REAIS, Linha, Totais, calcular_totais
-from .models import ItemPedido, Pedido
+from .calculos import (
+    DESCONTO_PERCENTUAL,
+    DESCONTO_REAIS,
+    Linha,
+    Totais,
+    calcular_totais,
+    ratear_desconto,
+)
+from .models import ContadorPedido, ItemPedido, Pedido
 
 QUANTIDADE_MAXIMA = 9999
 OBSERVACOES_MAXIMO = 1000
@@ -200,3 +210,134 @@ def definir_observacoes(pedido_id: int, texto: str, usuario) -> Pedido:
 def excluir_rascunho(pedido_id: int, usuario) -> None:
     with transaction.atomic():
         _rascunho_para_editar(pedido_id, usuario).delete()
+
+
+@dataclass(frozen=True)
+class MudancaPreco:
+    codigo: str
+    descricao: str
+    preco_anterior: Decimal
+    preco_novo: Decimal
+
+
+class ConfirmacaoRecusada(RegraDeNegocio):
+    """O rascunho não pode ser confirmado agora; nada foi gravado."""
+
+    def __init__(self, motivos: list[str]):
+        super().__init__(" ".join(motivos))
+        self.motivos = list(motivos)
+
+
+class PrecosAlterados(RegraDeNegocio):
+    """Algum preço mudou: o rascunho foi atualizado e gravado, mas não foi confirmado (§3.2)."""
+
+    def __init__(self, mudancas: list[MudancaPreco]):
+        super().__init__(
+            "Os preços de alguns produtos mudaram. Confira o novo total e confirme de novo."
+        )
+        self.mudancas = list(mudancas)
+
+
+def confirmar_pedido(pedido_id: int, usuario) -> Pedido:
+    """Confirma o rascunho numa operação única: ou tudo é gravado, ou nada é (§3.1).
+
+    Se algum preço mudou desde que o item entrou no rascunho, os itens passam para o preço atual
+    e os totais são recalculados e gravados, mas o pedido não é confirmado. Por isso
+    `PrecosAlterados` só é levantada depois do bloco atômico: dentro dele, desfaria a atualização.
+    """
+    with transaction.atomic():
+        pedido = _rascunho_para_editar(pedido_id, usuario)
+        itens = list(pedido.itens.all())
+        motivos = []
+        if pedido.cliente_id is None:
+            motivos.append("Escolha o cliente antes de confirmar.")
+        if not itens:
+            motivos.append("Adicione pelo menos um produto.")
+        if motivos:
+            raise ConfirmacaoRecusada(motivos)
+
+        # 1. Trava os produtos em ordem de id, para duas confirmações não se travarem em cruz.
+        # FOR NO KEY UPDATE: a baixa não muda chaves, então não espera quem só insere itens
+        # de rascunho apontando para o produto (a chave estrangeira pega FOR KEY SHARE).
+        travados = Produto.objects.select_for_update(no_key=True).filter(
+            pk__in=[item.produto_id for item in itens]
+        )
+        produtos = {produto.pk: produto for produto in travados.order_by("pk")}
+
+        # 2. Cliente e produtos continuam ativos (§3.7, §3.8).
+        if not pedido.cliente.ativo:
+            motivos.append(f"O cliente {pedido.cliente.nome} foi inativado. Escolha outro cliente.")
+        motivos += [
+            f"O produto {item.codigo} foi inativado. Remova-o do pedido."
+            for item in itens
+            if not produtos[item.produto_id].ativo
+        ]
+        if motivos:
+            raise ConfirmacaoRecusada(motivos)
+
+        # 3. Preço de cada item igual ao do cadastro (§3.2).
+        mudancas = _atualizar_precos(itens, produtos)
+        if mudancas:
+            _recalcular(pedido)
+        else:
+            _efetivar(pedido, itens, produtos, usuario)
+    if mudancas:
+        raise PrecosAlterados(mudancas)
+    return pedido
+
+
+def _atualizar_precos(itens: list[ItemPedido], produtos: dict[int, Produto]) -> list[MudancaPreco]:
+    """Passa para o preço atual os itens cujo preço mudou e devolve o que mudou."""
+    mudancas, alterados = [], []
+    for item in itens:
+        preco = produtos[item.produto_id].preco
+        if item.preco_unitario != preco:
+            mudancas.append(MudancaPreco(item.codigo, item.descricao, item.preco_unitario, preco))
+            item.preco_unitario = preco
+            alterados.append(item)
+    ItemPedido.objects.bulk_update(alterados, ["preco_unitario"])
+    return mudancas
+
+
+def _efetivar(
+    pedido: Pedido, itens: list[ItemPedido], produtos: dict[int, Produto], usuario
+) -> None:
+    """Passos 4 a 8 da confirmação, com os produtos já travados e os preços conferidos."""
+    totais = _recalcular(pedido)
+    # 4. Estoque de cada produto (cada produto aparece numa linha só do pedido).
+    motivos = [
+        f"Estoque insuficiente para {item.codigo}: "
+        f"{inteiro_br(produtos[item.produto_id].estoque)} em estoque, "
+        f"{inteiro_br(item.quantidade)} no pedido."
+        for item in itens
+        if item.quantidade > produtos[item.produto_id].estoque
+    ]
+    if totais.erro_desconto:
+        motivos.append(totais.erro_desconto)
+    if motivos:
+        raise ConfirmacaoRecusada(motivos)
+
+    # 5. Número sem buracos: se algo falhar depois daqui, o contador volta junto.
+    contador = ContadorPedido.objects.select_for_update().get(pk=1)
+    contador.ultimo_numero += 1
+    contador.save(update_fields=["ultimo_numero"])
+
+    # 6. e 7. Custo de cada item (o custo médio de agora) e saída do estoque (§3.5).
+    partes = ratear_desconto([item.total for item in itens], totais.desconto_valor)
+    for item, parte in zip(itens, partes, strict=True):
+        produto = produtos[item.produto_id]
+        item.custo_unitario = produto.custo_medio
+        item.desconto_rateado = parte
+        registrar_saida_pedido(
+            produto=produto, quantidade=item.quantidade, pedido=pedido, usuario=usuario
+        )
+    ItemPedido.objects.bulk_update(itens, ["custo_unitario", "desconto_rateado"])
+
+    # 8. Os totais já foram gravados por _recalcular; falta o status.
+    pedido.numero = contador.ultimo_numero
+    pedido.status = Pedido.Status.CONFIRMADO
+    pedido.confirmado_por = usuario
+    pedido.confirmado_em = timezone.now()
+    pedido.save(
+        update_fields=["numero", "status", "confirmado_por", "confirmado_em", "atualizado_em"]
+    )
