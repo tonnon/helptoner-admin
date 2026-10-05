@@ -1,5 +1,7 @@
 from allauth.mfa.models import Authenticator
 
+from apps.contas.forms import TrocarSenhaForm
+from apps.contas.models import Usuario
 from tests.apoio import SENHA_TESTE
 
 
@@ -35,6 +37,19 @@ def test_trocar_senha_volta_para_minha_conta(client_vendedor, vendedor):
     vendedor.refresh_from_db()
     assert vendedor.check_password(nova)
     assert client_vendedor.get("/minha-conta/").status_code == 200  # continua logado
+
+
+def test_trocar_senha_nao_desfaz_uma_desativacao_feita_ao_mesmo_tempo(vendedor):
+    # §4.2: quem é desativado perde o acesso na hora, mesmo no meio da troca de senha.
+    nova = "toner-azul-de-março"
+    form = TrocarSenhaForm(
+        data={"oldpassword": SENHA_TESTE, "password1": nova, "password2": nova}, user=vendedor
+    )
+    assert form.is_valid()
+    Usuario.objects.filter(pk=vendedor.pk).update(is_active=False)  # outro administrador desativou
+    form.save()
+    vendedor = Usuario.objects.get(pk=vendedor.pk)
+    assert not vendedor.is_active and vendedor.check_password(nova)
 
 
 def test_gerar_novos_codigos_pede_a_senha_e_mostra_os_novos(client_vendedor, vendedor):

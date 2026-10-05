@@ -13,8 +13,8 @@ from django.contrib.auth.signals import user_logged_in
 from django.core.exceptions import PermissionDenied
 from django.dispatch import receiver
 
-from .middleware import tem_autenticador
 from .models import RegistroAcesso
+from .services import tem_autenticador
 
 MOTIVO_CODIGO_INVALIDO = "Código de verificação inválido"
 

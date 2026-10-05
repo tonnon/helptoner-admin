@@ -24,6 +24,9 @@ ROTAS_LIVRES = {
     "account_login",  # a tela de login
     "mfa_authenticate",  # segunda etapa do login: a pessoa ainda não entrou
     "account_inactive",  # aviso para quem tentou entrar com um acesso desativado
+    # Login próprio do painel do Django: sem login, só leva ao login do sistema (com 2FA);
+    # quem não é superusuário recebe 403 (config/urls.py).
+    "admin:login",
     *ROTAS_DESLIGADAS,
 }
 
@@ -44,14 +47,16 @@ def views_por_nome():
 def todas_as_rotas():
     """Pares (nome, url): <int:...> vira "1" e os outros conversores viram "x".
 
-    Nas rotas com expressão regular (as do allauth), cada grupo (?P<nome>...) vira "x" e as
-    âncoras ^ e $ saem.
+    Nas rotas com expressão regular (as do allauth e as do painel), cada grupo, com nome
+    (?P<nome>...) ou sem nome ([^/]+), vira "x" e as âncoras ^ e $ saem.
     """
     rotas = []
     for nome, rota, _ in _percorrer(get_resolver().url_patterns):
         url = re.sub(r"<int:[^>]+>", "1", rota)
         url = re.sub(r"<[^>]+>", "x", url)
-        url = re.sub(r"\(\?Px[^)]*\)", "x", url).replace("^", "").replace("$", "")
+        url = re.sub(r"\(\?Px[^)]*\)", "x", url)  # grupo com nome (o <nome> já virou x)
+        url = re.sub(r"\([^?)][^)]*\)", "x", url)  # grupo sem nome (ex.: o simple-history)
+        url = url.replace("^", "").replace("$", "")
         assert not re.search(r"[\^$()?\[\]]", url), f"rota {nome} não se deixa montar: {rota}"
         rotas.append((nome, "/" + url))
     return rotas

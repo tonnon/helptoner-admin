@@ -551,6 +551,45 @@
     color: var(--color-vermelho-texto);
   }
 
+  /* ---------- Etiquetas pequenas das tabelas (perfil, 2FA, situação), como no esboço ---------- */
+  .etiqueta-verde,
+  .etiqueta-ambar,
+  .etiqueta-vermelho,
+  .etiqueta-azul,
+  .etiqueta-cinza {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .etiqueta-verde {
+    background: var(--color-verde-50);
+    color: var(--color-verde);
+  }
+
+  .etiqueta-ambar {
+    background: var(--color-ambar-50);
+    color: var(--color-ambar);
+  }
+
+  .etiqueta-vermelho {
+    background: var(--color-vermelho-50);
+    color: var(--color-vermelho-texto);
+  }
+
+  .etiqueta-azul {
+    background: var(--color-azul-50);
+    color: var(--color-azul);
+  }
+
+  .etiqueta-cinza {
+    background: var(--color-fundo);
+    color: var(--color-texto-2);
+  }
+
   /* ---------- Tabelas (no celular, cada linha vira um cartão) ---------- */
   .tabela-responsiva {
     width: 100%;

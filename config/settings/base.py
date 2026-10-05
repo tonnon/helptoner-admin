@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import dj_database_url
@@ -144,4 +145,11 @@ ACCOUNT_RATE_LIMITS = {"login": "30/m/ip", "login_failed": "10/m/ip,5/5m/key"}
 MFA_SUPPORTED_TYPES = ["totp", "recovery_codes"]
 MFA_TOTP_ISSUER = "Helptoner Pedidos"
 MFA_RECOVERY_CODE_COUNT = 10
+# O sistema não verifica e-mails (quem cadastra é o Administrador) e não cria EmailAddress do
+# allauth. Se um aparecer não verificado (pelo painel, por exemplo), o allauth recusaria ativar o
+# autenticador e o primeiro acesso ficaria num laço entre a ativação e a tela do 2FA.
+MFA_ALLOW_UNVERIFIED_EMAIL = True
 ALLAUTH_TRUSTED_CLIENT_IP_HEADER = None  # em produção: "x-vercel-forwarded-for" (Tarefa 28)
+
+# Painel de manutenção do Django (só o superusuário), num endereço que não é o padrão /admin/.
+ADMIN_URL = os.environ.get("ADMIN_URL", "manutencao/")

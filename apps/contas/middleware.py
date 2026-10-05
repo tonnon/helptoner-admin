@@ -2,16 +2,14 @@
 
 Enquanto não termina, o usuário logado só chega às rotas da etapa em que está (e a sair e
 confirmar a senha, que o allauth pede antes de ativar o autenticador ou mostrar os códigos).
+As etapas são calculadas em apps.contas.services.
 """
 
-from allauth.mfa.models import Authenticator
 from django.urls import reverse
 
 from apps.core.htmx import redirecionar
 
-ETAPA_SENHA = 1
-ETAPA_AUTENTICADOR = 2
-ETAPA_CODIGOS = 3
+from .services import ETAPA_AUTENTICADOR, ETAPA_CODIGOS, ETAPA_SENHA, etapa_do_primeiro_acesso
 
 # Rotas liberadas em cada etapa; a primeira é para onde as outras levam.
 ROTAS_DA_ETAPA = {
@@ -29,23 +27,6 @@ ROTAS_DA_ETAPA = {
 ROTAS_DE_TODAS_AS_ETAPAS = frozenset(
     {"account_logout", "account_reauthenticate", "mfa_reauthenticate"}
 )
-
-
-def tem_autenticador(usuario) -> bool:
-    """O usuário tem o aplicativo autenticador (TOTP) ativo."""
-    return Authenticator.objects.filter(user=usuario, type=Authenticator.Type.TOTP).exists()
-
-
-def etapa_do_primeiro_acesso(usuario) -> int | None:
-    """A etapa em que o usuário está, ou None se ele já concluiu o primeiro acesso.
-
-    Só consulta o banco quando os códigos de recuperação ainda não foram entregues.
-    """
-    if usuario.deve_trocar_senha:
-        return ETAPA_SENHA
-    if usuario.codigos_recuperacao_entregues:
-        return None
-    return ETAPA_CODIGOS if tem_autenticador(usuario) else ETAPA_AUTENTICADOR
 
 
 class PrimeiroAcessoMiddleware:

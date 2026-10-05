@@ -65,7 +65,8 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
 
     @cached_property
     def _nomes_dos_grupos(self) -> frozenset[str]:
-        return frozenset(self.groups.values_list("name", flat=True))
+        # .all() aproveita o prefetch_related("groups") das listas (uma consulta só para todos).
+        return frozenset(grupo.name for grupo in self.groups.all())
 
     @property
     def eh_administrador(self) -> bool:

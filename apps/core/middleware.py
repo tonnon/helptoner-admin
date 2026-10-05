@@ -1,5 +1,6 @@
 from urllib.parse import urlsplit
 
+from django.conf import settings
 from django.contrib.auth.middleware import LoginRequiredMiddleware
 from django.http import QueryDict
 from django.shortcuts import resolve_url
@@ -10,6 +11,11 @@ from .htmx import eh_htmx, redirecionar
 
 class LoginObrigatorioMiddleware(LoginRequiredMiddleware):
     """Exige login em todas as views; em HTMX, manda o navegador inteiro para o login."""
+
+    def get_login_url(self, view_func):
+        # Um login só, o do sistema (com a verificação em duas etapas). As views do painel do
+        # Django trazem login_url próprio (admin:login), que entraria sem o código: é ignorado.
+        return settings.LOGIN_URL
 
     def handle_no_permission(self, request, view_func):
         if not eh_htmx(request):

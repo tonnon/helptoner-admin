@@ -45,7 +45,8 @@ def test_base_usa_so_arquivos_locais_e_htmx_seguro(client_vendedor):
 def test_menu_mostra_so_as_rotas_que_existem(client_admin):
     html = client_admin.get("/").content.decode()
     assert 'href="/" class="item-menu ativo" aria-current="page"' in html
-    assert "Funcionários" not in html and "Relatórios" not in html  # rotas ainda não existem
+    assert '<a href="/funcionarios/" class="item-menu">' in html and "Funcionários" in html
+    assert "Relatórios" not in html  # rota ainda não existe
     assert '<a href="/minha-conta/" class="item-menu">' in html and "Minha conta" in html
 
 

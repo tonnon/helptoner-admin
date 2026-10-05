@@ -1,7 +1,9 @@
+from allauth.account.models import EmailAddress
 from allauth.mfa.models import Authenticator
 
-from apps.contas.middleware import etapa_do_primeiro_acesso
+from apps.contas.forms import NovaSenhaForm
 from apps.contas.models import Usuario
+from apps.contas.services import etapa_do_primeiro_acesso
 from tests.apoio import SENHA_TESTE, ativar_2fa, criar_usuario, totp_agora
 
 
@@ -61,6 +63,17 @@ def test_concluir_sem_totp_nao_conclui(client, db):
     client.post("/primeiro-acesso/concluir/")
     u.refresh_from_db()
     assert not u.codigos_recuperacao_entregues
+
+
+def test_email_nao_verificado_do_allauth_nao_prende_na_etapa_2(client, db):
+    # O sistema não verifica e-mails. Se um EmailAddress não verificado aparecer (pelo painel,
+    # por exemplo), o allauth não pode recusar a ativação do autenticador: ele mandaria para a
+    # tela do 2FA, e o PrimeiroAcessoMiddleware de volta para a ativação, num laço (Ruling R12).
+    u = criar_usuario(pronto=False)
+    Usuario.objects.filter(pk=u.pk).update(deve_trocar_senha=False)
+    EmailAddress.objects.create(user=u, email=u.email, verified=False, primary=True)
+    entrar_pelo_formulario(client, u)
+    assert client.get("/contas/2fa/totp/activate/").status_code == 200
 
 
 def test_textos_da_etapa_1(client, db):
@@ -132,3 +145,15 @@ def test_quem_ja_concluiu_nao_gasta_consulta_com_o_primeiro_acesso(
     usuario = Usuario.objects.get(pk=vendedor.pk)
     with django_assert_num_queries(0):
         assert etapa_do_primeiro_acesso(usuario) is None
+
+
+def test_nova_senha_nao_desfaz_uma_desativacao_feita_ao_mesmo_tempo(db):
+    # §4.2: quem é desativado perde o acesso na hora, mesmo no meio da troca de senha.
+    u = criar_usuario(pronto=False)
+    nova = "toner-azul-de-março"
+    form = NovaSenhaForm(u, {"new_password1": nova, "new_password2": nova})
+    assert form.is_valid()
+    Usuario.objects.filter(pk=u.pk).update(is_active=False)  # outro administrador desativou
+    form.save()
+    u = Usuario.objects.get(pk=u.pk)
+    assert not u.is_active and not u.deve_trocar_senha and u.check_password(nova)

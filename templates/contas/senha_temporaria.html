@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% comment %}
+Senha temporária de um funcionário novo ou com a senha redefinida. Aparece uma vez só: não fica
+gravada em lugar nenhum e a resposta vai com Cache-Control: no-store (apps.contas.views).
+Parâmetros: funcionario, senha e novo (True no cadastro).
+{% endcomment %}
+{% block titulo %}{% if novo %}Funcionário criado{% else %}Senha redefinida{% endif %} - Helptoner Pedidos{% endblock %}
+{% block trilha %}<a href="{% url 'contas:funcionarios' %}">Funcionários</a> / {{ funcionario.nome }}{% endblock %}
+{% block conteudo %}
+  <h1 class="fx">{% if novo %}Funcionário criado{% else %}Senha redefinida{% endif %}</h1>
+  <section class="cartao fx fx-1 mt-4 max-w-2xl" aria-labelledby="senha">
+    <h2 id="senha" class="text-base font-bold">Senha temporária de {{ funcionario.nome }}</h2>
+    <p class="mt-1 break-all text-[13px] text-texto-2">Login: {{ funcionario.email }}</p>
+    <p class="mt-4 select-all rounded-lg bg-fundo px-4 py-3 text-center font-mono text-xl font-bold tracking-wider">{{ senha }}</p>
+    <p class="mt-4 text-sm font-semibold">Copie e repasse ao funcionário. Ela não será mostrada de novo.</p>
+    <p class="mt-1 text-[13px] text-texto-2">{% if novo %}No primeiro acesso, {{ funcionario.primeiro_nome }} troca esta senha e configura o aplicativo autenticador no celular.{% else %}No próximo acesso, {{ funcionario.primeiro_nome }} entra com esta senha e escolhe uma nova.{% endif %}</p>
+    <a href="{% url 'contas:funcionarios' %}" class="btn-pri mt-6">Voltar para Funcionários</a>
+  </section>
+{% endblock %}

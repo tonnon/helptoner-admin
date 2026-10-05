@@ -28,6 +28,12 @@ class ContaAdapter(DefaultAccountAdapter):
     def get_password_change_redirect_url(self, request):
         return reverse("contas:minha_conta")
 
+    def set_password(self, user, password):
+        # Usado pelo TrocarSenhaForm ("Minha conta"). Grava só a senha: um user.save() inteiro
+        # desfaria uma desativação feita ao mesmo tempo por um administrador (§4.2).
+        user.set_password(password)
+        user.save(update_fields=["password"])
+
     def _get_login_attempts_cache_key(self, request, **credentials):
         """Chave do limite de tentativas erradas por conta: só o e-mail.
 
