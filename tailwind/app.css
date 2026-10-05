@@ -408,6 +408,43 @@
     line-height: 1.5;
   }
 
+  /* ---------- Primeiro acesso: etapas e QR code do autenticador ---------- */
+  .passo {
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--color-fundo);
+    color: var(--color-texto-2);
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .passo-feito {
+    background: var(--color-verde-50);
+    color: var(--color-verde);
+  }
+
+  .passo-atual {
+    background: var(--color-azul-50);
+    color: var(--color-azul);
+  }
+
+  /* O SVG do allauth já traz a margem branca em volta do código. */
+  .qr {
+    flex: none;
+    width: 148px;
+    padding: 4px;
+    border: 1px solid var(--color-linha);
+    border-radius: 10px;
+    background: #fff;
+  }
+
+  .qr svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
   /* ---------- Botões ---------- */
   .btn-pri,
   .btn-sec,

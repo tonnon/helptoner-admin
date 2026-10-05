@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block titulo %}Minha conta - Helptoner Pedidos{% endblock %}
+{% block conteudo %}
+  <h1 class="fx">Minha conta</h1>
+  <div class="mt-4 max-w-2xl">
+    <section class="cartao fx fx-1" aria-labelledby="dados">
+      <h2 id="dados" class="text-base font-bold">Seus dados</h2>
+      <dl class="mt-3 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[110px_minmax(0,1fr)]">
+        <dt class="font-semibold text-texto-2">Nome</dt>
+        <dd>{{ user.nome }}</dd>
+        <dt class="font-semibold text-texto-2">E-mail</dt>
+        <dd class="break-words">{{ user.email }}</dd>
+        <dt class="font-semibold text-texto-2">Perfil</dt>
+        <dd>{{ user.perfil }}</dd>
+      </dl>
+      <p class="mt-4 text-[13px] text-texto-2">Para mudar nome, e-mail ou perfil, fale com um administrador.</p>
+    </section>
+    <section class="cartao fx fx-2" aria-labelledby="seguranca">
+      <h2 id="seguranca" class="text-base font-bold">Segurança</h2>
+      <div class="mt-3 flex flex-col gap-3 border-b border-linha pb-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p class="text-sm font-semibold">Senha</p>
+          <p class="text-[13px] text-texto-2">Para trocar, você vai precisar da senha atual.</p>
+        </div>
+        <a href="{% url 'account_change_password' %}" class="btn-sec">Trocar senha</a>
+      </div>
+      <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p class="text-sm font-semibold">Códigos de recuperação</p>
+          <p class="text-[13px] text-texto-2">Servem para entrar se você perder o celular. Os novos substituem os antigos.</p>
+        </div>
+        <a href="{% url 'mfa_generate_recovery_codes' %}" class="btn-sec whitespace-normal text-center">Gerar novos códigos de recuperação</a>
+      </div>
+    </section>
+  </div>
+{% endblock %}

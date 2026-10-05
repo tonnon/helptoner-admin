@@ -62,3 +62,9 @@ def test_filtros_de_template():
 def test_iniciais_do_avatar():
     modelo = Template("{% load formato %}{{ a|iniciais }} {{ b|iniciais }} [{{ c|iniciais }}]")
     assert modelo.render(Context({"a": "Lucas Tonnon", "b": "carla", "c": ""})) == "LT C []"
+
+
+def test_texto_em_grupos():
+    modelo = Template("{% load formato %}{{ a|em_grupos }} {{ b|em_grupos:3 }} [{{ c|em_grupos }}]")
+    contexto = Context({"a": "ABCDEFGHIJ", "b": "123456", "c": ""})
+    assert modelo.render(contexto) == "ABCD EFGH IJ 123 456 []"

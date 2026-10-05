@@ -46,7 +46,7 @@ def test_menu_mostra_so_as_rotas_que_existem(client_admin):
     html = client_admin.get("/").content.decode()
     assert 'href="/" class="item-menu ativo" aria-current="page"' in html
     assert "Funcionários" not in html and "Relatórios" not in html  # rotas ainda não existem
-    assert "Minha conta" not in html  # a rota chega na Tarefa 6
+    assert '<a href="/minha-conta/" class="item-menu">' in html and "Minha conta" in html
 
 
 def test_inicio_e_bloco_do_usuario_com_sair(client_admin):
@@ -62,7 +62,8 @@ def test_menu_so_e_montado_se_o_template_usar(rf, vendedor, django_assert_num_qu
         contexto = navegacao(request)
     with django_assert_num_queries(1):  # os grupos do usuário
         assert [link.nome for link in contexto["menu"]] == ["Início"]
-    assert contexto["menu_ativo"] == "core:inicio" and contexto["url_minha_conta"] is None
+    assert contexto["menu_ativo"] == "core:inicio"
+    assert contexto["url_minha_conta"] == "/minha-conta/"
 
 
 def test_mensagens_do_django_viram_avisos(rf, vendedor):

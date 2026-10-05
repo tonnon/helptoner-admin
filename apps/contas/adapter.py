@@ -1,5 +1,6 @@
 from allauth.account.adapter import DefaultAccountAdapter
 from django.core.exceptions import ValidationError
+from django.urls import reverse
 
 from .models import Usuario
 from .sinais import registrar_acesso
@@ -23,6 +24,9 @@ class ContaAdapter(DefaultAccountAdapter):
 
     def is_open_for_signup(self, request):
         return False
+
+    def get_password_change_redirect_url(self, request):
+        return reverse("contas:minha_conta")
 
     def _get_login_attempts_cache_key(self, request, **credentials):
         """Chave do limite de tentativas erradas por conta: só o e-mail.

@@ -29,6 +29,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "apps.core.middleware.LoginObrigatorioMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    "apps.contas.middleware.PrimeiroAcessoMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.csp.ContentSecurityPolicyMiddleware",
@@ -138,6 +139,7 @@ ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_SESSION_REMEMBER = False
 ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = False
+ACCOUNT_FORMS = {"change_password": "apps.contas.forms.TrocarSenhaForm"}
 ACCOUNT_RATE_LIMITS = {"login": "30/m/ip", "login_failed": "10/m/ip,5/5m/key"}
 MFA_SUPPORTED_TYPES = ["totp", "recovery_codes"]
 MFA_TOTP_ISSUER = "Helptoner Pedidos"

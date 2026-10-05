@@ -1,0 +1,27 @@
+{% extends "mfa/base_manage.html" %}
+{% load formato %}
+{% comment %}
+Etapa 2 do primeiro acesso: ativar o aplicativo autenticador (no lugar da tela do allauth).
+O QR code vem em SVG dentro da página (totp_svg): a CSP não libera imagens "data:".
+{% endcomment %}
+{% block head_title %}Primeiro acesso{% endblock %}
+{% block content %}
+  {% include "contas/cabecalho_primeiro_acesso.html" with etapa=2 %}
+  <p class="mt-4 text-sm text-texto-2">Agora, ligue a verificação em duas etapas no seu celular.</p>
+  <div class="mt-4 flex flex-col items-center gap-4 sm:flex-row sm:items-start">
+    <div class="qr" role="img" aria-label="QR code para o aplicativo autenticador">{{ totp_svg|safe }}</div>
+    <ol class="list-decimal space-y-1 pl-5 text-sm leading-relaxed text-texto-2">
+      <li>Abra o Google ou o Microsoft Authenticator.</li>
+      <li>Escaneie o QR code.</li>
+      <li>Digite abaixo o código gerado.</li>
+    </ol>
+  </div>
+  <p class="mt-4 text-sm text-texto-2">Não consegue ler o QR? Digite esta chave no aplicativo:</p>
+  <code class="mt-1.5 block rounded-lg bg-fundo px-3 py-2 text-center font-mono text-sm font-semibold tracking-wider break-words" data-segredo>{{ form.secret|em_grupos }}</code>
+  <form method="post" action="{% url 'mfa_activate_totp' %}" class="mt-5">
+    {% csrf_token %}
+    {% include "componentes/erros_do_formulario.html" %}
+    {% include "componentes/campo_codigo.html" with campo=form.code %}
+    <button type="submit" class="btn-pri mt-6 w-full">Ativar e continuar</button>
+  </form>
+{% endblock %}

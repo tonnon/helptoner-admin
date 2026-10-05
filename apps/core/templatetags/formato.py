@@ -31,6 +31,14 @@ def pct(fracao, casas=1):
     return formatacao.percentual(fracao, int(casas))
 
 
+@register.filter("em_grupos")
+def em_grupos(texto, tamanho=4) -> str:
+    """'ABCDEFGHIJ' → 'ABCD EFGH IJ': chaves longas ficam mais fáceis de ler e digitar."""
+    texto = str(texto or "")
+    tamanho = int(tamanho)
+    return " ".join(texto[i : i + tamanho] for i in range(0, len(texto), tamanho))
+
+
 @register.filter("iniciais")
 def iniciais(nome) -> str:
     """'Lucas Tonnon' → 'LT' (primeiro e último nome); 'Carla' → 'C'."""

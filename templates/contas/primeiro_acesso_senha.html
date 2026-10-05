@@ -1,0 +1,17 @@
+{% extends "base_publica.html" %}
+{% comment %}
+Etapa 1 do primeiro acesso: trocar a senha temporária. Os textos são usados pelos testes no
+navegador (Tarefa 7).
+{% endcomment %}
+{% block titulo %}Primeiro acesso - Helptoner Pedidos{% endblock %}
+{% block conteudo %}
+  {% include "contas/cabecalho_primeiro_acesso.html" with etapa=1 %}
+  <p class="mt-4 text-sm text-texto-2">Olá, {{ user.primeiro_nome }}! Para começar, troque a senha temporária que você recebeu por uma senha só sua.</p>
+  <form method="post" action="{% url 'contas:primeiro_acesso_senha' %}" class="mt-5">
+    {% csrf_token %}
+    {% include "componentes/erros_do_formulario.html" %}
+    {% include "componentes/campo.html" with campo=form.new_password1 %}
+    {% include "componentes/campo.html" with campo=form.new_password2 %}
+    <button type="submit" class="btn-pri mt-6 w-full">Salvar e continuar</button>
+  </form>
+{% endblock %}

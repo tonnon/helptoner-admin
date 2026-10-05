@@ -37,7 +37,7 @@
           <div><b>{{ user.primeiro_nome }}</b><small>{{ user.perfil }}</small></div>
         </div>
         {% if url_minha_conta %}
-          <a href="{{ url_minha_conta }}" class="item-menu">{% include "icones/conta.svg" %}Minha conta</a>
+          <a href="{{ url_minha_conta }}" class="item-menu{% if request.path == url_minha_conta %} ativo{% endif %}"{% if request.path == url_minha_conta %} aria-current="page"{% endif %}>{% include "icones/conta.svg" %}Minha conta</a>
         {% endif %}
         <form method="post" action="{% url 'account_logout' %}">
           {% csrf_token %}

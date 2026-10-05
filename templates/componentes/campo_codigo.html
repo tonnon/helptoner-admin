@@ -1,0 +1,14 @@
+{% comment %}
+Campo do código de verificação, com dígitos grandes como no esboço. Parâmetros: campo (o
+BoundField "code" dos formulários do allauth) e autofoco (opcional).
+Ex.: {% include "componentes/campo_codigo.html" with campo=form.code autofoco=True %}
+{% endcomment %}
+<div class="grupo-campo">
+  <label class="rotulo text-center" for="{{ campo.auto_id }}">Código de 6 dígitos</label>
+  <div class="campo campo-codigo{% if campo.errors %} campo-invalido{% endif %}">
+    <input type="text" name="{{ campo.html_name }}" id="{{ campo.auto_id }}" inputmode="numeric" autocomplete="one-time-code" placeholder="000000" required{% if autofoco %} autofocus{% endif %}{% if campo.errors %} aria-invalid="true" aria-describedby="{{ campo.auto_id }}_error"{% endif %}>
+  </div>
+  {% if campo.errors %}
+    <div class="erro text-center" id="{{ campo.auto_id }}_error">{% for erro in campo.errors %}<p>{{ erro }}</p>{% endfor %}</div>
+  {% endif %}
+</div>

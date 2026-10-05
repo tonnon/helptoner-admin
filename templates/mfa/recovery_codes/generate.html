@@ -1,0 +1,18 @@
+{% extends "mfa/base_manage.html" %}
+{% comment %}
+Confirmação antes de gerar códigos de recuperação novos (no lugar da tela do allauth), aberta
+por "Minha conta".
+{% endcomment %}
+{% block head_title %}Gerar novos códigos de recuperação{% endblock %}
+{% block content %}
+  <h1>Gerar novos códigos de recuperação</h1>
+  <p class="mt-2 text-sm text-texto-2">Os códigos de recuperação servem para entrar se você perder o celular.{% if unused_code_count %} Os códigos atuais deixam de valer.{% endif %}</p>
+  <form method="post" action="{% url 'mfa_generate_recovery_codes' %}" class="mt-5">
+    {% csrf_token %}
+    {% include "componentes/erros_do_formulario.html" %}
+    <div class="flex flex-wrap gap-2">
+      <button type="submit" class="{% if unused_code_count %}btn-perigo{% else %}btn-pri{% endif %}">Gerar novos códigos</button>
+      <a href="{% url 'contas:minha_conta' %}" class="btn-sec">Voltar</a>
+    </div>
+  </form>
+{% endblock %}
