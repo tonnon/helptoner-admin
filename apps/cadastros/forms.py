@@ -5,6 +5,12 @@ from .documentos import normalizar_documento, validar_documento
 from .models import Cliente
 
 
+def mensagem_documento_repetido(outro) -> str:
+    if outro is None:
+        return "Já existe um cliente com este CPF/CNPJ."
+    return f"Já existe um cliente com este CPF/CNPJ: {outro.nome}."
+
+
 class ClienteForm(forms.ModelForm):
     # Sem o limite de 14: a pessoa digita com a máscara (18 caracteres no CNPJ).
     documento = forms.CharField(label="CPF/CNPJ", max_length=30)
@@ -53,9 +59,8 @@ class ClienteForm(forms.ModelForm):
                 return dados  # o erro de dígitos vem do modelo (Cliente.clean)
             outro = Cliente.objects.filter(documento=documento).exclude(pk=self.instance.pk).first()
             if outro:
-                self.add_error(
-                    "documento", f"Já existe um cliente com este CPF/CNPJ: {outro.nome}."
-                )
+                self.add_error("documento", mensagem_documento_repetido(outro))
+
         return dados
 
     def validate_unique(self):

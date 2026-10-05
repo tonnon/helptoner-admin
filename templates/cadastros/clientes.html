@@ -11,7 +11,7 @@ esqueleto e o HTMX busca o pedaço "resultados" na mesma URL. A busca roda enqua
     <a href="{% url 'cadastros:cliente_novo' %}" class="btn-pri">+ Novo cliente</a>
   </div>
   <form method="get" action="{% url 'cadastros:clientes' %}" class="fx fx-1 mt-4 flex flex-wrap items-center gap-x-5 gap-y-2" role="search"
-        hx-get="{% url 'cadastros:clientes' %}" hx-trigger="input changed delay:300ms, submit" hx-target="#resultados" hx-push-url="true">
+        hx-get="{% url 'cadastros:clientes' %}" hx-trigger="input changed delay:300ms from:find input[name=q], change from:find input[name=inativos], submit" hx-target="#resultados" hx-push-url="true">
     <div class="campo w-full sm:max-w-sm">
       <input type="search" name="q" value="{{ request.GET.q }}" maxlength="100" placeholder="Nome, CPF ou CNPJ" aria-label="Buscar cliente por nome, CPF ou CNPJ" autocomplete="off">
     </div>
@@ -46,7 +46,7 @@ esqueleto e o HTMX busca o pedaço "resultados" na mesma URL. A busca roda enqua
     </table>
   </div>
   {% include "componentes/paginacao.html" %}
-{% elif q %}
+{% elif not sem_clientes %}
   <div class="cartao fx">{% include "componentes/vazio.html" with mensagem="Nenhum cliente encontrado." %}</div>
 {% else %}
   <div class="cartao fx">{% url 'cadastros:cliente_novo' as url_novo %}{% include "componentes/vazio.html" with mensagem="Nenhum cliente ainda. Cadastre o primeiro." acao_url=url_novo acao_texto="Novo cliente" %}</div>
