@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load formato %}
+{% comment %}
+Histórico de movimentos de estoque (todos os perfis), como em docs/esbocos/telas.html. Padrão P18:
+a página abre com o esqueleto e o HTMX busca o pedaço "resultados" na mesma URL. O custo unitário
+só é desenhado para o Administrador (o Vendedor não recebe esse dado no HTML).
+{% endcomment %}
+{% block titulo %}Estoque - Helptoner Pedidos{% endblock %}
+{% block conteudo %}
+  <div class="fx flex flex-wrap items-center justify-between gap-3">
+    <h1>Estoque</h1>
+    {% if request.user.eh_administrador %}
+      <div class="flex flex-wrap gap-2">
+        <a href="{% url 'estoque:inicial' %}" class="btn-sec">Estoque inicial</a>
+        <a href="{% url 'estoque:ajuste' %}" class="btn-sec">Ajuste</a>
+        <a href="{% url 'estoque:entrada' %}" class="btn-pri">+ Entrada</a>
+      </div>
+    {% endif %}
+  </div>
+  <form method="get" action="{% url 'estoque:historico' %}" class="fx fx-1 mt-4 flex flex-wrap items-center gap-x-5 gap-y-2" role="search"
+        hx-get="{% url 'estoque:historico' %}" hx-trigger="input changed delay:300ms from:find input[name=produto], change from:find select[name=tipo], change from:find input[name=inicio], change from:find input[name=fim], submit" hx-target="#resultados" hx-push-url="true">
+    <div class="campo w-full sm:max-w-xs">
+      <input type="search" name="produto" value="{{ produto }}" maxlength="40" placeholder="Código do produto" aria-label="Filtrar por código do produto" autocomplete="off">
+    </div>
+    <div class="campo">
+      <select name="tipo" aria-label="Filtrar por tipo">
+        <option value="">Tipo: todos</option>
+        {% for valor, nome in tipos %}<option value="{{ valor }}"{% if tipo == valor %} selected{% endif %}>{{ nome }}</option>{% endfor %}
+      </select>
+    </div>
+    <label class="flex items-center gap-2 text-sm text-texto-2">De
+      <span class="campo"><input type="date" name="inicio" value="{{ inicio|date:'Y-m-d' }}"></span>
+    </label>
+    <label class="flex items-center gap-2 text-sm text-texto-2">até
+      <span class="campo"><input type="date" name="fim" value="{{ fim|date:'Y-m-d' }}"></span>
+    </label>
+  </form>
+  <div id="resultados" class="mt-4" hx-get="{{ request.get_full_path }}" hx-trigger="load">
+    {% include "componentes/esqueleto_linhas.html" with linhas=5 %}
+  </div>
+{% endblock %}
+
+{% partialdef resultados %}
+{% if pagina.paginator.count %}
+  <div class="cartao fx">
+    <table class="tabela-responsiva">
+      <thead>
+        <tr><th>Data</th><th>Produto</th><th>Tipo</th><th class="num">Qtd.</th>{% if request.user.eh_administrador %}<th class="num">Custo unit.</th>{% endif %}<th>Por</th></tr>
+      </thead>
+      <tbody>
+        {% for m in pagina %}
+          <tr>
+            <td data-rotulo="Data">{{ m.criado_em|data_hora_br }}</td>
+            <td data-rotulo="Produto"><span class="font-semibold">{{ m.produto.codigo }}</span></td>
+            <td data-rotulo="Tipo">
+              {% if m.tipo == "saida" %}<span class="etiqueta-vermelho">Saída{% if m.pedido %} · pedido nº {{ m.pedido|pedido_numero }}{% endif %}</span>
+              {% elif m.tipo == "devolucao" %}<span class="etiqueta-azul">Devolução{% if m.pedido %} · pedido nº {{ m.pedido|pedido_numero }}{% endif %}</span>
+              {% elif m.tipo == "entrada" %}<span class="etiqueta-verde">Entrada{% if m.motivo %} · {{ m.motivo }}{% endif %}</span>
+              {% elif m.tipo == "inicial" %}<span class="etiqueta-cinza">Estoque inicial</span>
+              {% else %}<span class="etiqueta-ambar">Ajuste{% if m.motivo %} · {{ m.motivo }}{% endif %}</span>{% endif %}
+            </td>
+            <td data-rotulo="Qtd." class="num">{% if m.entra %}+{% else %}−{% endif %}{{ m.quantidade|inteiro }}</td>
+            {% if request.user.eh_administrador %}<td data-rotulo="Custo unit." class="num">{{ m.custo_unitario|brl }}</td>{% endif %}
+            <td data-rotulo="Por">{{ m.usuario.primeiro_nome }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "componentes/paginacao.html" %}
+{% else %}
+  <div class="cartao fx">{% include "componentes/vazio.html" with mensagem="Nenhum movimento no período." %}</div>
+{% endif %}
+{% endpartialdef %}

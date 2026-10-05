@@ -11,6 +11,7 @@ from tests.apoio import criar_produto
 PAGINAS = [
     ("/produtos/", True),
     ("/produtos/{produto}/", False),
+    ("/estoque/", True),
 ]
 
 

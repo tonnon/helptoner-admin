@@ -47,3 +47,13 @@ class MovimentoEstoque(models.Model):
 
     def __str__(self):
         return f"{self.get_tipo_display()} de {self.quantidade} ({self.produto})"
+
+    @property
+    def entra(self) -> bool:
+        """Se o movimento soma ao estoque (a quantidade é sempre positiva)."""
+        return self.tipo in (
+            self.Tipo.INICIAL,
+            self.Tipo.ENTRADA,
+            self.Tipo.DEVOLUCAO,
+            self.Tipo.AJUSTE_MAIS,
+        )

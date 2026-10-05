@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% comment %}
+Entrada, estoque inicial e ajuste (só Administrador). O produto vem pelo código (datalist dos
+códigos ativos). O ajuste tem uma etapa de confirmação, sem script: o primeiro envio mostra o
+resumo com os mesmos dados escondidos e confirmar=1; o segundo grava.
+{% endcomment %}
+{% block titulo %}{{ titulo }} - Helptoner Pedidos{% endblock %}
+{% block trilha %}<a href="{% url 'estoque:historico' %}">Estoque</a> / {{ titulo }}{% endblock %}
+{% block conteudo %}
+  <h1>{{ titulo }}</h1>
+  <div class="mt-4 max-w-2xl">
+    <section class="cartao fx fx-1" aria-labelledby="dados">
+      <h2 id="dados" class="text-base font-bold">Dados</h2>
+      {% if confirmacao %}
+        <form method="post" action="{{ request.path }}" class="mt-4">
+          {% csrf_token %}
+          <div class="alerta-erro" role="alert"><p>{{ confirmacao }}</p></div>
+          <input type="hidden" name="codigo" value="{{ form.cleaned_data.codigo }}">
+          <input type="hidden" name="sentido" value="{{ form.cleaned_data.sentido }}">
+          <input type="hidden" name="quantidade" value="{{ form.cleaned_data.quantidade }}">
+          <input type="hidden" name="motivo" value="{{ form.cleaned_data.motivo }}">
+          <input type="hidden" name="confirmar" value="1">
+          <div class="mt-6 flex flex-wrap gap-2">
+            <button type="submit" class="btn-pri">Registrar</button>
+            <a href="{{ request.path }}" class="btn-sec">Voltar</a>
+          </div>
+        </form>
+      {% else %}
+        <form method="post" action="{{ request.path }}" class="mt-4" novalidate>
+          {% csrf_token %}
+          {% include "componentes/erros_do_formulario.html" %}
+          {% for campo in form.visible_fields %}
+            {% include "componentes/campo.html" %}
+          {% endfor %}
+          <datalist id="codigos">{% for codigo in codigos %}<option value="{{ codigo }}">{% endfor %}</datalist>
+          <div class="mt-6 flex flex-wrap gap-2">
+            <button type="submit" class="btn-pri">Registrar</button>
+            <a href="{% url 'estoque:historico' %}" class="btn-sec">Cancelar</a>
+          </div>
+        </form>
+      {% endif %}
+    </section>
+  </div>
+{% endblock %}
