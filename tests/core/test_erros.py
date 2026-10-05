@@ -1,3 +1,10 @@
+from importlib import import_module
+
+from django.conf import settings
+from django.contrib.messages import constants
+from django.contrib.messages.storage.cookie import CookieStorage
+from django.db import DatabaseError
+from django.http import HttpResponse
 from django.test import Client, override_settings
 
 
@@ -25,3 +32,29 @@ def test_falha_de_csrf_no_htmx_recarrega_a_pagina(vendedor):
     c.force_login(vendedor)
     r = c.post("/", headers={"HX-Request": "true"})
     assert r.status_code == 403 and r["HX-Refresh"] == "true"
+
+
+@override_settings(ROOT_URLCONF="tests.core.urls_erros")
+def test_500_aparece_mesmo_com_a_sessao_quebrada(client_vendedor, monkeypatch):
+    def falhar(self):
+        raise DatabaseError("banco fora do ar")
+
+    monkeypatch.setattr(import_module(settings.SESSION_ENGINE).SessionStore, "load", falhar)
+    client_vendedor.raise_request_exception = False
+    r = client_vendedor.get("/teste/500/")
+    assert r.status_code == 500 and "Código de referência:" in r.content.decode()
+
+
+@override_settings(ROOT_URLCONF="tests.core.urls_erros")
+def test_500_nao_consome_as_mensagens_pendentes(client_vendedor, rf):
+    armazenamento = CookieStorage(rf.get("/"))
+    armazenamento.add(constants.SUCCESS, "Pedido salvo.")
+    resposta = HttpResponse()
+    armazenamento.update(resposta)
+    client_vendedor.cookies[CookieStorage.cookie_name] = resposta.cookies[
+        CookieStorage.cookie_name
+    ].value
+    client_vendedor.raise_request_exception = False
+    r = client_vendedor.get("/teste/500/")
+    assert r.status_code == 500 and "Pedido salvo." not in r.content.decode()
+    assert CookieStorage.cookie_name not in r.cookies  # a mensagem fica para a próxima página

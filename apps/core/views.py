@@ -2,8 +2,9 @@ import logging
 import secrets
 
 from django.contrib.auth.decorators import login_not_required
-from django.http import Http404, HttpResponse, JsonResponse
+from django.http import Http404, HttpResponse, HttpResponseServerError, JsonResponse
 from django.shortcuts import render
+from django.template import loader
 from django.views.decorators.http import require_GET
 
 from .htmx import eh_htmx
@@ -47,7 +48,9 @@ def erro_404(request, exception=None):
 def erro_500(request):
     codigo = secrets.token_hex(4)
     log_erros.error("erro interno codigo=%s caminho=%s", codigo, request.path, exc_info=True)
-    return render(request, "500.html", {"codigo": codigo}, status=500)
+    # Sem o request, nenhum context processor roda: a página não depende da sessão nem do
+    # banco (que podem ser a causa do erro) e não consome as mensagens da próxima página.
+    return HttpResponseServerError(loader.render_to_string("500.html", {"codigo": codigo}))
 
 
 def falha_csrf(request, reason=""):
