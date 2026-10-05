@@ -1,0 +1,19 @@
+{% extends "account/base_entrance.html" %}
+{% comment %}
+Login (no lugar da tela do allauth), com o visual de docs/esbocos/telas.html, seção Acesso.
+Não há "criar conta" nem "esqueci a senha": quem cadastra e redefine é o administrador (o texto
+de ajuda da senha está em account/password_reset_help_text.html).
+O rótulo "E-mail" vai fixo porque a tradução do django.contrib.auth ("Email") vence a do allauth.
+{% endcomment %}
+{% block head_title %}Entrar{% endblock %}
+{% block content %}
+  <h1>Entrar</h1>
+  <form method="post" action="{% url 'account_login' %}" class="mt-5">
+    {% csrf_token %}
+    {% include "componentes/erros_do_formulario.html" %}
+    {% include "componentes/campo.html" with campo=form.login rotulo="E-mail" %}
+    {% include "componentes/campo.html" with campo=form.password %}
+    {{ redirect_field }}
+    <button type="submit" class="btn-pri mt-6 w-full">Entrar</button>
+  </form>
+{% endblock %}

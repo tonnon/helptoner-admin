@@ -357,6 +357,57 @@
     color: var(--color-vermelho-texto);
   }
 
+  /* Erro do formulário inteiro (ex.: "E-mail ou senha incorretos."), acima dos campos. */
+  .alerta-erro {
+    margin-bottom: 14px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--color-vermelho-50);
+    color: var(--color-vermelho-texto);
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.45;
+  }
+
+  /* Código de verificação: dígitos grandes e espaçados, como no esboço da tela. */
+  .campo.campo-codigo input {
+    padding: 4px 0;
+    font-size: 24px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.4em;
+    text-align: center;
+    text-indent: 0.4em; /* compensa o espaço que sobra depois do último dígito */
+  }
+
+  .campo.campo-codigo input::placeholder {
+    color: var(--color-linha);
+  }
+
+  /* Dica que abre com um clique (details/summary), sem JavaScript. */
+  .dica summary {
+    list-style: none;
+    color: var(--color-azul);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .dica summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .dica summary:hover {
+    text-decoration: underline;
+  }
+
+  .dica p {
+    margin-top: 6px;
+    color: var(--color-texto-2);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
   /* ---------- Botões ---------- */
   .btn-pri,
   .btn-sec,

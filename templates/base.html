@@ -39,7 +39,7 @@
         {% if url_minha_conta %}
           <a href="{{ url_minha_conta }}" class="item-menu">{% include "icones/conta.svg" %}Minha conta</a>
         {% endif %}
-        <form method="post" action="/contas/logout/">
+        <form method="post" action="{% url 'account_logout' %}">
           {% csrf_token %}
           <button type="submit" class="item-menu">{% include "icones/sair.svg" %}Sair</button>
         </form>

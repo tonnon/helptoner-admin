@@ -13,6 +13,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "simple_history",
+    "allauth",
+    "allauth.account",
+    "allauth.mfa",
     "apps.core",
     "apps.contas",
 ]
@@ -25,6 +28,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "apps.core.middleware.LoginObrigatorioMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.csp.ContentSecurityPolicyMiddleware",
@@ -52,6 +56,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 AUTH_USER_MODEL = "contas.Usuario"
+AUTHENTICATION_BACKENDS = ["allauth.account.auth_backends.AuthenticationBackend"]
 
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
@@ -91,6 +96,7 @@ def banco_de_dados(url: str, **opcoes) -> dict:
 
 
 LOGIN_URL = "/contas/login/"
+LOGIN_REDIRECT_URL = "/"
 CSRF_FAILURE_VIEW = "apps.core.views.falha_csrf"
 
 SESSION_COOKIE_AGE = 7200
@@ -121,3 +127,19 @@ CACHES = {
         "LOCATION": "cache_django",
     }
 }
+
+# Login pelo django-allauth: e-mail e senha, sem cadastro público, e verificação em duas etapas
+# (TOTP e códigos de recuperação). As tentativas erradas contam no cache acima, no PostgreSQL.
+ACCOUNT_ADAPTER = "apps.contas.adapter.ContaAdapter"
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*"]
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_SESSION_REMEMBER = False
+ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = False
+ACCOUNT_RATE_LIMITS = {"login": "30/m/ip", "login_failed": "10/m/ip,5/5m/key"}
+MFA_SUPPORTED_TYPES = ["totp", "recovery_codes"]
+MFA_TOTP_ISSUER = "Helptoner Pedidos"
+MFA_RECOVERY_CODE_COUNT = 10
+ALLAUTH_TRUSTED_CLIENT_IP_HEADER = None  # em produção: "x-vercel-forwarded-for" (Tarefa 28)

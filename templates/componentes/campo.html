@@ -1,10 +1,11 @@
 {% comment %}
-Campo de formulário com rótulo, ajuda e erro. Parâmetro: campo (um BoundField).
+Campo de formulário com rótulo, ajuda e erro. Parâmetros: campo (um BoundField) e, se o rótulo
+do formulário não servir, rotulo (texto que o substitui).
 Ex.: {% include "componentes/campo.html" with campo=form.nome %}
 Os ids de ajuda e erro são os que o Django liga ao campo por aria-describedby.
 {% endcomment %}
 <div class="grupo-campo">
-  <label class="rotulo" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+  <label class="rotulo" for="{{ campo.id_for_label }}">{% firstof rotulo campo.label %}</label>
   <div class="campo{% if campo.errors %} campo-invalido{% endif %}">{{ campo }}</div>
   {% if campo.help_text %}<p class="ajuda" id="{{ campo.auto_id }}_helptext">{{ campo.help_text }}</p>{% endif %}
   {% if campo.errors %}

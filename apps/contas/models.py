@@ -83,3 +83,31 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     def primeiro_nome(self) -> str:
         partes = self.nome.split()
         return partes[0] if partes else ""
+
+
+class RegistroAcesso(models.Model):
+    """Uma tentativa de login, com ou sem sucesso (gravada por apps.contas.sinais)."""
+
+    email_tentado = models.CharField("e-mail tentado", max_length=254)
+    usuario = models.ForeignKey(
+        Usuario,
+        verbose_name="usuário",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="acessos",
+    )
+    sucesso = models.BooleanField("sucesso")
+    motivo = models.CharField("motivo", max_length=100, blank=True)
+    ip = models.GenericIPAddressField("IP", null=True, blank=True)
+    navegador = models.CharField("navegador", max_length=300, blank=True)
+    quando = models.DateTimeField("quando", default=timezone.now, db_index=True)
+
+    class Meta:
+        verbose_name = "registro de acesso"
+        verbose_name_plural = "registros de acesso"
+        ordering = ["-quando"]
+
+    def __str__(self):
+        situacao = "entrou" if self.sucesso else "recusado"
+        return f"{self.email_tentado} ({situacao})"
