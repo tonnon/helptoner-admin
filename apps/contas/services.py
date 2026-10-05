@@ -3,13 +3,16 @@
 import secrets
 
 from allauth.mfa.models import Authenticator
+from django.contrib.auth import SESSION_KEY
 from django.contrib.auth.models import Group
+from django.contrib.sessions.models import Session
 from django.db import IntegrityError, transaction
+from django.utils import timezone
 
 from apps.core.erros import RegraDeNegocio
 from apps.core.permissoes import exigir_administrador
 
-from .models import PERFIS, Usuario
+from .models import PERFIS, VENDEDOR, Usuario
 
 # ---------- Primeiro acesso: nova senha → aplicativo autenticador → códigos de recuperação ----
 
@@ -41,6 +44,7 @@ def etapa_do_primeiro_acesso(usuario) -> int | None:
 
 ALFABETO_DA_SENHA = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789"
 EMAIL_REPETIDO = "Já existe um funcionário com este e-mail."
+SEM_PAINEL = " e acesso ao painel removido"
 
 
 def gerar_senha_temporaria() -> str:
@@ -63,6 +67,32 @@ def _gravar(usuario: Usuario, *, por, motivo: str | None, campos: list[str] | No
         usuario.save(update_fields=campos)
     finally:  # não deixa autor e motivo para uma gravação seguinte do mesmo objeto
         del usuario._history_user, usuario._change_reason
+
+
+def _tirar_o_painel(usuario: Usuario, *, por, motivo: str, campos: list[str]):
+    """Ruling R15: um Administrador que não é superusuário e zera o 2FA, redefine a senha ou
+    rebaixa um superusuário também tira dele o acesso ao painel de manutenção.
+
+    Senão, ele poderia tomar a conta (2FA zerado e senha temporária na mão), concluir o primeiro
+    acesso com o próprio celular e entrar no painel, que é só do superusuário (§4.3). Entre
+    superusuários, nada muda. Devolve o motivo e os campos da gravação, já ajustados.
+    """
+    if por.is_superuser or not usuario.is_superuser:
+        return motivo, campos
+    usuario.is_superuser = False
+    usuario.is_staff = False
+    return motivo + SEM_PAINEL, [*campos, "is_superuser", "is_staff"]
+
+
+def _encerrar_sessoes(usuario: Usuario) -> None:
+    """Apaga as sessões abertas do usuário (§4.2: as sessões são invalidadas).
+
+    As sessões ficam no banco (o padrão do Django), sem índice por usuário: cada sessão ainda
+    válida é lida. São poucas (poucos funcionários, 2 horas de validade).
+    """
+    abertas = Session.objects.filter(expire_date__gt=timezone.now()).iterator()
+    dele = [s.pk for s in abertas if s.get_decoded().get(SESSION_KEY) == str(usuario.pk)]
+    Session.objects.filter(pk__in=dele).delete()
 
 
 def criar_funcionario(*, nome: str, email: str, perfil: str, por) -> tuple[Usuario, str]:
@@ -109,7 +139,10 @@ def alterar_funcionario(usuario: Usuario, *, nome: str, perfil: str, por) -> Usu
             usuario.groups.add(grupo)
             usuario.__dict__.pop("_nomes_dos_grupos", None)  # o perfil guardado no objeto
             # O grupo não entra no histórico: esta gravação, sem mudar campos, registra a troca.
-            _gravar(usuario, por=por, motivo=f"Perfil: {anterior} → {perfil}", campos=["nome"])
+            motivo, campos = f"Perfil: {anterior} → {perfil}", ["nome"]
+            if perfil == VENDEDOR:
+                motivo, campos = _tirar_o_painel(usuario, por=por, motivo=motivo, campos=campos)
+            _gravar(usuario, por=por, motivo=motivo, campos=campos)
     return usuario
 
 
@@ -119,7 +152,10 @@ def redefinir_senha(usuario: Usuario, *, por) -> str:
     senha = gerar_senha_temporaria()
     usuario.set_password(senha)
     usuario.deve_trocar_senha = True
-    _gravar(usuario, por=por, motivo="Senha redefinida", campos=["password", "deve_trocar_senha"])
+    motivo, campos = _tirar_o_painel(
+        usuario, por=por, motivo="Senha redefinida", campos=["password", "deve_trocar_senha"]
+    )
+    _gravar(usuario, por=por, motivo=motivo, campos=campos)
     return senha
 
 
@@ -132,24 +168,27 @@ def zerar_2fa(usuario: Usuario, *, por) -> None:
     with transaction.atomic():
         Authenticator.objects.filter(user=usuario).delete()
         usuario.codigos_recuperacao_entregues = False
-        _gravar(
+        motivo, campos = _tirar_o_painel(
             usuario,
             por=por,
             motivo="Verificação em duas etapas zerada",
             campos=["codigos_recuperacao_entregues"],
         )
+        _gravar(usuario, por=por, motivo=motivo, campos=campos)
 
 
 def desativar_funcionario(usuario: Usuario, *, por) -> None:
     """Tira o acesso na hora e mantém o histórico do funcionário.
 
-    O login recusa quem está inativo, e as sessões abertas deixam de valer porque o Django não
-    carrega usuário inativo. O Administrador não desativa a si mesmo (P13).
+    O login recusa quem está inativo, e as sessões abertas são apagadas (uma reativação pelo
+    painel não as traz de volta). O Administrador não desativa a si mesmo (P13).
     """
     exigir_administrador(por)
     if usuario.pk == por.pk:
         raise RegraDeNegocio("Você não pode desativar a si mesmo.")
     if not usuario.is_active:
         return
-    usuario.is_active = False
-    _gravar(usuario, por=por, motivo="Funcionário desativado", campos=["is_active"])
+    with transaction.atomic():
+        usuario.is_active = False
+        _gravar(usuario, por=por, motivo="Funcionário desativado", campos=["is_active"])
+        _encerrar_sessoes(usuario)

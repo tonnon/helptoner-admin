@@ -40,6 +40,10 @@ cada uma com confirmação (componentes/dialogo.html). Ninguém desativa a si me
     {% if funcionario %}
       <section class="cartao fx fx-2" aria-labelledby="acesso">
         <h2 id="acesso" class="text-base font-bold">Acesso</h2>
+        {% if funcionario.is_superuser and not user.is_superuser %}
+          {# Ruling R15: apps.contas.services._tirar_o_painel #}
+          <p class="mt-2 text-[13px] text-texto-2">{{ funcionario.primeiro_nome }} tem acesso ao painel de manutenção. Redefinir a senha, zerar o 2FA ou mudar o perfil para Vendedor também tira esse acesso.</p>
+        {% endif %}
         {% if funcionario.is_active %}
           <div class="mt-3 flex flex-col gap-3 border-b border-linha pb-4 sm:flex-row sm:items-center sm:justify-between">
             <div>

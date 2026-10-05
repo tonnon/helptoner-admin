@@ -3,7 +3,9 @@ import re
 import pytest
 from allauth.account.models import EmailAddress
 from allauth.mfa.models import Authenticator
+from django.contrib.sessions.models import Session
 from django.core.exceptions import PermissionDenied
+from django.test import Client
 
 from apps.contas.models import ADMINISTRADOR, VENDEDOR, Usuario
 from apps.contas.services import (
@@ -15,8 +17,21 @@ from apps.contas.services import (
     zerar_2fa,
 )
 from apps.core.erros import RegraDeNegocio
+from tests.apoio import criar_usuario
 
 ALFABETO = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789"
+SEM_PAINEL = " e acesso ao painel removido"
+
+
+def _superusuario(email="su@helptoner.com.br", nome="Lucas Super"):
+    su = criar_usuario(ADMINISTRADOR, email=email, nome=nome)
+    Usuario.objects.filter(pk=su.pk).update(is_staff=True, is_superuser=True)
+    return Usuario.objects.get(pk=su.pk)
+
+
+def _sessoes_de(usuario) -> list[Session]:
+    pk = str(usuario.pk)
+    return [s for s in Session.objects.all() if s.get_decoded().get("_auth_user_id") == pk]
 
 
 def test_senha_temporaria_tem_16_caracteres_em_4_grupos():
@@ -191,3 +206,67 @@ def test_acao_nao_desfaz_uma_desativacao_feita_ao_mesmo_tempo(administrador, ven
     Usuario.objects.filter(pk=vendedor.pk).update(is_active=False)
     acao(vendedor, administrador)
     assert not Usuario.objects.get(pk=vendedor.pk).is_active
+
+
+def test_desativar_encerra_as_sessoes_abertas(client, client_admin, administrador, vendedor):
+    # §4.2: "as sessões são invalidadas" (Ruling R16). Só as do funcionário desativado.
+    client.force_login(vendedor)
+    Client().force_login(vendedor)  # outro navegador
+    assert len(_sessoes_de(vendedor)) == 2
+    desativar_funcionario(vendedor, por=administrador)
+    assert _sessoes_de(vendedor) == [] and _sessoes_de(administrador)
+    assert client_admin.get("/").status_code == 200
+    # Reativado depois (pelo painel), a sessão antiga não volta a valer.
+    Usuario.objects.filter(pk=vendedor.pk).update(is_active=True)
+    assert client.get("/")["Location"].startswith("/contas/login/")
+
+
+# Ruling R15: um Administrador comum que zera o 2FA, redefine a senha ou rebaixa um superusuário
+# tira dele o acesso ao painel. Senão, poderia tomar a conta (2FA zerado + senha conhecida) e
+# entrar no painel, que é só do superusuário (§4.3).
+@pytest.mark.parametrize(
+    "acao,motivo",
+    [
+        (lambda u, por: zerar_2fa(u, por=por), "Verificação em duas etapas zerada"),
+        (lambda u, por: redefinir_senha(u, por=por), "Senha redefinida"),
+        (
+            lambda u, por: alterar_funcionario(u, nome=u.nome, perfil=VENDEDOR, por=por),
+            "Perfil: Administrador → Vendedor",
+        ),
+    ],
+    ids=["zerar_2fa", "redefinir_senha", "rebaixar"],
+)
+def test_administrador_comum_tira_o_painel_do_superusuario(administrador, acao, motivo):
+    su = _superusuario()
+    acao(su, administrador)
+    su = Usuario.objects.get(pk=su.pk)
+    assert not su.is_superuser and not su.is_staff
+    registro = su.history.first()
+    assert registro.history_change_reason == motivo + SEM_PAINEL
+    assert registro.history_user == administrador
+
+
+@pytest.mark.parametrize(
+    "acao",
+    [
+        lambda u, por: zerar_2fa(u, por=por),
+        lambda u, por: redefinir_senha(u, por=por),
+        lambda u, por: alterar_funcionario(u, nome=u.nome, perfil=VENDEDOR, por=por),
+    ],
+    ids=["zerar_2fa", "redefinir_senha", "rebaixar"],
+)
+def test_superusuario_agindo_sobre_superusuario_mantem_o_painel(db, acao):
+    su = _superusuario()
+    outro = _superusuario(email="pai@helptoner.com.br", nome="Pai Super")
+    acao(outro, su)
+    outro = Usuario.objects.get(pk=outro.pk)
+    assert outro.is_superuser and outro.is_staff
+    assert SEM_PAINEL not in outro.history.first().history_change_reason
+
+
+def test_outras_acoes_do_administrador_comum_mantem_o_painel(administrador):
+    su = _superusuario()
+    alterar_funcionario(su, nome="Lucas S.", perfil=ADMINISTRADOR, por=administrador)
+    desativar_funcionario(su, por=administrador)
+    su = Usuario.objects.get(pk=su.pk)
+    assert su.is_superuser and su.is_staff and not su.is_active and su.nome == "Lucas S."

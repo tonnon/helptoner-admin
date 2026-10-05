@@ -161,3 +161,15 @@ def test_desativar_a_si_mesmo_pela_tela(client_admin, administrador):
     assert r.redirect_chain[-1][0] == f"/funcionarios/{administrador.pk}/"
     assert "Você não pode desativar a si mesmo." in r.content.decode()
     assert Usuario.objects.get(pk=administrador.pk).is_active
+
+
+def test_tela_avisa_que_as_acoes_tiram_o_painel_do_superusuario(client_admin, client):
+    su, outro = (
+        criar_usuario(ADMINISTRADOR, email=f"{nome}@helptoner.com.br", nome=nome)
+        for nome in ("super", "pai")
+    )
+    Usuario.objects.filter(pk__in=[su.pk, outro.pk]).update(is_staff=True, is_superuser=True)
+    aviso = "também tira esse acesso"
+    assert aviso in client_admin.get(f"/funcionarios/{su.pk}/").content.decode()
+    client.force_login(su)  # um superusuário mexendo em outro mantém o painel: sem aviso
+    assert aviso not in client.get(f"/funcionarios/{outro.pk}/").content.decode()

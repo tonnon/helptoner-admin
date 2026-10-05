@@ -6,6 +6,7 @@ from django.contrib import admin
 from django.core.exceptions import PermissionDenied
 from django.urls import include, path, re_path
 
+from apps.core.permissoes import eh_administrador
 from apps.core.views import rota_bloqueada
 
 
@@ -27,9 +28,12 @@ def _sem_formulario_de_login(login):
     return view
 
 
-# Painel de manutenção: endereço não padrão, só para o superusuário, pelo mesmo login do
-# sistema (com a verificação em duas etapas e o primeiro acesso obrigatório).
-admin.site.has_permission = lambda r: r.user.is_active and r.user.is_superuser
+# Painel de manutenção: endereço não padrão, só para o superusuário que também tem o perfil
+# Administrador, pelo mesmo login do sistema (com a verificação em duas etapas e o primeiro
+# acesso obrigatório).
+admin.site.has_permission = lambda r: (
+    r.user.is_active and r.user.is_superuser and eh_administrador(r.user)
+)
 admin.site.login = secure_admin_login(_sem_formulario_de_login(admin.site.login))
 
 urlpatterns = [

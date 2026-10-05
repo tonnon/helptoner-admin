@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 from django.utils.csp import CSP
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -151,5 +152,20 @@ MFA_RECOVERY_CODE_COUNT = 10
 MFA_ALLOW_UNVERIFIED_EMAIL = True
 ALLAUTH_TRUSTED_CLIENT_IP_HEADER = None  # em produção: "x-vercel-forwarded-for" (Tarefa 28)
 
+
+def normalizar_admin_url(valor: str) -> str:
+    """O caminho do painel com uma barra só, no fim ("/segredo" → "segredo/").
+
+    Recusa o vazio (o painel ocuparia a raiz do site) e o padrão "admin".
+    """
+    caminho = valor.strip().strip("/")
+    if not caminho or caminho.lower() == "admin":
+        raise ImproperlyConfigured(
+            'ADMIN_URL precisa ser um caminho não padrão, como "manutencao/" (nem vazio, nem '
+            '"admin").'
+        )
+    return f"{caminho}/"
+
+
 # Painel de manutenção do Django (só o superusuário), num endereço que não é o padrão /admin/.
-ADMIN_URL = os.environ.get("ADMIN_URL", "manutencao/")
+ADMIN_URL = normalizar_admin_url(os.environ.get("ADMIN_URL", "manutencao/"))
