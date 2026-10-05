@@ -17,6 +17,7 @@ markers = ["e2e: testes no navegador (Playwright)"]
 testpaths = ["tests"]
 
 [tool.ruff]
+extend-exclude = ["docs"]
 line-length = 100
 target-version = "py314"
 
