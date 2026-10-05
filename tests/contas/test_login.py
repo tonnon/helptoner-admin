@@ -74,6 +74,27 @@ def test_tentativa_bloqueada_tambem_fica_registrada(client, db):
     ]
 
 
+@override_settings(ALLOWED_HOSTS=["helptoner.com.br"])
+def test_bloqueio_da_conta_nao_depende_do_host(client, db):
+    # O Django aceita o mesmo host em maiúsculas ou com porta; a conta segue bloqueada.
+    criar_usuario(email="carla@helptoner.com.br")
+    for i in range(5):  # um IP por tentativa, para o bloqueio por IP não entrar na conta
+        entrar_com_senha(
+            client,
+            "carla@helptoner.com.br",
+            "senha-errada-de-novo",
+            HTTP_HOST="helptoner.com.br",
+            REMOTE_ADDR=f"10.0.0.{i}",
+        )
+    variantes = ["HELPTONER.com.br", "helptoner.com.br:443", "helptoner.com.br:8443"]
+    for i, host in enumerate(variantes):
+        r = entrar_com_senha(
+            client, "carla@helptoner.com.br", HTTP_HOST=host, REMOTE_ADDR=f"10.0.1.{i}"
+        )
+        assert r.status_code == 200 and "Muitas tentativas erradas" in r.content.decode(), host
+    assert not RegistroAcesso.objects.filter(sucesso=True).exists()
+
+
 def test_bloqueio_por_ip_depois_de_10_erros(client, db):
     for i in range(10):
         entrar_com_senha(client, f"ninguem{i}@x.com", "senha-errada-de-novo")
@@ -117,6 +138,17 @@ def test_usuario_desativado_nao_entra(client, db):
     entrar_com_senha(client, u.email)
     assert client.get("/").status_code == 302
     assert not RegistroAcesso.objects.filter(sucesso=True).exists()
+    reg = RegistroAcesso.objects.get(sucesso=False)
+    assert (reg.motivo, reg.usuario, reg.email_tentado) == ("Acesso desativado", u, u.email)
+
+
+def test_usuario_desativado_com_senha_errada_fica_registrado_sem_revelar_na_tela(client, db):
+    u = criar_usuario(email="carla@helptoner.com.br")
+    Usuario.objects.filter(pk=u.pk).update(is_active=False)
+    r = entrar_com_senha(client, u.email, "senha-errada-de-novo")
+    assert "E-mail ou senha incorretos." in r.content.decode()  # a mesma tela de qualquer erro
+    reg = RegistroAcesso.objects.get()
+    assert (reg.sucesso, reg.motivo, reg.usuario) == (False, "Acesso desativado", u)
 
 
 def test_usuario_desativado_ve_o_aviso(client, db):
@@ -134,6 +166,8 @@ def test_codigo_de_recuperacao_entra_pelo_mesmo_campo(client, db):
 
 
 def test_depois_do_codigo_volta_para_a_pagina_pedida(client, db):
+    html = client.get("/contas/login/?next=/pedidos/7/").content.decode()
+    assert '<input type="hidden" name="next" value="/pedidos/7/">' in html
     u = criar_usuario()
     client.post("/contas/login/?next=/pedidos/7/", {"login": u.email, "password": SENHA_TESTE})
     r = client.post("/contas/2fa/authenticate/", {"code": codigo_totp(u)})
