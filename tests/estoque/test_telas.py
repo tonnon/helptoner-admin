@@ -108,6 +108,9 @@ def test_historico_mostra_detalhe_e_custo_so_ao_administrador(client_admin, clie
     cab = {"HX-Request": "true"}
     html = client_admin.get("/estoque/", headers=cab).content.decode()
     assert "Entrada · NF 1" in html and "+3" in html and "Custo unit." in html
-    assert "Custo unit." not in client_vendedor.get("/estoque/", headers=cab).content.decode()
+    html_vendedor = client_vendedor.get("/estoque/", headers=cab).content.decode()
+    assert "R$ 70,00" in html and "R$ 60,00" in html
+    assert "Custo unit." not in html_vendedor
+    assert "70,00" not in html_vendedor and "60,00" not in html_vendedor
     assert "+ Entrada" not in client_vendedor.get("/estoque/").content.decode()
     assert "+ Entrada" in client_admin.get("/estoque/").content.decode()

@@ -1,10 +1,8 @@
-from decimal import Decimal
 from types import SimpleNamespace
 
 import pytest
 
-from apps.cadastros.models import Produto
-from tests.apoio import criar_produto
+from tests.apoio import com_estoque, criar_produto
 
 # (url, pedaço HTMX?) das páginas em que o Vendedor nunca vê custo, lucro nem margem.
 # As URLs podem ter {produto}, {pedido} e {rascunho}; as próximas tarefas acrescentam as suas.
@@ -18,7 +16,7 @@ PAGINAS = [
 @pytest.fixture
 def cenario_custo(db):
     produto = criar_produto()
-    Produto.objects.filter(pk=produto.pk).update(custo_medio=Decimal("87.6543"), estoque=5)
+    com_estoque(produto, 5, "87.6543")  # movimento real: o custo também está no histórico
     return SimpleNamespace(produto=produto)
 
 
