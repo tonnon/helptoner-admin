@@ -4,6 +4,7 @@ import subprocess
 import sys
 import time
 import uuid
+from decimal import Decimal
 from pathlib import Path
 
 from allauth.mfa.adapter import get_adapter as get_mfa_adapter
@@ -115,3 +116,28 @@ def criar_produto(
     return Produto.objects.create(
         codigo=codigo, descricao=descricao, marca=marca, preco=preco, ativo=ativo
     )
+
+
+def com_estoque(produto: Produto, quantidade: int, custo: str = "100.00", por=None) -> Produto:
+    """Põe `quantidade` no estoque (estoque inicial se não há movimentos, senão entrada)."""
+    from apps.contas.models import ADMINISTRADOR
+    from apps.estoque.services import registrar_entrada, registrar_estoque_inicial
+
+    por = por or criar_usuario(ADMINISTRADOR)
+    if produto.movimentos.exists():
+        registrar_entrada(
+            produto_id=produto.pk,
+            quantidade=quantidade,
+            custo_unitario=Decimal(custo),
+            observacao="teste",
+            usuario=por,
+        )
+    else:
+        registrar_estoque_inicial(
+            produto_id=produto.pk,
+            quantidade=quantidade,
+            custo_unitario=Decimal(custo),
+            usuario=por,
+        )
+    produto.refresh_from_db()
+    return produto
