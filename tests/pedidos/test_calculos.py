@@ -1,6 +1,8 @@
 import random
 from decimal import Decimal
 
+import pytest
+
 from apps.pedidos.calculos import Linha, Totais, calcular_totais, margem, ratear_desconto
 
 
@@ -82,8 +84,6 @@ def test_rateio_nunca_negativo_nem_maior_que_o_item():
 
 
 def test_rateio_rejeita_desconto_invalido():
-    import pytest
-
     with pytest.raises(ValueError):
         ratear_desconto([Decimal("10.00")], Decimal("-0.01"))
     with pytest.raises(ValueError):
@@ -94,3 +94,33 @@ def test_margem():
     assert margem(Decimal("125.00"), Decimal("325.00")) == Decimal("0.3846")
     assert margem(Decimal("-10"), Decimal("100")) == Decimal("-0.1000")
     assert margem(Decimal("0"), Decimal("0")) is None
+
+
+@pytest.mark.parametrize("tipo", ["percent", "", None])
+def test_tipo_de_desconto_invalido_e_recusado(tipo):
+    with pytest.raises(ValueError):
+        calcular_totais(L((1, "10")), tipo, Decimal("1"))
+    with pytest.raises(ValueError):
+        calcular_totais([], tipo, Decimal("1"))
+
+
+def test_percentual_negativo_da_erro_de_negativo():
+    t = calcular_totais(L((1, "10")), "percentual", Decimal("-5"))
+    assert (t.erro_desconto, t.desconto_valor) == (
+        "O desconto não pode ser negativo.",
+        Decimal("0.00"),
+    )
+
+
+def test_subtotal_zero_com_itens_nao_da_erro():
+    t = calcular_totais(L((1, "0.00")), "reais", Decimal("-1"))
+    assert t == Totais(Decimal("0.00"), Decimal("0.00"), Decimal("0.00"), None)
+
+
+def test_total_da_linha_arredonda_meio_para_cima():
+    assert Linha(3, Decimal("0.335")).total == Decimal("1.01")
+
+
+def test_margem_receita_negativa_e_meio_para_cima():
+    assert margem(Decimal("5"), Decimal("-10")) is None
+    assert margem(Decimal("1"), Decimal("32")) == Decimal("0.0313")

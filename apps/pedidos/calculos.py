@@ -46,6 +46,8 @@ def _erro_do_desconto(subtotal: Decimal, desconto_tipo: str, informado: Decimal)
 def calcular_totais(
     linhas: Sequence[Linha], desconto_tipo: str, desconto_informado: Decimal
 ) -> Totais:
+    if desconto_tipo not in (DESCONTO_REAIS, DESCONTO_PERCENTUAL):
+        raise ValueError(f"Tipo de desconto inválido: {desconto_tipo!r}")
     subtotal = sum((linha.total for linha in linhas), _ZERO)
     if subtotal == 0:
         return Totais(subtotal, _ZERO, subtotal, None)
