@@ -1,11 +1,20 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+{% load static %}<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block titulo %}Helptoner Pedidos{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script src="{% static 'js/app.js' %}" defer></script>
 </head>
-<body>
-  <main>{% block conteudo %}{% endblock %}</main>
+<body class="min-h-screen">
+  <div class="faixa" aria-hidden="true"></div>
+  <main class="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-4 py-10">
+    <img src="{% static 'img/logo-helptoner.png' %}" alt="Helptoner" class="mx-auto mb-6 h-auto w-44" width="176" height="71">
+    <div class="cartao fx">
+      {% block conteudo %}{% endblock %}
+    </div>
+  </main>
+  {% include "componentes/toasts.html" %}
 </body>
 </html>

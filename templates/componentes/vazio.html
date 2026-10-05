@@ -1,0 +1,10 @@
+{% comment %}
+Tela vazia com orientação. Parâmetros: mensagem; acao_url e acao_texto (opcionais).
+Ex.: {% include "componentes/vazio.html" with mensagem="Nenhum cliente ainda. Cadastre o primeiro." acao_url=url_novo acao_texto="Novo cliente" %}
+{% endcomment %}
+<div class="px-4 py-8 text-center text-texto-2">
+  <p>{{ mensagem }}</p>
+  {% if acao_url %}
+    <a href="{{ acao_url }}" class="btn-pri mt-4">{{ acao_texto }}</a>
+  {% endif %}
+</div>

@@ -1,0 +1,24 @@
+Arquivos de terceiros servidos pelo próprio sistema (nada é carregado de outro site).
+Baixados em 05/10/2026, no Linux, com curl. SHA-256 de cada arquivo como está no repositório.
+
+HTMX 2.0.11
+  Origem: https://unpkg.com/htmx.org@2.0.11/dist/htmx.min.js
+  Arquivo: static/vendor/htmx.min.js
+  SHA-256: d6fdc75f204e6bdefa99b69bf1e6d4ac69b8a364f77929f45c13476b4000f717
+  Conferido: igual ao dist/htmx.min.js do pacote do npm htmx.org-2.0.11.tgz
+  (integrity sha512-Thx/WtpeOQqSrqBCw/A1cwGJGg4UrVa3+sW0GmrM3p4gJgO89ecH4qtbnyzDDWFvBTqjnIMCgELTNt636dtamA==)
+  Licença: 0BSD
+
+Inter 4.1 (fonte variável)
+  Origem: https://github.com/rsms/inter/releases/download/v4.1/Inter-4.1.zip
+  SHA-256 do zip: 9883fdd4a49d4fb66bd8177ba6625ef9a64aa45899767dde3d36aa425756b11e
+  Arquivo: static/fontes/InterVariable.woff2 (web/InterVariable.woff2 do zip)
+  SHA-256: 693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3
+  Licença: static/fontes/OFL.txt (LICENSE.txt do zip, SIL Open Font License 1.1)
+  SHA-256: 262481e844521b326f5ecd053e59b98c8b2da78c8ee1bdbb6e8174305e54935a
+
+Tailwind CSS 4.3.3 (só no desenvolvimento e no CI; não vai para o navegador)
+  Origem: https://github.com/tailwindlabs/tailwindcss/releases/download/v4.3.3/tailwindcss-linux-x64
+  SHA-256: dc61b3ac6b8c9ca874c0cc4c57b2409791a64c5540404ca5f5367360babc313a
+  (igual ao digest publicado pelo GitHub na página da versão)
+  Baixado e conferido por scripts/css.py, que gera static/css/app.css.

@@ -1,0 +1,15 @@
+{% comment %}
+Avisos que somem sozinhos (3,2 s, pelo static/js/app.js).
+As mensagens do Django viram avisos; o app.js cria outros a partir do <template id="modelo-aviso">
+quando chega o evento "aviso" (cabeçalho HX-Trigger, ver apps.core.htmx.avisar).
+{% endcomment %}
+{% partialdef aviso %}<div class="toast{% if tipo == 'error' or tipo == 'erro' %} toast-erro{% endif %}">
+  <span class="toast-icone"><span class="so-sucesso">{% include "icones/ok.svg" %}</span><span class="so-erro">{% include "icones/fechar.svg" %}</span></span>
+  <span data-texto>{{ texto }}</span>
+</div>{% endpartialdef %}
+<div id="avisos" class="avisos" role="status" aria-live="polite">
+  {% for mensagem in messages %}
+    {% with texto=mensagem.message tipo=mensagem.level_tag %}{% partial aviso %}{% endwith %}
+  {% endfor %}
+</div>
+<template id="modelo-aviso">{% with texto="" tipo="sucesso" %}{% partial aviso %}{% endwith %}</template>

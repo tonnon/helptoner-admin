@@ -1,0 +1,5 @@
+{% comment %}
+Selo de status do pedido. Parâmetros: status ("rascunho", "confirmado" ou "cancelado") e
+texto (opcional; o padrão é o nome do status, ex.: "Confirmado").
+{% endcomment %}
+<span class="selo-{{ status }}"><span class="ponto" aria-hidden="true"></span>{% if texto %}{{ texto }}{% elif status == "rascunho" %}Rascunho{% elif status == "confirmado" %}Confirmado{% elif status == "cancelado" %}Cancelado{% endif %}</span>

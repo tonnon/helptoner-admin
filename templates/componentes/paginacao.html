@@ -1,0 +1,22 @@
+{% load formato %}{% comment %}
+Paginação no formato do esboço: "1–20 de 38 · ‹ ›". Parâmetro: pagina (uma Page do Paginator).
+Os links mudam só o ?pagina= da URL atual e trocam o conteúdo de #resultados (padrão P18).
+{% endcomment %}
+{% if pagina.paginator.count %}
+<nav class="mt-3 flex items-center justify-end gap-2 text-[13px] text-texto-2" aria-label="Paginação">
+  <span class="num">{{ pagina.start_index|inteiro }}–{{ pagina.end_index|inteiro }} de {{ pagina.paginator.count|inteiro }}</span>
+  {% if pagina.paginator.num_pages > 1 %}
+    <span aria-hidden="true">·</span>
+    {% if pagina.has_previous %}
+      <a href="{% querystring pagina=pagina.previous_page_number %}" hx-get="{% querystring pagina=pagina.previous_page_number %}" hx-target="#resultados" hx-push-url="true" class="botao-icone" aria-label="Página anterior">‹</a>
+    {% else %}
+      <span class="botao-icone opacity-40" aria-hidden="true">‹</span>
+    {% endif %}
+    {% if pagina.has_next %}
+      <a href="{% querystring pagina=pagina.next_page_number %}" hx-get="{% querystring pagina=pagina.next_page_number %}" hx-target="#resultados" hx-push-url="true" class="botao-icone" aria-label="Próxima página">›</a>
+    {% else %}
+      <span class="botao-icone opacity-40" aria-hidden="true">›</span>
+    {% endif %}
+  {% endif %}
+</nav>
+{% endif %}

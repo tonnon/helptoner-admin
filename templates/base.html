@@ -1,0 +1,56 @@
+{% load static formato %}<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="htmx-config" content='{"allowEval":false,"includeIndicatorStyles":false,"historyCacheSize":0,"refreshOnHistoryMiss":true}'>
+  <title>{% block titulo %}Helptoner Pedidos{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script src="{% static 'vendor/htmx.min.js' %}" defer></script>
+  <script src="{% static 'js/app.js' %}" defer></script>
+</head>
+<body class="min-h-screen" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  <div class="faixa" aria-hidden="true"></div>
+  <a href="#conteudo" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[70] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:font-semibold focus:text-azul">Pular para o conteúdo</a>
+  <div class="md:grid md:grid-cols-[232px_minmax(0,1fr)]">
+    <header class="topo-celular">
+      <button type="button" class="botao-icone" data-alternar-menu aria-controls="menu" aria-expanded="false" aria-label="Menu">
+        {% include "icones/menu.svg" %}
+      </button>
+      <a href="/"><img src="{% static 'img/logo-helptoner.png' %}" alt="Helptoner" class="logo-topo" width="85" height="34"></a>
+      <span class="avatar" aria-hidden="true">{{ user.nome|iniciais }}</span>
+    </header>
+
+    <aside id="menu" class="menu-lateral">
+      <div class="marca">
+        <img src="{% static 'img/logo-helptoner.png' %}" alt="Helptoner" class="logo-menu" width="190" height="76">
+        <small>Pedidos de venda</small>
+      </div>
+      <nav aria-label="Menu principal" class="flex flex-col gap-1">
+        {% for link in menu %}
+          <a href="{{ link.url }}" class="item-menu{% if link.url_name == menu_ativo %} ativo{% endif %}"{% if link.url_name == menu_ativo %} aria-current="page"{% endif %}>{% include link.icone %}{{ link.nome }}</a>
+        {% endfor %}
+      </nav>
+      <div class="usuario">
+        <div class="usuario-quem">
+          <span class="avatar" aria-hidden="true">{{ user.nome|iniciais }}</span>
+          <div><b>{{ user.primeiro_nome }}</b><small>{{ user.perfil }}</small></div>
+        </div>
+        {% if url_minha_conta %}
+          <a href="{{ url_minha_conta }}" class="item-menu">{% include "icones/conta.svg" %}Minha conta</a>
+        {% endif %}
+        <form method="post" action="/contas/logout/">
+          {% csrf_token %}
+          <button type="submit" class="item-menu">{% include "icones/sair.svg" %}Sair</button>
+        </form>
+      </div>
+    </aside>
+
+    <main id="conteudo" class="principal">
+      <div class="trilha">{% block trilha %}{% endblock %}</div>
+      {% block conteudo %}{% endblock %}
+    </main>
+  </div>
+  {% include "componentes/toasts.html" %}
+</body>
+</html>
