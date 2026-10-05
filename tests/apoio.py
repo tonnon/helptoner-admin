@@ -23,13 +23,10 @@ UA_CHROME_WINDOWS = (
 
 def rodar_django(*args: str, env: dict[str, str]) -> subprocess.CompletedProcess[str]:
     """Roda o manage.py com o Python atual, em outro processo, e captura a saída como texto."""
-    # O conftest dos testes no navegador liga DJANGO_ALLOW_ASYNC_UNSAFE neste processo; o outro
-    # processo simula a produção, onde o check --deploy proíbe essa variável.
-    ambiente = {k: v for k, v in os.environ.items() if k != "DJANGO_ALLOW_ASYNC_UNSAFE"}
     return subprocess.run(
         [sys.executable, "manage.py", *args],
         cwd=RAIZ,
-        env={**ambiente, **env},
+        env={**os.environ, **env},
         capture_output=True,
         text=True,
         check=False,

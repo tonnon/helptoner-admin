@@ -1,15 +1,16 @@
-import os
-
 import pytest
 from playwright.sync_api import expect
 
 from tests.apoio import SENHA_TESTE, codigo_totp
 
-# O servidor de teste roda numa thread e o Playwright, no mesmo processo: o Django precisa
-# aceitar consultas ao banco de dentro do laço assíncrono.
-os.environ.setdefault("DJANGO_ALLOW_ASYNC_UNSAFE", "true")
-
 MARCAS_DE_CSP = ("Content Security Policy", "Refused to")
+
+
+@pytest.fixture(autouse=True)
+def permitir_django_no_laco_assincrono(monkeypatch):
+    """O Playwright roda um laço assíncrono neste processo e o Django precisa poder consultar o
+    banco de dentro dele. Vale só para os testes desta pasta."""
+    monkeypatch.setenv("DJANGO_ALLOW_ASYNC_UNSAFE", "true")
 
 
 @pytest.fixture
