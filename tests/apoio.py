@@ -2,6 +2,7 @@ import itertools
 import os
 import subprocess
 import sys
+import threading
 import time
 import uuid
 from decimal import Decimal
@@ -12,6 +13,7 @@ from allauth.mfa.models import Authenticator
 from allauth.mfa.recovery_codes.internal.auth import RecoveryCodes
 from allauth.mfa.totp.internal.auth import TOTP, generate_totp_secret, hotp_value
 from django.contrib.auth.models import Group
+from django.db import connection
 
 from apps.cadastros.documentos import digitos_verificadores_cnpj, digitos_verificadores_cpf
 from apps.cadastros.models import Cliente, Produto
@@ -141,3 +143,58 @@ def com_estoque(produto: Produto, quantidade: int, custo: str = "100.00", por=No
         )
     produto.refresh_from_db()
     return produto
+
+
+def montar_rascunho(usuario, *, cliente=None, itens=(), desconto=None):
+    """Monta um rascunho pelos serviços. `itens`: pares (produto, quantidade); `desconto`: par
+    (tipo, "valor"). Sem `cliente`, o rascunho fica sem cliente."""
+    from apps.pedidos.models import Pedido
+    from apps.pedidos.services import (
+        adicionar_item,
+        criar_rascunho,
+        definir_cliente,
+        definir_desconto,
+    )
+
+    pedido = criar_rascunho(usuario)
+    if cliente is not None:
+        definir_cliente(pedido.pk, cliente.pk, usuario)
+    for produto, quantidade in itens:
+        adicionar_item(pedido.pk, produto.pk, quantidade, usuario)
+    if desconto is not None:
+        tipo, valor = desconto
+        definir_desconto(pedido.pk, tipo, Decimal(valor), usuario)
+    return Pedido.objects.get(pk=pedido.pk)
+
+
+def rodar_juntos(*funcoes, espera: float = 30) -> list[object]:
+    """Roda cada função numa thread, todas liberadas ao mesmo tempo por uma barreira.
+
+    Devolve, na ordem das funções, o resultado de cada uma ou a exceção que ela levantou.
+    Cada thread usa a própria conexão com o banco e a fecha no fim. Se uma thread não chegar à
+    barreira ou não terminar em `espera` segundos, o teste falha em vez de ficar parado.
+    """
+    barreira = threading.Barrier(len(funcoes), timeout=espera)
+    resultados: list[object] = [None] * len(funcoes)
+
+    def rodar(indice, funcao):
+        try:
+            barreira.wait()
+            resultados[indice] = funcao()
+        except Exception as erro:
+            resultados[indice] = erro
+        finally:
+            connection.close()
+
+    threads = [
+        threading.Thread(target=rodar, args=(indice, funcao), daemon=True)
+        for indice, funcao in enumerate(funcoes)
+    ]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join(espera)
+    paradas = [indice for indice, thread in enumerate(threads) if thread.is_alive()]
+    if paradas:
+        raise AssertionError(f"As funções {paradas} não terminaram em {espera} s.")
+    return resultados

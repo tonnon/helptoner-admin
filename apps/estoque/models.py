@@ -33,6 +33,15 @@ class MovimentoEstoque(models.Model):
         related_name="+",
     )
     motivo = models.CharField("Observação ou motivo", max_length=200, blank=True)
+    # Só a saída por pedido e a devolução por cancelamento apontam para um pedido.
+    pedido = models.ForeignKey(
+        "pedidos.Pedido",
+        verbose_name="Pedido",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="movimentos",
+    )
     criado_em = models.DateTimeField("Criado em", auto_now_add=True, db_index=True)
 
     class Meta:
