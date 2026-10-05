@@ -2,7 +2,13 @@
 name = "helptoner-pedidos"
 version = "0.1.0"
 requires-python = ">=3.14,<3.15"
-dependencies = ["django>=6.1,<6.2", "psycopg[binary]>=3.3", "dj-database-url>=3.1"]
+dependencies = [
+    "django>=6.1,<6.2",
+    "psycopg[binary]>=3.3",
+    "dj-database-url>=3.1",
+    "argon2-cffi>=25.1.0",
+    "django-simple-history>=3.13.0",
+]
 
 [dependency-groups]
 dev = ["pytest>=8", "pytest-django>=4.14", "ruff>=0.16", "python-dotenv>=1.1"]
@@ -26,4 +32,5 @@ select = ["E", "F", "W", "I", "B", "UP", "DJ", "S", "SIM"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101", "S105", "S106", "S311", "S603", "S607"]
+"**/migrations/*.py" = ["E501"]
 "scripts/**" = ["S603", "S607", "S310"]
