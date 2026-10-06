@@ -55,7 +55,7 @@ def avisos_do_rascunho(pedido: Pedido) -> Avisos:
 def _numero_da_busca(busca: str) -> int | None:
     """ "1.042", "1042" e "nº 1042" viram 1042; qualquer outra coisa é busca por cliente."""
     digitos = re.sub(r"[nº°.\s]", "", busca, flags=re.IGNORECASE)
-    return int(digitos) if digitos.isdigit() else None
+    return int(digitos) if re.fullmatch(r"[0-9]+", digitos) else None
 
 
 def _mes_valido(mes: str) -> date | None:

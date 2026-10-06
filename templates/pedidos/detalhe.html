@@ -6,7 +6,7 @@ Lucro, margem e o botão de cancelar só existem no HTML do Administrador. "Cont
 "Repetir pedido" e o PDF vêm nas Tarefas 19 e 20.
 {% endcomment %}
 {% block titulo %}{% if pedido.numero %}Pedido {{ pedido.numero|pedido_numero }}{% else %}Rascunho{% endif %} - Helptoner Pedidos{% endblock %}
-{% block trilha %}<a href="{% url 'pedidos:lista' %}">Pedidos</a> / {{ pedido.numero|pedido_numero }}{% endblock %}
+{% block trilha %}<a href="{% url 'pedidos:lista' %}">Pedidos</a> / {% if pedido.numero %}{{ pedido.numero|pedido_numero }}{% else %}Rascunho{% endif %}{% endblock %}
 {% block conteudo %}
   <div class="fx flex flex-wrap items-center justify-between gap-3">
     <h1 class="flex flex-wrap items-center gap-3">

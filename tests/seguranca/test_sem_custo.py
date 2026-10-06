@@ -11,6 +11,7 @@ PAGINAS = [
     ("/produtos/{produto}/", False),
     ("/estoque/", True),
     ("/pedidos/{pedido}/", False),
+    ("/pedidos/{rascunho}/", False),
     ("/pedidos/", True),
 ]
 

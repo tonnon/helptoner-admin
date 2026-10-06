@@ -82,3 +82,11 @@ def test_cancelar_de_novo_mostra_o_erro_da_regra(client_admin, vendedor):
 def test_cancelar_so_aceita_post_e_pedido_existente(client_admin):
     assert client_admin.get("/pedidos/1/cancelar/").status_code == 405
     assert client_admin.post("/pedidos/999999/cancelar/", {"motivo": "x"}).status_code == 404
+
+
+def test_vendedor_abre_rascunho_de_outro_usuario_so_para_ler(client_vendedor, administrador):
+    rascunho = montar_rascunho(administrador, itens=[(com_estoque(criar_produto(), 5), 1)])
+    resposta = client_vendedor.get(f"/pedidos/{rascunho.pk}/")
+    html = resposta.content.decode()
+    assert resposta.status_code == 200
+    assert "Cancelar pedido" not in html and "/ Rascunho" in html

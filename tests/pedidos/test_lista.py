@@ -101,3 +101,9 @@ def test_lista_vazia_e_paginacao(client_vendedor, vendedor):
 def test_pagina_completa_traz_os_filtros(client_vendedor):
     html = client_vendedor.get("/pedidos/").content.decode()
     assert "Nº do pedido ou cliente" in html and 'name="status"' in html and 'name="mes"' in html
+
+
+@pytest.mark.parametrize("busca", ["²", "1²", "١٢"])
+def test_busca_com_digitos_nao_ascii_nao_quebra(client_vendedor, busca):
+    resposta = client_vendedor.get("/pedidos/", {"busca": busca}, headers=HTMX)
+    assert resposta.status_code == 200
