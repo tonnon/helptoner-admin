@@ -6,6 +6,7 @@ from django.test.utils import CaptureQueriesContext
 
 from apps.core.datas import hoje
 from apps.pedidos.models import ContadorPedido
+from apps.pedidos.services import cancelar_pedido
 from tests.apoio import com_estoque, criar_produto, montar_pedido_confirmado
 
 
@@ -136,3 +137,13 @@ def test_historico_mostra_o_numero_do_pedido_na_saida(client_vendedor, vendedor)
     montar_pedido_confirmado(vendedor, itens=[(prod, 3)])
     html, com_tres_saidas = consultas()
     assert "Saída · pedido nº 1.044" in html and com_tres_saidas == com_uma_saida
+
+
+def test_historico_mostra_o_numero_do_pedido_na_devolucao(client_vendedor, vendedor, administrador):
+    prod = com_estoque(criar_produto(), 10)
+    ContadorPedido.objects.update(ultimo_numero=1041)
+    ped = montar_pedido_confirmado(vendedor, itens=[(prod, 3)])
+    cancelar_pedido(ped.pk, "Cliente desistiu", administrador)
+    html = client_vendedor.get("/estoque/", headers={"HX-Request": "true"}).content.decode()
+    assert "Saída · pedido nº 1.042" in html and "−3" in html
+    assert "Devolução · pedido nº 1.042" in html and "+3" in html

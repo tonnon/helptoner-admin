@@ -146,6 +146,23 @@ def registrar_saida_pedido(
     )
 
 
+def registrar_devolucao_pedido(
+    *, produto: Produto, quantidade: int, custo_unitario: Decimal, pedido: Pedido, usuario
+) -> MovimentoEstoque:
+    """Devolução por cancelamento, feita pelo cancelamento, que já travou o produto.
+
+    Volta ao estoque pelo custo gravado no item, que entra na média como uma entrada (§3.5).
+    """
+    return _aplicar_movimento(
+        produto,
+        tipo=Tipo.DEVOLUCAO,
+        quantidade=quantidade,
+        custo_unitario=custo_unitario,
+        usuario=usuario,
+        pedido=pedido,
+    )
+
+
 def registrar_ajuste(*, produto_id: int, delta: int, motivo: str, usuario) -> MovimentoEstoque:
     exigir_administrador(usuario)
     motivo = (motivo or "").strip()

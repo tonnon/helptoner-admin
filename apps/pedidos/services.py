@@ -1,4 +1,4 @@
-"""Regras do pedido: rascunho e confirmação (§3.1 a §3.3).
+"""Regras do pedido: rascunho, confirmação, cancelamento e repetição (§3.1 a §3.5).
 
 Toda edição abre uma transação e trava a linha do pedido (`_rascunho_para_editar`). Assim, duas
 abas mexendo no mesmo rascunho são atendidas uma depois da outra. Ordem das travas, que vale
@@ -17,8 +17,8 @@ from apps.cadastros.models import Cliente, Produto
 from apps.core.dinheiro import arredondar
 from apps.core.erros import EstoqueInsuficiente, RegraDeNegocio
 from apps.core.formatacao import inteiro_br
-from apps.core.permissoes import eh_administrador
-from apps.estoque.services import registrar_saida_pedido
+from apps.core.permissoes import eh_administrador, exigir_administrador
+from apps.estoque.services import registrar_devolucao_pedido, registrar_saida_pedido
 
 from .calculos import (
     DESCONTO_PERCENTUAL,
@@ -256,13 +256,8 @@ def confirmar_pedido(pedido_id: int, usuario) -> Pedido:
         if motivos:
             raise ConfirmacaoRecusada(motivos)
 
-        # 1. Trava os produtos em ordem de id, para duas confirmações não se travarem em cruz.
-        # FOR NO KEY UPDATE: a baixa não muda chaves, então não espera quem só insere itens
-        # de rascunho apontando para o produto (a chave estrangeira pega FOR KEY SHARE).
-        travados = Produto.objects.select_for_update(no_key=True).filter(
-            pk__in=[item.produto_id for item in itens]
-        )
-        produtos = {produto.pk: produto for produto in travados.order_by("pk")}
+        # 1. Trava os produtos em ordem de id.
+        produtos = _travar_produtos(itens)
 
         # 2. Cliente e produtos continuam ativos (§3.7, §3.8).
         if not pedido.cliente.ativo:
@@ -284,6 +279,19 @@ def confirmar_pedido(pedido_id: int, usuario) -> Pedido:
     if mudancas:
         raise PrecosAlterados(mudancas)
     return pedido
+
+
+def _travar_produtos(itens: list[ItemPedido]) -> dict[int, Produto]:
+    """Trava os produtos dos itens em ordem de id e os devolve por id.
+
+    A ordem fixa evita que duas operações (confirmação ou cancelamento) se travem em cruz.
+    FOR NO KEY UPDATE: estoque e custo não são chaves, então a trava não espera quem só insere
+    itens de rascunho apontando para o produto (a chave estrangeira pega FOR KEY SHARE).
+    """
+    travados = Produto.objects.select_for_update(no_key=True).filter(
+        pk__in=[item.produto_id for item in itens]
+    )
+    return {produto.pk: produto for produto in travados.order_by("pk")}
 
 
 def _atualizar_precos(itens: list[ItemPedido], produtos: dict[int, Produto]) -> list[MudancaPreco]:
@@ -341,3 +349,73 @@ def _efetivar(
     pedido.save(
         update_fields=["numero", "status", "confirmado_por", "confirmado_em", "atualizado_em"]
     )
+
+
+def cancelar_pedido(pedido_id: int, motivo: str, usuario) -> Pedido:
+    """Cancela o pedido confirmado numa operação única e devolve o estoque (§3.1, §3.4, §3.5).
+
+    Cada item volta pelo custo gravado nele na confirmação, que entra no custo médio como uma
+    entrada. Número, totais e itens ficam como estavam.
+    """
+    exigir_administrador(usuario)
+    motivo = (motivo or "").strip()
+    if not motivo:
+        raise RegraDeNegocio("Informe o motivo do cancelamento.")
+    with transaction.atomic():
+        # O status é lido com a trava: quem esperava outro cancelamento vê o pedido já cancelado.
+        pedido = Pedido.objects.select_for_update().get(pk=pedido_id)
+        if pedido.status != Pedido.Status.CONFIRMADO:
+            raise RegraDeNegocio("Só pedidos confirmados podem ser cancelados.")
+        itens = list(pedido.itens.all())
+        produtos = _travar_produtos(itens)
+        for item in itens:
+            registrar_devolucao_pedido(
+                produto=produtos[item.produto_id],
+                quantidade=item.quantidade,
+                custo_unitario=item.custo_unitario,
+                pedido=pedido,
+                usuario=usuario,
+            )
+        pedido.status = Pedido.Status.CANCELADO
+        pedido.cancelado_por = usuario
+        pedido.cancelado_em = timezone.now()
+        pedido.motivo_cancelamento = motivo
+        pedido.save(
+            update_fields=[
+                "status",
+                "cancelado_por",
+                "cancelado_em",
+                "motivo_cancelamento",
+                "atualizado_em",
+            ]
+        )
+    return pedido
+
+
+def repetir_pedido(pedido_id: int, usuario) -> Pedido:
+    """Cria um rascunho de `usuario` com o cliente e os itens do pedido (§3.1, decisão P7).
+
+    Os itens recebem o código, a descrição e o preço atuais do produto. Desconto e observações
+    não são copiados. Produtos inativos ou sem estoque entram assim mesmo: os avisos do rascunho
+    mostram o que impede a confirmação.
+    """
+    original = Pedido.objects.get(pk=pedido_id)
+    if original.status not in (Pedido.Status.CONFIRMADO, Pedido.Status.CANCELADO):
+        raise RegraDeNegocio("Só pedidos confirmados ou cancelados podem ser repetidos.")
+    with transaction.atomic():
+        novo = criar_rascunho(usuario)
+        novo.cliente_id = original.cliente_id
+        novo.save(update_fields=["cliente", "atualizado_em"])
+        ItemPedido.objects.bulk_create(
+            ItemPedido(
+                pedido=novo,
+                produto=item.produto,
+                codigo=item.produto.codigo,
+                descricao=item.produto.descricao,
+                quantidade=item.quantidade,
+                preco_unitario=item.produto.preco,
+            )
+            for item in original.itens.select_related("produto")
+        )
+        _recalcular(novo)
+    return novo
