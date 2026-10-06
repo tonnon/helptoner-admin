@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from tests.apoio import com_estoque, criar_produto
+from tests.apoio import com_estoque, criar_produto, montar_pedido_confirmado, montar_rascunho
 
 # (url, pedaço HTMX?) das páginas em que o Vendedor nunca vê custo, lucro nem margem.
 # As URLs podem ter {produto}, {pedido} e {rascunho}; as próximas tarefas acrescentam as suas.
@@ -10,14 +10,18 @@ PAGINAS = [
     ("/produtos/", True),
     ("/produtos/{produto}/", False),
     ("/estoque/", True),
+    ("/pedidos/{pedido}/", False),
+    ("/pedidos/", True),
 ]
 
 
 @pytest.fixture
-def cenario_custo(db):
+def cenario_custo(db, vendedor):
     produto = criar_produto()
     com_estoque(produto, 5, "87.6543")  # movimento real: o custo também está no histórico
-    return SimpleNamespace(produto=produto)
+    pedido = montar_pedido_confirmado(vendedor, itens=[(produto, 1)])
+    rascunho = montar_rascunho(vendedor, itens=[(produto, 1)])
+    return SimpleNamespace(produto=produto, pedido=pedido, rascunho=rascunho)
 
 
 @pytest.mark.parametrize(("url", "htmx"), PAGINAS)

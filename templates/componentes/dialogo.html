@@ -1,7 +1,8 @@
 {% comment %}
 Confirmação para ações sérias, num <dialog>. O botão que abre usa data-abrir-dialogo="<id>".
 Parâmetros: id, titulo, texto, acao_url (POST), botao (texto do botão de confirmar),
-perigo (botão vermelho), campo_motivo (pede o motivo, enviado como "motivo").
+perigo (botão vermelho), campo_motivo (pede o motivo, enviado como "motivo") e
+motivo_max (limite de caracteres do motivo, opcional).
 {% endcomment %}
 <dialog id="{{ id }}" class="dialogo" aria-labelledby="{{ id }}-titulo">
   <form method="post" action="{{ acao_url }}">
@@ -10,7 +11,7 @@ perigo (botão vermelho), campo_motivo (pede o motivo, enviado como "motivo").
     {% if texto %}<p class="mt-1.5 text-sm text-texto-2">{{ texto }}</p>{% endif %}
     {% if campo_motivo %}
       <label class="rotulo mt-4" for="{{ id }}-motivo">Motivo</label>
-      <div class="campo"><textarea id="{{ id }}-motivo" name="motivo" rows="2" required></textarea></div>
+      <div class="campo"><textarea id="{{ id }}-motivo" name="motivo" rows="2" required{% if motivo_max %} maxlength="{{ motivo_max }}"{% endif %}></textarea></div>
     {% endif %}
     <div class="mt-5 flex flex-wrap justify-end gap-2">
       <button type="button" class="btn-sec" data-fechar-dialogo>Voltar</button>

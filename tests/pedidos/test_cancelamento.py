@@ -164,3 +164,12 @@ def test_cancelar_duas_vezes_ao_mesmo_tempo_devolve_uma_vez(disputa):  # Review 
     prod.refresh_from_db()
     assert prod.estoque == 10 and MovimentoEstoque.objects.filter(tipo="devolucao").count() == 1
     assert Pedido.objects.get(pk=ped.pk).motivo_cancelamento == cancelados[0].motivo_cancelamento
+
+
+def test_motivo_acima_de_500_caracteres_e_recusado(administrador, vendedor):
+    pedido = montar_pedido_confirmado(vendedor, itens=[(com_estoque(criar_produto(), 5), 1)])
+    with pytest.raises(RegraDeNegocio, match="O motivo pode ter até 500 caracteres."):
+        cancelar_pedido(pedido.pk, "x" * 501, administrador)
+    pedido.refresh_from_db()
+    assert pedido.status == Pedido.Status.CONFIRMADO
+    cancelar_pedido(pedido.pk, "  " + "x" * 500 + "  ", administrador)

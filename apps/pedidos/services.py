@@ -32,6 +32,7 @@ from .models import ContadorPedido, ItemPedido, Pedido
 
 QUANTIDADE_MAXIMA = 9999
 OBSERVACOES_MAXIMO = 1000
+MOTIVO_MAXIMO = 500
 
 _MSG_QUANTIDADE = "Informe uma quantidade inteira maior que zero."
 _MSG_QUANTIDADE_MAXIMA = f"Quantidade máxima por item: {inteiro_br(QUANTIDADE_MAXIMA)}."
@@ -361,6 +362,8 @@ def cancelar_pedido(pedido_id: int, motivo: str, usuario) -> Pedido:
     motivo = (motivo or "").strip()
     if not motivo:
         raise RegraDeNegocio("Informe o motivo do cancelamento.")
+    if len(motivo) > MOTIVO_MAXIMO:
+        raise RegraDeNegocio(f"O motivo pode ter até {MOTIVO_MAXIMO} caracteres.")
     with transaction.atomic():
         # O status é lido com a trava: quem esperava outro cancelamento vê o pedido já cancelado.
         pedido = Pedido.objects.select_for_update().get(pk=pedido_id)

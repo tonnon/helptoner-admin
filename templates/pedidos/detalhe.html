@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load formato cadastros %}
+{% comment %}
+Detalhe do pedido, em qualquer status (todos os perfis), como em docs/esbocos/telas.html.
+Lucro, margem e o botão de cancelar só existem no HTML do Administrador. "Continuar editando",
+"Repetir pedido" e o PDF vêm nas Tarefas 19 e 20.
+{% endcomment %}
+{% block titulo %}{% if pedido.numero %}Pedido {{ pedido.numero|pedido_numero }}{% else %}Rascunho{% endif %} - Helptoner Pedidos{% endblock %}
+{% block trilha %}<a href="{% url 'pedidos:lista' %}">Pedidos</a> / {{ pedido.numero|pedido_numero }}{% endblock %}
+{% block conteudo %}
+  <div class="fx flex flex-wrap items-center justify-between gap-3">
+    <h1 class="flex flex-wrap items-center gap-3">
+      {% if pedido.numero %}Pedido {{ pedido.numero|pedido_numero }}{% else %}Rascunho{% endif %}
+      {% include "componentes/selo_status.html" with status=pedido.status %}
+    </h1>
+    {% if request.user.eh_administrador and pedido.status == "confirmado" %}
+      <button type="button" class="btn-perigo" data-abrir-dialogo="cancelar-pedido">Cancelar pedido</button>
+    {% endif %}
+  </div>
+
+  <section class="cartao fx fx-1 mt-4" aria-labelledby="dados">
+    <h2 id="dados" class="text-base font-bold">Cliente</h2>
+    {% if pedido.cliente %}
+      <p class="mt-2 font-semibold">{{ pedido.cliente.nome }}</p>
+      <p class="text-sm text-texto-2">{% if pedido.cliente.tipo == "PF" %}CPF{% else %}CNPJ{% endif %} <span class="num">{{ pedido.cliente.documento|documento:pedido.cliente.tipo }}</span>{% if pedido.cliente.telefone %} · {{ pedido.cliente.telefone }}{% endif %}{% if pedido.cliente.email %} · {{ pedido.cliente.email }}{% endif %}</p>
+      {% if pedido.cliente.cidade %}<p class="text-sm text-texto-2">{{ pedido.cliente.cidade }}{% if pedido.cliente.uf %}/{{ pedido.cliente.uf }}{% endif %}</p>{% endif %}
+    {% else %}
+      <p class="mt-2 text-sm text-texto-2">Sem cliente.</p>
+    {% endif %}
+    <ul class="mt-3 space-y-1 text-sm text-texto-2">
+      <li>Emitido por {{ pedido.criado_por.primeiro_nome }} em <span class="num">{{ pedido.criado_em|data_hora_br }}</span></li>
+      {% if pedido.confirmado_em %}<li>Confirmado por {{ pedido.confirmado_por.primeiro_nome }} em <span class="num">{{ pedido.confirmado_em|data_hora_br }}</span></li>{% endif %}
+      {% if pedido.cancelado_em %}<li>Cancelado por {{ pedido.cancelado_por.primeiro_nome }} em <span class="num">{{ pedido.cancelado_em|data_hora_br }}</span> · Motivo: {{ pedido.motivo_cancelamento }}</li>{% endif %}
+    </ul>
+  </section>
+
+  <section class="cartao fx fx-1 mt-4" aria-labelledby="itens">
+    <h2 id="itens" class="text-base font-bold">Itens</h2>
+    <table class="tabela-responsiva mt-2">
+      <thead>
+        <tr><th>Código</th><th>Produto</th><th class="num">Qtd.</th><th class="num">Preço</th><th class="num">Total</th></tr>
+      </thead>
+      <tbody>
+        {% for item in itens %}
+          <tr>
+            <td data-rotulo="Código" class="font-semibold">{{ item.codigo }}</td>
+            <td data-rotulo="Produto">{{ item.descricao }}</td>
+            <td data-rotulo="Qtd." class="num">{{ item.quantidade|inteiro }}</td>
+            <td data-rotulo="Preço" class="num">{{ item.preco_unitario|brl }}</td>
+            <td data-rotulo="Total" class="num">{{ item.total|brl }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <dl class="mt-3 ml-auto max-w-xs space-y-1 text-sm">
+      <div class="flex justify-between gap-4"><dt>Subtotal</dt><dd class="num">{{ pedido.subtotal|brl }}</dd></div>
+      {% if pedido.desconto_valor > 0 %}
+        <div class="flex justify-between gap-4"><dt>Desconto{% if pedido.desconto_tipo == "percentual" %} ({{ pedido.desconto_informado|floatformat:"-2" }}%){% endif %}</dt><dd class="num">− {{ pedido.desconto_valor|brl }}</dd></div>
+      {% endif %}
+      <div class="flex justify-between gap-4 text-base font-bold"><dt>Total</dt><dd class="num">{{ pedido.total|brl }}</dd></div>
+      {% if lucro is not None %}
+        <div class="pt-1 text-texto-2">Lucro bruto {{ lucro|brl }} · margem {{ margem|pct }}</div>
+      {% endif %}
+    </dl>
+  </section>
+
+  {% if pedido.observacoes %}
+    <section class="cartao fx fx-1 mt-4" aria-labelledby="obs">
+      <h2 id="obs" class="text-base font-bold">Observações</h2>
+      <p class="mt-2 whitespace-pre-line text-sm">{{ pedido.observacoes }}</p>
+    </section>
+  {% endif %}
+
+  {% if request.user.eh_administrador and pedido.status == "confirmado" %}
+    {% url 'pedidos:cancelar' pedido.pk as url_cancelar %}
+    {% include "componentes/dialogo.html" with id="cancelar-pedido" titulo=titulo_cancelar texto=texto_cancelar acao_url=url_cancelar botao="Cancelar pedido" perigo=True campo_motivo=True motivo_max=motivo_max %}
+  {% endif %}
+{% endblock %}

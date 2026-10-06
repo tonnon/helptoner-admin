@@ -50,6 +50,7 @@ urlpatterns = [
     path("", include("apps.contas.urls")),
     path("", include("apps.cadastros.urls")),
     path("", include("apps.estoque.urls")),
+    path("", include("apps.pedidos.urls")),
     path("", include("apps.core.urls")),
 ]
 
