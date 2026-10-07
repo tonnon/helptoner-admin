@@ -152,6 +152,12 @@ def test_mudar_quantidade_parte_da_quantidade_gravada(vendedor):  # botões − 
     assert (p.itens.get().quantidade, p.total) == (1, Decimal("189.90"))
 
 
+def test_observacoes_sem_caractere_nulo(vendedor):  # Ruling R23: o PostgreSQL recusa o NUL
+    p = definir_observacoes(criar_rascunho(vendedor).pk, " a\x00b ", vendedor)
+    p.refresh_from_db()
+    assert p.observacoes == "ab"
+
+
 def test_mudar_quantidade_de_item_removido_ou_de_outra_pessoa(vendedor, administrador):
     p = montar_rascunho(vendedor, itens=[(com_estoque(criar_produto(), 5), 2)])
     item = p.itens.get()

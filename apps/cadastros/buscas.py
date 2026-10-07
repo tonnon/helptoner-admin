@@ -10,8 +10,12 @@ MINIMO_DOCUMENTO = 3
 
 
 def normalizar_busca(texto: str) -> str:
-    """Tira espaços das pontas, junta espaços repetidos e corta em 100 caracteres."""
-    return re.sub(r"\s+", " ", texto or "").strip()[:TAMANHO_MAXIMO]
+    """Tira espaços das pontas, junta espaços repetidos e corta em 100 caracteres.
+
+    O caractere nulo sai: o PostgreSQL não aceita texto com ele (daria erro 500).
+    """
+    texto = (texto or "").replace("\x00", "")
+    return re.sub(r"\s+", " ", texto).strip()[:TAMANHO_MAXIMO]
 
 
 def buscar_clientes(

@@ -209,7 +209,8 @@ def definir_desconto(pedido_id: int, tipo: str, valor: Decimal, usuario) -> Pedi
 
 
 def definir_observacoes(pedido_id: int, texto: str, usuario) -> Pedido:
-    texto = (texto or "").strip()
+    # O caractere nulo sai: o PostgreSQL não aceita texto com ele.
+    texto = (texto or "").replace("\x00", "").strip()
     if len(texto) > OBSERVACOES_MAXIMO:
         raise RegraDeNegocio(
             f"As observações podem ter até {inteiro_br(OBSERVACOES_MAXIMO)} caracteres."

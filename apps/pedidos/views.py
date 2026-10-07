@@ -344,29 +344,41 @@ def remover_item(request, pedido, item_id):
     return _atualizacao(request, pedido)
 
 
-@require_POST
-@_no_rascunho
-def definir_desconto(request, pedido):
-    """A resposta redesenha só o campo do valor (com o erro, se houver), não o tipo: um clique em
-    R$ ou % feito enquanto ela vinha continua valendo e é enviado em seguida."""
+def _gravar_desconto(request, pedido: Pedido) -> str | None:
+    """Grava o desconto enviado (tipo e valor) e devolve a mensagem de erro, se ele não vale."""
     form = DescontoForm(request.POST)
-    erro = None if form.is_valid() else next(iter(form.errors.values()))[0]
-    if erro is None:
-        try:
-            services.definir_desconto(
-                pedido.pk, form.cleaned_data["tipo"], form.cleaned_data["valor"], request.user
-            )
-        except RegraDeNegocio as recusa:
-            erro = recusa.mensagem
-    if erro is None:
-        return _atualizacao(request, pedido, parte_desconto="campo")
+    if not form.is_valid():
+        return next(iter(form.errors.values()))[0]
+    try:
+        services.definir_desconto(
+            pedido.pk, form.cleaned_data["tipo"], form.cleaned_data["valor"], request.user
+        )
+    except RegraDeNegocio as erro:
+        return erro.mensagem
+    return None
+
+
+def _desconto_recusado(request, pedido: Pedido, erro: str, **extras):
+    """O campo do desconto volta com o que foi digitado, marcado, e a mensagem embaixo."""
     return _atualizacao(
         request,
         pedido,
         parte_desconto="campo",
         erro_desconto=erro,
         valor_desconto=request.POST.get("valor", ""),
+        **extras,
     )
+
+
+@require_POST
+@_no_rascunho
+def definir_desconto(request, pedido):
+    """A resposta redesenha só o campo do valor (com o erro, se houver), não o tipo: um clique em
+    R$ ou % feito enquanto ela vinha continua valendo e é enviado em seguida."""
+    erro = _gravar_desconto(request, pedido)
+    if erro:
+        return _desconto_recusado(request, pedido, erro)
+    return _atualizacao(request, pedido, parte_desconto="campo")
 
 
 @require_POST
@@ -383,6 +395,22 @@ def definir_observacoes(request, pedido):
 @require_POST
 @_no_rascunho
 def confirmar(request, pedido):
+    """Confirma com o que está na tela (Ruling R24).
+
+    Os botões mandam junto as observações e o desconto dos campos (hx-include), que são gravados
+    antes, pelos mesmos serviços: o pedido não é confirmado com um desconto diferente do que a
+    pessoa vê. Desconto inválido ou recusado não confirma: o campo volta com o erro e o foco.
+    """
+    if "texto" in request.POST:
+        try:
+            services.definir_observacoes(pedido.pk, request.POST["texto"], request.user)
+        except RegraDeNegocio as erro:
+            resposta = _atualizacao(request, pedido, parte_desconto=None)
+            return avisar(resposta, erro.mensagem, "erro")
+    if "tipo" in request.POST or "valor" in request.POST:
+        erro = _gravar_desconto(request, pedido)
+        if erro:
+            return _desconto_recusado(request, pedido, erro, foco_desconto=True)
     try:
         confirmado = services.confirmar_pedido(pedido.pk, request.user)
     except services.PrecosAlterados as erro:

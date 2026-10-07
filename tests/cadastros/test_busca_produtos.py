@@ -28,3 +28,10 @@ def test_inativos_so_quando_pedidos_e_ordem_por_codigo(db):
     assert list(buscar_produtos("")) == [a, b]
     assert list(buscar_produtos("", incluir_inativos=True)) == [a, b, inativo]
     assert list(buscar_produtos("", limite=1)) == [a]
+
+
+def test_caractere_nulo_na_busca_nao_quebra(client_vendedor):  # Ruling R23
+    p = criar_produto("CE285A")
+    assert list(buscar_produtos("ce\x00285")) == [p]
+    r = client_vendedor.get("/produtos/?q=%00", headers={"HX-Request": "true"})
+    assert r.status_code == 200 and "CE285A" in r.content.decode()

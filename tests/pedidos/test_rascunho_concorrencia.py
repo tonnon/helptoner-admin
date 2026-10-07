@@ -4,7 +4,7 @@ import pytest
 
 from apps.core.erros import EstoqueInsuficiente
 from apps.pedidos import services
-from apps.pedidos.services import adicionar_item, criar_rascunho
+from apps.pedidos.services import adicionar_item, criar_rascunho, mudar_quantidade
 from tests.apoio import com_estoque, criar_produto, criar_usuario, rodar_juntos
 
 concorrencia = pytest.mark.django_db(transaction=True, serialized_rollback=True)
@@ -48,6 +48,21 @@ def test_duas_abas_juntas_nao_passam_do_estoque(trava_demorada):
     assert [r.mensagem for r in recusas] == [
         "Estoque insuficiente: 4 em estoque, 3 já no pedido (dá para adicionar mais 1)."
     ]
+    assert p.itens.get().quantidade == 3
+
+
+@concorrencia
+def test_dois_cliques_no_mais_ao_mesmo_tempo_contam_os_dois(trava_demorada):  # botão + da tela
+    vendedor = criar_usuario()
+    prod = com_estoque(criar_produto(), 5)
+    p = criar_rascunho(vendedor)
+    item = adicionar_item(p.pk, prod.pk, 1, vendedor)
+    resultados = rodar_juntos(
+        lambda: mudar_quantidade(p.pk, item.pk, 1, vendedor),
+        lambda: mudar_quantidade(p.pk, item.pk, 1, vendedor),
+    )
+    assert not any(isinstance(r, Exception) for r in resultados)
+    assert sorted(r.quantidade for r in resultados) == [2, 3]
     assert p.itens.get().quantidade == 3
 
 

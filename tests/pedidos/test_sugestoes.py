@@ -26,10 +26,32 @@ def _produtos(client, rascunho, q):
 def test_sugestoes_de_cliente_com_realce_e_sem_inativos(client_vendedor, rascunho):
     criar_cliente("João da Silva", tipo="PF", documento="12345678909")
     criar_cliente("Joana Inativa", tipo="PF", ativo=False)
+    # Inativo que bate com a busca: só ele mostra que os inativos ficam de fora.
+    inativo = criar_cliente("João Inativo", tipo="PF", ativo=False)
     html = client_vendedor.get(
         f"/pedidos/{rascunho.pk}/sugestoes/clientes/?q=joao"
     ).content.decode()
     assert "<mark>João</mark> da Silva" in html and "Joana" not in html
+    assert "Inativo" not in html and f"opcao-cliente-{inativo.pk}" not in html
+
+
+def test_produto_inativo_fica_fora_das_sugestoes(client_vendedor, rascunho):
+    com_estoque(criar_produto("CE285A"), 5)
+    inativo = criar_produto("CE285X", descricao="Toner HP 85X Preto", ativo=False)
+    html = _produtos(client_vendedor, rascunho, "ce285")
+    assert "<mark>CE285</mark>A" in html
+    assert "Toner HP 85X Preto" not in html and f"opcao-produto-{inativo.pk}" not in html
+
+
+@pytest.mark.parametrize("tipo", ["clientes", "produtos"])
+def test_caractere_nulo_na_busca_nao_quebra(client_vendedor, rascunho, tipo):  # Ruling R23
+    criar_cliente("Papelaria Central Ltda")
+    com_estoque(criar_produto(), 5)
+    url = f"/pedidos/{rascunho.pk}/sugestoes/{tipo}/?q=%00"
+    r = client_vendedor.get(url, headers=HTMX)
+    assert r.status_code == 200 and r.content.decode().strip() == ""
+    url = f"/pedidos/{rascunho.pk}/sugestoes/{tipo}/?q=pa%00pel"
+    assert client_vendedor.get(url, headers=HTMX).status_code == 200
 
 
 def test_sugestoes_escapam_html(client_vendedor, rascunho):

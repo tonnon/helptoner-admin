@@ -48,7 +48,7 @@ hx-swap-oob quando saem nessa resposta. As buscas com sugestões usam static/js/
                       hx-post="{% url 'pedidos:definir_observacoes' pedido.pk %}" hx-trigger="change, keyup changed delay:800ms" hx-target="#itens" hx-swap="outerHTML">{{ pedido.observacoes }}</textarea>
           </div>
         </div>
-        <button type="button" id="confirmar" class="btn-pri btn-cheio btn-confirmar mt-4" hx-post="{% url 'pedidos:confirmar' pedido.pk %}" hx-target="#itens" hx-swap="outerHTML" hx-disabled-elt="this" data-espera-mudancas>
+        <button type="button" id="confirmar" class="btn-pri btn-cheio btn-confirmar mt-4" hx-post="{% url 'pedidos:confirmar' pedido.pk %}" hx-include="#form-desconto, #observacoes" hx-target="#itens" hx-swap="outerHTML" hx-disabled-elt="this" data-espera-mudancas data-confere-campo="desconto">
           <span class="giro" aria-hidden="true"></span><span class="txt-normal">Confirmar pedido</span><span class="txt-carregando">Confirmando…</span>
         </button>
         <p class="seguro">{% include "icones/cadeado.svg" %}Estoque e total conferidos ao confirmar</p>
@@ -210,7 +210,7 @@ hx-swap-oob quando saem nessa resposta. As buscas com sugestões usam static/js/
 {% endpartialdef %}
 
 
-{% partialdef campo_desconto %}<div id="campo-desconto" class="campo{% if erro_desconto %} campo-invalido{% endif %}"{% if oob_campo %} hx-swap-oob="true"{% endif %}><input id="desconto" name="valor" value="{% if valor_desconto is None %}{{ pedido.desconto_informado|floatformat:'-2' }}{% else %}{{ valor_desconto }}{% endif %}" inputmode="decimal" autocomplete="off" aria-describedby="erro-desconto"{% if erro_desconto %} aria-invalid="true"{% endif %}></div>{% endpartialdef %}
+{% partialdef campo_desconto %}<div id="campo-desconto" class="campo{% if erro_desconto %} campo-invalido{% endif %}"{% if oob_campo %} hx-swap-oob="true"{% endif %}><input id="desconto" name="valor" value="{% if valor_desconto is None %}{{ pedido.desconto_informado|floatformat:'-2' }}{% else %}{{ valor_desconto }}{% endif %}" inputmode="decimal" autocomplete="off" aria-describedby="erro-desconto"{% if erro_desconto %} aria-invalid="true"{% endif %}{% if foco_desconto %} autofocus{% endif %}></div>{% endpartialdef %}
 
 
 {% partialdef erro_desconto %}<p id="erro-desconto" class="msg" role="alert"{% if oob_campo %} hx-swap-oob="true"{% endif %}>{{ erro_desconto|default_if_none:"" }}</p>{% endpartialdef %}
@@ -243,7 +243,7 @@ hx-swap-oob quando saem nessa resposta. As buscas com sugestões usam static/js/
 {% partialdef barra %}
 <div id="barra-celular" class="barra-celular"{% if oob %} hx-swap-oob="true"{% endif %}>
   <div class="barra-total"><span>Total</span><b id="total-celular" class="num" data-valor-centavos="{{ pedido.total|centavos }}">{{ pedido.total|brl }}</b></div>
-  <button type="button" id="confirmar-celular" class="btn-pri btn-confirmar" hx-post="{% url 'pedidos:confirmar' pedido.pk %}" hx-target="#itens" hx-swap="outerHTML" hx-disabled-elt="this" data-espera-mudancas>
+  <button type="button" id="confirmar-celular" class="btn-pri btn-confirmar" hx-post="{% url 'pedidos:confirmar' pedido.pk %}" hx-include="#form-desconto, #observacoes" hx-target="#itens" hx-swap="outerHTML" hx-disabled-elt="this" data-espera-mudancas data-confere-campo="desconto">
     <span class="giro" aria-hidden="true"></span><span class="txt-normal">Confirmar</span><span class="txt-carregando">Confirmando…</span>
   </button>
 </div>

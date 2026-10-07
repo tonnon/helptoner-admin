@@ -133,11 +133,15 @@
     });
   });
 
-  // Botões com data-espera-mudancas (o "Confirmar" do pedido) esperam as mudanças que ainda estão
-  // a caminho do servidor, como o desconto enviado quando o campo perde o foco no próprio clique:
-  // assim o pedido é conferido já com elas.
+  // Botões com data-espera-mudancas (o "Confirmar" do pedido) só seguem com a tela em dia:
+  // - esperam as mudanças que ainda estão a caminho do servidor (como o desconto enviado quando o
+  //   campo perde o foco no próprio clique) e não seguem se alguma delas falhou;
+  // - não seguem com erro no campo de data-confere-campo (aria-invalid ou a mensagem ligada por
+  //   aria-describedby): o foco vai para ele.
+  // O servidor confere de novo, com os campos que o botão manda junto (Ruling R24).
   const mudancasPendentes = new Set();
   const depoisDasMudancas = [];
+  let algumaFalhou = false;
 
   document.addEventListener("htmx:beforeSend", (evento) => {
     const { xhr, requestConfig } = evento.detail;
@@ -145,22 +149,46 @@
     mudancasPendentes.add(xhr);
     xhr.addEventListener("loadend", () => {
       mudancasPendentes.delete(xhr);
-      if (!mudancasPendentes.size) depoisDasMudancas.splice(0).forEach((funcao) => funcao());
+      if (xhr.status < 200 || xhr.status >= 300) algumaFalhou = true; // erro do servidor ou rede
+      if (mudancasPendentes.size) return;
+      const falhou = algumaFalhou;
+      algumaFalhou = false;
+      depoisDasMudancas.splice(0).forEach((funcao) => funcao(falhou));
     });
   });
 
+  function campoComErro(botao) {
+    const campo = document.getElementById(botao.dataset.confereCampo);
+    if (!campo) return null;
+    const mensagem = document.getElementById(campo.getAttribute("aria-describedby"));
+    const comErro = campo.getAttribute("aria-invalid") === "true" || mensagem?.textContent.trim();
+    return comErro ? campo : null;
+  }
+
   document.addEventListener("htmx:confirm", (evento) => {
     const botao = evento.detail.elt;
-    if (!mudancasPendentes.size || !botao.matches?.("[data-espera-mudancas]")) return;
+    if (!botao.matches?.("[data-espera-mudancas]")) return;
+    if (!mudancasPendentes.size) {
+      const campo = campoComErro(botao);
+      if (campo) {
+        evento.preventDefault();
+        campo.focus();
+      }
+      return;
+    }
     evento.preventDefault();
     if (botao.disabled) return; // já está esperando
     botao.disabled = true;
     botao.classList.add("htmx-request");
-    depoisDasMudancas.push(() => {
+    depoisDasMudancas.push((falhou) => {
       botao.disabled = false;
       botao.classList.remove("htmx-request");
-      // A resposta pode ter redesenhado o botão (a barra do celular): clica no que está na tela.
-      (botao.isConnected ? botao : document.getElementById(botao.id))?.click();
+      if (falhou) return; // o aviso de erro já apareceu; a pessoa confere e confirma de novo
+      // A resposta pode ter redesenhado o botão (a barra do celular): usa o que está na tela.
+      const atual = botao.isConnected ? botao : document.getElementById(botao.id);
+      const campo = atual && campoComErro(atual);
+      if (campo) campo.focus();
+      else atual?.click();
     });
   });
 

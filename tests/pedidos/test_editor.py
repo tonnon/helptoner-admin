@@ -5,7 +5,7 @@ from decimal import Decimal
 import pytest
 
 from apps.cadastros.models import Produto
-from apps.pedidos.models import Pedido
+from apps.pedidos.models import ContadorPedido, Pedido
 from apps.pedidos.services import cancelar_pedido, criar_rascunho
 from tests.apoio import (
     com_estoque,
@@ -378,6 +378,75 @@ def test_observacoes(client_vendedor, rascunho):
     assert rascunho.observacoes == "Entregar na portaria"
 
 
+def test_observacoes_com_caractere_nulo(client_vendedor, rascunho):  # Ruling R23
+    r = htmx_post(
+        client_vendedor, f"/pedidos/{rascunho.pk}/observacoes/", {"texto": "Entregar\x00 já"}
+    )
+    rascunho.refresh_from_db()
+    assert r.status_code == 200 and rascunho.observacoes == "Entregar já"
+
+
+def _rascunho_pronto(vendedor, preco="189.90", quantidade=2):
+    return montar_rascunho(
+        vendedor,
+        cliente=criar_cliente(),
+        itens=[(com_estoque(criar_produto(preco=preco), 5), quantidade)],
+    )
+
+
+def test_confirmar_grava_antes_o_desconto_e_as_observacoes_da_tela(
+    client_vendedor, vendedor
+):  # Ruling R24
+    ped = _rascunho_pronto(vendedor)
+    r = htmx_post(
+        client_vendedor,
+        f"/pedidos/{ped.pk}/confirmar/",
+        {"tipo": "percentual", "valor": "10", "texto": "Entregar na portaria"},
+    )
+    assert r["HX-Redirect"] == f"/pedidos/{ped.pk}/"
+    ped.refresh_from_db()
+    assert (ped.status, ped.desconto_tipo, ped.desconto_informado, ped.total) == (
+        "confirmado",
+        "percentual",
+        Decimal("10.00"),
+        Decimal("341.82"),
+    )
+    assert ped.observacoes == "Entregar na portaria"
+
+
+@pytest.mark.parametrize(
+    ("tipo", "valor", "erro"),
+    [
+        ("percentual", "7.5", "Informe um número. Ex.: 10 ou 10,5"),
+        ("reais", "R$ 10", "Informe um número. Ex.: 10 ou 10,5"),
+        ("percentual", "150", "O desconto não pode passar de 100%."),
+        ("outro", "10", "Tipo de desconto inválido."),
+    ],
+)
+def test_confirmar_com_desconto_invalido_na_tela_nao_confirma(
+    client_vendedor, vendedor, tipo, valor, erro
+):  # Ruling R24
+    ped = _rascunho_pronto(vendedor)
+    html = htmx_post(
+        client_vendedor,
+        f"/pedidos/{ped.pk}/confirmar/",
+        {"tipo": tipo, "valor": valor, "texto": "Entregar na portaria"},
+    ).content.decode()
+    assert erro in html and "campo campo-invalido" in html
+    campo = html.split('<input id="desconto"')[1].split(">")[0]
+    assert f'value="{valor}"' in campo and "autofocus" in campo  # o foco volta ao desconto
+    ped.refresh_from_db()
+    assert (ped.status, ped.desconto_informado) == ("rascunho", Decimal("0"))
+    assert ContadorPedido.objects.get().ultimo_numero == 0  # nenhum número gasto
+    assert ped.observacoes == "Entregar na portaria"  # o que vale é gravado
+
+
+def test_botoes_de_confirmar_levam_o_desconto_e_as_observacoes(client_vendedor, rascunho):
+    html = client_vendedor.get(f"/pedidos/{rascunho.pk}/editar/").content.decode()
+    assert html.count('hx-include="#form-desconto, #observacoes"') == 2
+    assert html.count('data-espera-mudancas data-confere-campo="desconto"') == 2
+
+
 def test_confirmar_sem_cliente_mostra_os_motivos(client_vendedor, vendedor):
     ped = montar_rascunho(vendedor, itens=[(com_estoque(criar_produto(), 5), 1)])
     html = htmx_post(client_vendedor, f"/pedidos/{ped.pk}/confirmar/", {}).content.decode()
@@ -429,9 +498,27 @@ def test_repetir_rascunho_nao_vale(client_vendedor, rascunho):
     assert "Só pedidos confirmados ou cancelados podem ser repetidos." in r.content.decode()
 
 
-def test_rotas_que_mudam_so_aceitam_post(client_vendedor, rascunho):
-    for url in ["/pedidos/novo/", f"/pedidos/{rascunho.pk}/confirmar/"]:
-        assert client_vendedor.get(url).status_code == 405, url
+@pytest.mark.parametrize(
+    "rota",
+    [
+        "novo/",
+        "{pk}/cliente/",
+        "{pk}/itens/",
+        "{pk}/itens/{item}/quantidade/",
+        "{pk}/itens/{item}/remover/",
+        "{pk}/desconto/",
+        "{pk}/observacoes/",
+        "{pk}/confirmar/",
+        "{pk}/excluir/",
+        "{pk}/repetir/",
+    ],
+)
+def test_rotas_que_mudam_so_aceitam_post(client_vendedor, vendedor, rota):
+    ped = montar_rascunho(vendedor, itens=[(com_estoque(criar_produto(), 5), 1)])
+    url = "/pedidos/" + rota.format(pk=ped.pk, item=ped.itens.get().pk)
+    assert client_vendedor.get(url).status_code == 405
+    ped.refresh_from_db()
+    assert ped.itens.get().quantidade == 1
 
 
 def test_detalhe_e_lista_ganham_os_botoes(client_vendedor, vendedor, administrador):

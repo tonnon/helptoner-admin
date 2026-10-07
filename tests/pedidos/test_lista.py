@@ -32,6 +32,11 @@ def test_busca_por_numero_enorme_nao_quebra(client_vendedor):
     assert "Nenhum pedido" in _lista(client_vendedor, "?busca=99999999999999999999")
 
 
+def test_caractere_nulo_na_busca_nao_quebra(client_vendedor, vendedor):  # Ruling R23
+    ped = montar_pedido_confirmado(vendedor, itens=[(com_estoque(criar_produto(), 5), 1)])
+    assert f"/pedidos/{ped.pk}/" in _lista(client_vendedor, "?busca=%00")
+
+
 def test_busca_por_cliente_sem_acento(client_vendedor, vendedor):
     ped = montar_pedido_confirmado(
         vendedor,
