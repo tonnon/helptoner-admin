@@ -378,12 +378,12 @@ def test_observacoes(client_vendedor, rascunho):
     assert rascunho.observacoes == "Entregar na portaria"
 
 
-def test_observacoes_com_caractere_nulo(client_vendedor, rascunho):  # Ruling R23
+def test_observacoes_com_caractere_nulo(client_vendedor, rascunho):  # Rulings R23 e R25
     r = htmx_post(
         client_vendedor, f"/pedidos/{rascunho.pk}/observacoes/", {"texto": "Entregar\x00 já"}
     )
     rascunho.refresh_from_db()
-    assert r.status_code == 200 and rascunho.observacoes == "Entregar já"
+    assert r.status_code == 400 and rascunho.observacoes == ""  # recusada antes da view
 
 
 def _rascunho_pronto(vendedor, preco="189.90", quantidade=2):

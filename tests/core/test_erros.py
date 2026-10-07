@@ -9,6 +9,13 @@ from django.test import Client, override_settings
 
 
 @override_settings(ROOT_URLCONF="tests.core.urls_erros")
+def test_400_no_visual_do_sistema(client_vendedor):
+    r = client_vendedor.get("/teste/400/")
+    html = r.content.decode()
+    assert r.status_code == 400 and "Requisição inválida." in html and "Voltar ao início" in html
+
+
+@override_settings(ROOT_URLCONF="tests.core.urls_erros")
 def test_403_no_visual_do_sistema_e_registrado(client_vendedor, caplog):
     r = client_vendedor.get("/teste/403/")
     assert r.status_code == 403 and "Voltar ao início" in r.content.decode()

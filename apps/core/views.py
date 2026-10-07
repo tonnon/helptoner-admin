@@ -2,7 +2,13 @@ import logging
 import secrets
 
 from django.contrib.auth.decorators import login_not_required
-from django.http import Http404, HttpResponse, HttpResponseServerError, JsonResponse
+from django.http import (
+    Http404,
+    HttpResponse,
+    HttpResponseBadRequest,
+    HttpResponseServerError,
+    JsonResponse,
+)
 from django.shortcuts import render
 from django.template import loader
 from django.views.decorators.http import require_GET
@@ -29,6 +35,11 @@ def inicio(request):
 def rota_bloqueada(request, *args, **kwargs):
     """Rota desligada de propósito: responde 404 como se não existisse."""
     raise Http404
+
+
+def erro_400(request, exception=None):
+    # Sem o request, como o erro_500: a página não depende da sessão nem do banco.
+    return HttpResponseBadRequest(loader.render_to_string("400.html"))
 
 
 def erro_403(request, exception=None):

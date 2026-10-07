@@ -28,6 +28,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # Caractere nulo no GET ou no POST: 400 antes de tudo, sem sessão e sem banco (Ruling R25).
+    "apps.core.middleware.RecusarNuloMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",

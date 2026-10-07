@@ -28,12 +28,12 @@ def test_normalizar_busca():
     assert len(normalizar_busca("a" * 300)) == 100
 
 
-def test_caractere_nulo_na_busca_nao_quebra(client_vendedor):  # Ruling R23
+def test_caractere_nulo_na_busca(client_vendedor):  # Rulings R23 e R25
     joao = criar_cliente("João da Silva", tipo="PF", documento="12345678909")
-    assert normalizar_busca("jo\x00ao") == "joao"
+    assert normalizar_busca("jo\x00ao") == "joao"  # a busca também se defende
     assert list(buscar_clientes("jo\x00ao")) == [joao]
     r = client_vendedor.get("/clientes/?q=%00", headers={"HX-Request": "true"})
-    assert r.status_code == 200 and "João da Silva" in r.content.decode()
+    assert r.status_code == 400  # a requisição é recusada antes de chegar à view
 
 
 def test_limite(db):

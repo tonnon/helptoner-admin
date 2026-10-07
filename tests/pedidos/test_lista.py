@@ -2,6 +2,7 @@ from datetime import UTC, datetime
 
 import pytest
 
+from apps.pedidos.consultas import filtrar_pedidos
 from apps.pedidos.models import ContadorPedido, Pedido
 from tests.apoio import (
     com_estoque,
@@ -32,9 +33,11 @@ def test_busca_por_numero_enorme_nao_quebra(client_vendedor):
     assert "Nenhum pedido" in _lista(client_vendedor, "?busca=99999999999999999999")
 
 
-def test_caractere_nulo_na_busca_nao_quebra(client_vendedor, vendedor):  # Ruling R23
+def test_caractere_nulo_na_busca(client_vendedor, vendedor):  # Rulings R23 e R25
     ped = montar_pedido_confirmado(vendedor, itens=[(com_estoque(criar_produto(), 5), 1)])
-    assert f"/pedidos/{ped.pk}/" in _lista(client_vendedor, "?busca=%00")
+    assert list(filtrar_pedidos(busca="\x00")) == [ped]  # a busca também se defende
+    r = client_vendedor.get("/pedidos/?busca=%00", headers=HTMX)
+    assert r.status_code == 400  # a requisição é recusada antes de chegar à view
 
 
 def test_busca_por_cliente_sem_acento(client_vendedor, vendedor):

@@ -44,14 +44,10 @@ def test_produto_inativo_fica_fora_das_sugestoes(client_vendedor, rascunho):
 
 
 @pytest.mark.parametrize("tipo", ["clientes", "produtos"])
-def test_caractere_nulo_na_busca_nao_quebra(client_vendedor, rascunho, tipo):  # Ruling R23
-    criar_cliente("Papelaria Central Ltda")
-    com_estoque(criar_produto(), 5)
-    url = f"/pedidos/{rascunho.pk}/sugestoes/{tipo}/?q=%00"
-    r = client_vendedor.get(url, headers=HTMX)
-    assert r.status_code == 200 and r.content.decode().strip() == ""
-    url = f"/pedidos/{rascunho.pk}/sugestoes/{tipo}/?q=pa%00pel"
-    assert client_vendedor.get(url, headers=HTMX).status_code == 200
+def test_caractere_nulo_na_busca_recebe_400(client_vendedor, rascunho, tipo):  # Rulings R23, R25
+    for q in ["%00", "pa%00pel"]:
+        url = f"/pedidos/{rascunho.pk}/sugestoes/{tipo}/?q={q}"
+        assert client_vendedor.get(url, headers=HTMX).status_code == 400, q
 
 
 def test_sugestoes_escapam_html(client_vendedor, rascunho):

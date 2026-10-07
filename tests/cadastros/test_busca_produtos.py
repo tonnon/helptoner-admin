@@ -30,8 +30,8 @@ def test_inativos_so_quando_pedidos_e_ordem_por_codigo(db):
     assert list(buscar_produtos("", limite=1)) == [a]
 
 
-def test_caractere_nulo_na_busca_nao_quebra(client_vendedor):  # Ruling R23
+def test_caractere_nulo_na_busca(client_vendedor):  # Rulings R23 e R25
     p = criar_produto("CE285A")
-    assert list(buscar_produtos("ce\x00285")) == [p]
+    assert list(buscar_produtos("ce\x00285")) == [p]  # a busca também se defende
     r = client_vendedor.get("/produtos/?q=%00", headers={"HX-Request": "true"})
-    assert r.status_code == 200 and "CE285A" in r.content.decode()
+    assert r.status_code == 400  # a requisição é recusada antes de chegar à view
