@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+{% load static formato cadastros pedidos %}
+{% comment %}
+Editor do rascunho (novo pedido), como em docs/esbocos/identidade-visual-v3.html (organização B):
+cartões "Cliente" e "Itens do pedido" e o "Resumo" fixo ao lado. No celular (e em telas estreitas),
+uma coluna só, com a barra fixa embaixo mostrando o total e o botão "Confirmar".
+
+Cada ação de mudança responde com o pedaço "atualizacao": "#itens" é a troca principal e as outras
+partes vão com hx-swap-oob (ver apps/pedidos/views.py). Os pedaços marcados com "oob" só ganham o
+hx-swap-oob quando saem nessa resposta. As buscas com sugestões usam static/js/sugestoes.js.
+{% endcomment %}
+{% block titulo %}Novo pedido - Helptoner Pedidos{% endblock %}
+{% block trilha %}<a href="{% url 'pedidos:lista' %}">Pedidos</a> / Novo{% endblock %}
+{% block conteudo %}
+  <div class="editor">
+    <div class="fx flex flex-wrap items-center justify-between gap-3">
+      <h1>Novo pedido</h1>
+      <div class="flex flex-wrap items-center gap-2">
+        {% partial selo %}
+        <button type="button" class="btn-sec" data-abrir-dialogo="excluir-rascunho">Excluir rascunho</button>
+      </div>
+    </div>
+
+    <div class="editor-grade mt-4">
+      <div class="min-w-0">
+        <section class="cartao fx fx-1" aria-labelledby="titulo-cliente">
+          <h2 id="titulo-cliente" class="rotulo">Cliente</h2>
+          {% partial cliente %}
+          {% partial msg_cliente %}
+        </section>
+        <section class="cartao fx fx-2" aria-labelledby="titulo-itens">
+          <h2 id="titulo-itens" class="rotulo">Itens do pedido</h2>
+          {% partial adicionar %}
+          {% partial msg_produto %}
+          {% partial itens %}
+        </section>
+      </div>
+
+      <aside class="cartao resumo fx fx-3" aria-labelledby="titulo-resumo">
+        <h2 id="titulo-resumo" class="resumo-titulo">Resumo</h2>
+        {% partial subtotal %}
+        {% partial desconto %}
+        {% partial resumo %}
+        <div class="mt-3.5">
+          <label class="rotulo" for="observacoes">Observações</label>
+          <div class="campo">
+            <textarea id="observacoes" name="texto" rows="2" maxlength="1000" placeholder="Ex.: entregar na portaria"
+                      hx-post="{% url 'pedidos:definir_observacoes' pedido.pk %}" hx-trigger="change, keyup changed delay:800ms" hx-target="#itens" hx-swap="outerHTML">{{ pedido.observacoes }}</textarea>
+          </div>
+        </div>
+        <button type="button" id="confirmar" class="btn-pri btn-cheio btn-confirmar mt-4" hx-post="{% url 'pedidos:confirmar' pedido.pk %}" hx-target="#itens" hx-swap="outerHTML" hx-disabled-elt="this" data-espera-mudancas>
+          <span class="giro" aria-hidden="true"></span><span class="txt-normal">Confirmar pedido</span><span class="txt-carregando">Confirmando…</span>
+        </button>
+        <p class="seguro">{% include "icones/cadeado.svg" %}Estoque e total conferidos ao confirmar</p>
+      </aside>
+    </div>
+
+    {% partial barra %}
+  </div>
+
+  {% url 'pedidos:excluir' pedido.pk as url_excluir %}
+  {% include "componentes/dialogo.html" with id="excluir-rascunho" titulo="Excluir este rascunho?" texto="O cliente, os itens e o desconto deste rascunho serão apagados." acao_url=url_excluir botao="Excluir rascunho" perigo=True %}
+  <script src="{% static 'js/sugestoes.js' %}" defer></script>
+{% endblock %}
+
+
+{% partialdef atualizacao %}
+{% partial itens %}
+{% with oob=True %}
+  {% partial subtotal %}
+  {% partial resumo %}
+  {% partial barra %}
+  {% partial selo %}
+  {% partial msg_cliente %}
+  {% partial msg_produto %}
+  {% if parte_cliente %}{% partial cliente %}{% endif %}
+  {% if parte_item %}{% partial adicionar %}{% endif %}
+  {% if parte_desconto == "form" %}
+    {% partial desconto %}
+  {% elif parte_desconto == "campo" %}
+    {% with oob_campo=True %}{% partial campo_desconto %}{% partial erro_desconto %}{% endwith %}
+  {% endif %}
+{% endwith %}
+{% endpartialdef %}
+
+
+{% partialdef selo %}<span id="selo-salvo" class="selo-rascunho"{% if oob %} hx-swap-oob="true"{% endif %}><span class="ponto" aria-hidden="true"></span>Rascunho · salvo às {{ pedido.atualizado_em|time:"H:i" }}</span>{% endpartialdef %}
+
+
+{% partialdef esqueleto_sugestoes %}
+<div class="sug-esqueleto" aria-hidden="true">
+  <div class="px-3 py-2.5"><div class="osso h-[13px] w-[70%]"></div><div class="osso mt-[7px] h-[11px] w-[35%]"></div></div>
+  <div class="px-3 py-2.5"><div class="osso h-[13px] w-[60%]"></div><div class="osso mt-[7px] h-[11px] w-[30%]"></div></div>
+  <div class="px-3 py-2.5"><div class="osso h-[13px] w-[66%]"></div><div class="osso mt-[7px] h-[11px] w-[33%]"></div></div>
+</div>
+{% endpartialdef %}
+
+
+{% partialdef cliente %}
+<div id="cliente" data-cliente{% if oob %} hx-swap-oob="true"{% endif %}>
+  {% if pedido.cliente %}
+    <div class="cliente-escolhido" data-cliente-escolhido>
+      <span class="cliente-ini" aria-hidden="true">{{ pedido.cliente.nome|iniciais }}</span>
+      <div class="min-w-0">
+        <b>{{ pedido.cliente.nome }}</b>
+        <small>{% if pedido.cliente.tipo == "PF" %}CPF{% else %}CNPJ{% endif %} {{ pedido.cliente.documento|documento:pedido.cliente.tipo }}{% if pedido.cliente.cidade %} · {{ pedido.cliente.cidade }}{% if pedido.cliente.uf %}/{{ pedido.cliente.uf }}{% endif %}{% endif %}</small>
+      </div>
+      <button type="button" class="btn-sec" data-trocar-cliente>Trocar</button>
+    </div>
+  {% endif %}
+  <div class="busca" data-sugestoes{% if pedido.cliente %} hidden{% endif %}>
+    <label class="campo" for="busca-cliente">
+      {% include "icones/buscar.svg" %}
+      <input id="busca-cliente" type="text" name="q" maxlength="100" placeholder="Buscar cliente por nome, CPF ou CNPJ" aria-label="Buscar cliente por nome, CPF ou CNPJ" autocomplete="off"
+             role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="sugestoes-cliente" aria-describedby="msg-cliente" data-sugestoes-campo
+             hx-get="{% url 'pedidos:sugestoes_cliente' pedido.pk %}" hx-trigger="input changed delay:300ms, focus" hx-target="#sugestoes-cliente" hx-swap="innerHTML" hx-sync="this:replace" hx-indicator="closest [data-sugestoes]"{% if foco_cliente %} autofocus{% endif %}>
+    </label>
+    <div class="sugestoes">
+      {% partial esqueleto_sugestoes %}
+      <div id="sugestoes-cliente" role="listbox" aria-label="Clientes encontrados"></div>
+    </div>
+  </div>
+</div>
+{% endpartialdef %}
+
+
+{% partialdef msg_cliente %}<p id="msg-cliente" class="msg" role="alert"{% if oob %} hx-swap-oob="true"{% endif %}>{{ msg_cliente }}</p>{% endpartialdef %}
+
+
+{% partialdef adicionar %}
+<form id="form-item" class="linha-add" hx-post="{% url 'pedidos:adicionar_item' pedido.pk %}" hx-target="#itens" hx-swap="outerHTML"{% if oob %} hx-swap-oob="true"{% endif %}>
+  <div class="busca" data-sugestoes data-sugestoes-escolhido="produto-id" data-sugestoes-info="info-produto" data-sugestoes-foco="quantidade">
+    <label class="campo{% if novo_item.campo_com_erro == 'produto' %} campo-invalido{% endif %}" for="busca-produto">
+      {% include "icones/buscar.svg" %}
+      <input id="busca-produto" type="text" name="q" value="{{ novo_item.busca }}" maxlength="100" placeholder="Buscar produto por código ou nome" aria-label="Buscar produto por código ou nome" autocomplete="off"
+             role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="sugestoes-produto" aria-describedby="msg-produto" data-sugestoes-campo
+             hx-get="{% url 'pedidos:sugestoes_produto' pedido.pk %}" hx-trigger="input changed delay:300ms, focus" hx-target="#sugestoes-produto" hx-swap="innerHTML" hx-sync="this:replace" hx-indicator="closest [data-sugestoes]"{% if novo_item.campo_com_erro == 'produto' %} aria-invalid="true"{% endif %}{% if novo_item.foco == 'produto' %} autofocus{% endif %}>
+    </label>
+    <div class="sugestoes">
+      {% partial esqueleto_sugestoes %}
+      <div id="sugestoes-produto" role="listbox" aria-label="Produtos encontrados"></div>
+    </div>
+  </div>
+  <input type="hidden" id="produto-id" name="produto_id" value="{{ novo_item.produto_id }}">
+  <div class="campo campo-quantidade{% if novo_item.campo_com_erro == 'quantidade' %} campo-invalido{% endif %}">
+    <label for="quantidade" class="sr-only">Quantidade</label>
+    <input id="quantidade" name="quantidade" value="{{ novo_item.quantidade }}" inputmode="numeric" autocomplete="off" aria-describedby="msg-produto"{% if novo_item.campo_com_erro == 'quantidade' %} aria-invalid="true"{% endif %}{% if novo_item.foco == 'quantidade' %} autofocus{% endif %}>
+  </div>
+  <button type="submit" class="btn-pri">{% include "icones/mais.svg" %}Adicionar</button>
+  <p id="info-produto" class="info-produto" aria-live="polite">{% if novo_item.produto %}<b>{{ novo_item.produto.preco|brl }}</b> cada · <b>{{ novo_item.produto.estoque|inteiro }}</b> em estoque{% if novo_item.no_pedido %} · {{ novo_item.no_pedido|inteiro }} já no pedido{% endif %}{% endif %}</p>
+</form>
+{% endpartialdef %}
+
+
+{% partialdef msg_produto %}<p id="msg-produto" class="msg" role="alert"{% if oob %} hx-swap-oob="true"{% endif %}>{{ msg_produto }}</p>{% endpartialdef %}
+
+
+{% partialdef itens %}
+<div id="itens">
+  <table class="tabela-itens">
+    <thead>
+      <tr><th scope="col">Produto</th><th scope="col" class="text-center">Qtd.</th><th scope="col" class="num col-unit">Unit.</th><th scope="col" class="num">Total</th><th scope="col"><span class="sr-only">Remover</span></th></tr>
+    </thead>
+    <tbody>
+      {% for item, aviso in linhas %}
+        <tr id="item-{{ item.pk }}"{% if item.pk == destaque_id %} class="nova{% if aviso %} com-aviso{% endif %}"{% elif aviso %} class="com-aviso"{% endif %}>
+          <td>
+            <span class="desc">{{ item.descricao }}</span>
+            <span class="cod">{{ item.codigo }}</span>
+            {% if aviso %}<span class="aviso-linha">{{ aviso }}</span>{% endif %}
+          </td>
+          <td class="text-center">
+            <span class="passos">
+              <button type="button" hx-post="{% url 'pedidos:alterar_quantidade' pedido.pk item.pk %}" hx-vals='{"acao": "menos"}' hx-target="#itens" hx-swap="outerHTML" hx-disabled-elt="this" aria-label="Diminuir {{ item.codigo }}"{% if item.quantidade <= 1 %} disabled{% endif %}>−</button>
+              <span>{{ item.quantidade|inteiro }}</span>
+              <button type="button" hx-post="{% url 'pedidos:alterar_quantidade' pedido.pk item.pk %}" hx-vals='{"acao": "mais"}' hx-target="#itens" hx-swap="outerHTML" hx-disabled-elt="this" aria-label="Aumentar {{ item.codigo }}">+</button>
+            </span>
+          </td>
+          <td class="num col-unit">{{ item.preco_unitario|brl }}</td>
+          <td class="num"><b>{{ item.total|brl }}</b></td>
+          <td class="text-center">
+            <button type="button" class="remover" hx-post="{% url 'pedidos:remover_item' pedido.pk item.pk %}" hx-target="#itens" hx-swap="outerHTML swap:280ms" data-remover-linha aria-label="Remover {{ item.codigo }}">{% include "icones/fechar.svg" %}</button>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5" class="vazio">Nenhum item ainda. Busque um produto pelo código ou nome.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endpartialdef %}
+
+
+{% partialdef subtotal %}<div id="subtotal" class="linha-val"{% if oob %} hx-swap-oob="true"{% endif %}><span>Subtotal</span><b class="num">{{ pedido.subtotal|brl }}</b></div>{% endpartialdef %}
+
+
+{% partialdef desconto %}
+<form id="form-desconto" class="mt-2.5" hx-post="{% url 'pedidos:definir_desconto' pedido.pk %}" hx-trigger="change, submit" hx-target="#itens" hx-swap="outerHTML"{% if oob %} hx-swap-oob="true"{% endif %}>
+  <label class="rotulo" for="desconto">Desconto</label>
+  <div class="desconto">
+    {% partial campo_desconto %}
+    <fieldset class="segmentado">
+      <legend class="sr-only">Tipo de desconto</legend>
+      <label><input type="radio" id="desconto-reais" name="tipo" value="reais"{% if pedido.desconto_tipo == "reais" %} checked{% endif %}><span>R$</span></label>
+      <label><input type="radio" id="desconto-percentual" name="tipo" value="percentual"{% if pedido.desconto_tipo == "percentual" %} checked{% endif %}><span>%</span></label>
+    </fieldset>
+  </div>
+  {% partial erro_desconto %}
+</form>
+{% endpartialdef %}
+
+
+{% partialdef campo_desconto %}<div id="campo-desconto" class="campo{% if erro_desconto %} campo-invalido{% endif %}"{% if oob_campo %} hx-swap-oob="true"{% endif %}><input id="desconto" name="valor" value="{% if valor_desconto is None %}{{ pedido.desconto_informado|floatformat:'-2' }}{% else %}{{ valor_desconto }}{% endif %}" inputmode="decimal" autocomplete="off" aria-describedby="erro-desconto"{% if erro_desconto %} aria-invalid="true"{% endif %}></div>{% endpartialdef %}
+
+
+{% partialdef erro_desconto %}<p id="erro-desconto" class="msg" role="alert"{% if oob_campo %} hx-swap-oob="true"{% endif %}>{{ erro_desconto|default_if_none:"" }}</p>{% endpartialdef %}
+
+
+{% partialdef resumo %}
+<div id="resumo"{% if oob %} hx-swap-oob="true"{% endif %}>
+  <div class="linha-val"><span>Desconto</span><b class="num">− {{ pedido.desconto_valor|brl }}</b></div>
+  <div class="total-linha"><span>Total</span><b id="total" class="num" data-valor-centavos="{{ pedido.total|centavos }}">{{ pedido.total|brl }}</b></div>
+  {% if avisos.gerais %}
+    <ul class="alerta-erro mt-3" role="alert">{% for aviso in avisos.gerais %}<li>{{ aviso }}</li>{% endfor %}</ul>
+  {% endif %}
+  {% if motivos %}
+    <div class="alerta-erro mt-3" role="alert">
+      <p class="font-semibold">Não foi possível confirmar:</p>
+      <ul class="mt-1 list-disc pl-5">{% for motivo in motivos %}<li>{{ motivo }}</li>{% endfor %}</ul>
+    </div>
+  {% endif %}
+  {% if mudancas %}
+    <div class="alerta-aviso mt-3" role="alert">
+      <p class="font-semibold">Os preços de alguns produtos mudaram:</p>
+      <ul class="mt-1 list-disc pl-5">{% for mudanca in mudancas %}<li>{{ mudanca.codigo }}: de {{ mudanca.preco_anterior|brl }} para {{ mudanca.preco_novo|brl }}</li>{% endfor %}</ul>
+      <p class="mt-1">Confira o novo total e confirme de novo.</p>
+    </div>
+  {% endif %}
+</div>
+{% endpartialdef %}
+
+
+{% partialdef barra %}
+<div id="barra-celular" class="barra-celular"{% if oob %} hx-swap-oob="true"{% endif %}>
+  <div class="barra-total"><span>Total</span><b id="total-celular" class="num" data-valor-centavos="{{ pedido.total|centavos }}">{{ pedido.total|brl }}</b></div>
+  <button type="button" id="confirmar-celular" class="btn-pri btn-confirmar" hx-post="{% url 'pedidos:confirmar' pedido.pk %}" hx-target="#itens" hx-swap="outerHTML" hx-disabled-elt="this" data-espera-mudancas>
+    <span class="giro" aria-hidden="true"></span><span class="txt-normal">Confirmar</span><span class="txt-carregando">Confirmando…</span>
+  </button>
+</div>
+{% endpartialdef %}
+
+
+{% partialdef sugestoes_cliente %}
+{% for cliente in clientes %}
+  <button type="button" id="opcao-cliente-{{ cliente.pk }}" class="sug" role="option" aria-selected="false" tabindex="-1"
+          hx-post="{% url 'pedidos:definir_cliente' pedido.pk %}" hx-vals='{"cliente_id": "{{ cliente.pk }}"}' hx-target="#itens" hx-swap="outerHTML">
+    <span class="min-w-0"><b>{{ cliente.nome|realce:busca }}</b><small>{% if cliente.tipo == "PF" %}CPF{% else %}CNPJ{% endif %} {% with doc=cliente.documento|documento:cliente.tipo %}{{ doc|realce:busca }}{% endwith %}</small></span>
+    {% if cliente.cidade %}<span class="dir"><small>{{ cliente.cidade }}{% if cliente.uf %}/{{ cliente.uf }}{% endif %}</small></span>{% endif %}
+  </button>
+{% empty %}
+  {% if busca %}<p class="sug-vazia">Nada encontrado para “{{ busca }}”.</p>{% endif %}
+{% endfor %}
+{% endpartialdef %}
+
+
+{% partialdef sugestoes_produto %}
+{% for sugestao in sugestoes %}
+  {% with produto=sugestao.produto disponivel=sugestao.disponivel %}
+    <div id="opcao-produto-{{ produto.pk }}" class="sug" role="option" aria-selected="false"{% if disponivel %} data-produto-id="{{ produto.pk }}" data-texto="{{ produto.codigo }} · {{ produto.descricao }}" data-preco="{{ produto.preco|brl }}" data-estoque="{{ produto.estoque|inteiro }}" data-no-pedido="{{ sugestao.no_pedido|inteiro }}"{% else %} aria-disabled="true"{% endif %}>
+      <span class="min-w-0"><b>{{ produto.descricao|realce:busca }}</b><small>{{ produto.codigo|realce:busca }}</small></span>
+      <span class="dir">
+        <b class="num">{{ produto.preco|brl }}</b>
+        {% if not produto.estoque %}<span class="tag-estoque zero">Sem estoque</span>{% elif not disponivel %}<span class="tag-estoque zero">Todo no pedido</span>{% else %}<span class="tag-estoque{% if disponivel <= 3 %} baixo{% endif %}">{{ disponivel|inteiro }} disponíve{{ disponivel|pluralize:"l,is" }}</span>{% endif %}
+      </span>
+    </div>
+  {% endwith %}
+{% empty %}
+  {% if busca %}<p class="sug-vazia">Nada encontrado para “{{ busca }}”.</p>{% endif %}
+{% endfor %}
+{% endpartialdef %}

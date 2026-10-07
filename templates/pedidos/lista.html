@@ -2,13 +2,17 @@
 {% load formato %}
 {% comment %}
 Lista de pedidos (todos os perfis), como em docs/esbocos/telas.html. Padrão P18: a página abre
-com o esqueleto e o HTMX busca o pedaço "resultados" na mesma URL. O botão "+ Novo pedido" vem
-na Tarefa 19.
+com o esqueleto e o HTMX busca o pedaço "resultados" na mesma URL. "+ Novo pedido" cria o
+rascunho (POST) e abre o editor.
 {% endcomment %}
 {% block titulo %}Pedidos - Helptoner Pedidos{% endblock %}
 {% block conteudo %}
   <div class="fx flex flex-wrap items-center justify-between gap-3">
     <h1>Pedidos</h1>
+    <form method="post" action="{% url 'pedidos:novo' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn-pri">+ Novo pedido</button>
+    </form>
   </div>
   <form method="get" action="{% url 'pedidos:lista' %}" class="fx fx-1 mt-4 flex flex-wrap items-center gap-x-5 gap-y-2" role="search"
         hx-get="{% url 'pedidos:lista' %}" hx-trigger="input changed delay:300ms from:find input[name=busca], change from:find select[name=status], change from:find select[name=mes], submit" hx-target="#resultados" hx-push-url="true">

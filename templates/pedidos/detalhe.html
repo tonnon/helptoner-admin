@@ -2,8 +2,9 @@
 {% load formato cadastros %}
 {% comment %}
 Detalhe do pedido, em qualquer status (todos os perfis), como em docs/esbocos/telas.html.
-Lucro, margem e o botão de cancelar só existem no HTML do Administrador. "Continuar editando",
-"Repetir pedido" e o PDF vêm nas Tarefas 19 e 20.
+Lucro, margem e o botão de cancelar só existem no HTML do Administrador. "Continuar editando"
+aparece para quem pode editar o rascunho; "Repetir pedido", nos confirmados e cancelados. O PDF
+vem na Tarefa 20.
 {% endcomment %}
 {% block titulo %}{% if pedido.numero %}Pedido {{ pedido.numero|pedido_numero }}{% else %}Rascunho{% endif %} - Helptoner Pedidos{% endblock %}
 {% block trilha %}<a href="{% url 'pedidos:lista' %}">Pedidos</a> / {% if pedido.numero %}{{ pedido.numero|pedido_numero }}{% else %}Rascunho{% endif %}{% endblock %}
@@ -13,9 +14,20 @@ Lucro, margem e o botão de cancelar só existem no HTML do Administrador. "Cont
       {% if pedido.numero %}Pedido {{ pedido.numero|pedido_numero }}{% else %}Rascunho{% endif %}
       {% include "componentes/selo_status.html" with status=pedido.status %}
     </h1>
-    {% if request.user.eh_administrador and pedido.status == "confirmado" %}
-      <button type="button" class="btn-perigo" data-abrir-dialogo="cancelar-pedido">Cancelar pedido</button>
-    {% endif %}
+    <div class="flex flex-wrap items-center gap-2">
+      {% if pode_editar %}
+        <a href="{% url 'pedidos:editar' pedido.pk %}" class="btn-pri">Continuar editando</a>
+      {% endif %}
+      {% if pedido.status != "rascunho" %}
+        <form method="post" action="{% url 'pedidos:repetir' pedido.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn-sec">Repetir pedido</button>
+        </form>
+      {% endif %}
+      {% if request.user.eh_administrador and pedido.status == "confirmado" %}
+        <button type="button" class="btn-perigo" data-abrir-dialogo="cancelar-pedido">Cancelar pedido</button>
+      {% endif %}
+    </div>
   </div>
 
   <section class="cartao fx fx-1 mt-4" aria-labelledby="dados">

@@ -34,8 +34,9 @@ QUANTIDADE_MAXIMA = 9999
 OBSERVACOES_MAXIMO = 1000
 MOTIVO_MAXIMO = 500
 
-_MSG_QUANTIDADE = "Informe uma quantidade inteira maior que zero."
-_MSG_QUANTIDADE_MAXIMA = f"Quantidade máxima por item: {inteiro_br(QUANTIDADE_MAXIMA)}."
+# Também usadas pelo formulário do item (apps/pedidos/forms.py).
+MSG_QUANTIDADE = "Informe uma quantidade inteira maior que zero."
+MSG_QUANTIDADE_MAXIMA = f"Quantidade máxima por item: {inteiro_br(QUANTIDADE_MAXIMA)}."
 
 # Maior valor que cabe nos campos de dinheiro (12 dígitos, 2 casas).
 _VALOR_MAXIMO = Decimal("9999999999.99")
@@ -76,9 +77,9 @@ def _recalcular(pedido: Pedido) -> Totais:
 
 def _validar_quantidade(quantidade) -> None:
     if isinstance(quantidade, bool) or not isinstance(quantidade, int) or quantidade <= 0:
-        raise RegraDeNegocio(_MSG_QUANTIDADE)
+        raise RegraDeNegocio(MSG_QUANTIDADE)
     if quantidade > QUANTIDADE_MAXIMA:
-        raise RegraDeNegocio(_MSG_QUANTIDADE_MAXIMA)
+        raise RegraDeNegocio(MSG_QUANTIDADE_MAXIMA)
 
 
 def criar_rascunho(usuario) -> Pedido:
@@ -111,7 +112,7 @@ def adicionar_item(pedido_id: int, produto_id: int, quantidade: int, usuario) ->
         if nova > produto.estoque:
             raise EstoqueInsuficiente(_falta_para_adicionar(produto.estoque, ja_no_pedido))
         if nova > QUANTIDADE_MAXIMA:
-            raise RegraDeNegocio(_MSG_QUANTIDADE_MAXIMA)
+            raise RegraDeNegocio(MSG_QUANTIDADE_MAXIMA)
         if item:
             item.quantidade = nova
             item.save(update_fields=["quantidade"])
@@ -160,6 +161,18 @@ def alterar_quantidade(pedido_id: int, item_id: int, quantidade: int, usuario) -
         item.save(update_fields=["quantidade"])
         _recalcular(pedido)
         return item
+
+
+def mudar_quantidade(pedido_id: int, item_id: int, passo: int, usuario) -> ItemPedido:
+    """Soma `passo` (1 no botão +, -1 no −) à quantidade gravada na linha.
+
+    A quantidade é lida com o pedido já travado: dois cliques seguidos, ou duas abas, contam
+    os dois. As regras são as de `alterar_quantidade`.
+    """
+    with transaction.atomic():
+        pedido = _rascunho_para_editar(pedido_id, usuario)
+        item = _item_para_editar(pedido, item_id)
+        return alterar_quantidade(pedido_id, item_id, item.quantidade + passo, usuario)
 
 
 def remover_item(pedido_id: int, item_id: int, usuario) -> None:

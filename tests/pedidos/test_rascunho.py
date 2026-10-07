@@ -17,6 +17,7 @@ from apps.pedidos.services import (
     definir_desconto,
     definir_observacoes,
     excluir_rascunho,
+    mudar_quantidade,
     pode_editar,
     remover_item,
 )
@@ -132,6 +133,34 @@ def test_diminuir_quantidade_vale_mesmo_sem_estoque(vendedor):
     p = montar_rascunho(vendedor, itens=[(prod, 5)])
     Produto.objects.filter(pk=prod.pk).update(estoque=2)
     assert alterar_quantidade(p.pk, p.itens.get().pk, 4, vendedor).quantidade == 4
+
+
+def test_mudar_quantidade_parte_da_quantidade_gravada(vendedor):  # botões − e + da tela
+    prod = com_estoque(criar_produto(), 3)
+    p = montar_rascunho(vendedor, itens=[(prod, 2)])
+    item = p.itens.get()
+    assert mudar_quantidade(p.pk, item.pk, 1, vendedor).quantidade == 3
+    with pytest.raises(
+        EstoqueInsuficiente, match="Estoque insuficiente para CE285A: 3 em estoque."
+    ):
+        mudar_quantidade(p.pk, item.pk, 1, vendedor)
+    assert mudar_quantidade(p.pk, item.pk, -1, vendedor).quantidade == 2
+    assert mudar_quantidade(p.pk, item.pk, -1, vendedor).quantidade == 1
+    with pytest.raises(RegraDeNegocio, match="Informe uma quantidade inteira maior que zero."):
+        mudar_quantidade(p.pk, item.pk, -1, vendedor)
+    p.refresh_from_db()
+    assert (p.itens.get().quantidade, p.total) == (1, Decimal("189.90"))
+
+
+def test_mudar_quantidade_de_item_removido_ou_de_outra_pessoa(vendedor, administrador):
+    p = montar_rascunho(vendedor, itens=[(com_estoque(criar_produto(), 5), 2)])
+    item = p.itens.get()
+    with pytest.raises(PermissionDenied):
+        mudar_quantidade(p.pk, item.pk, 1, criar_usuario(email="outro@helptoner.com.br"))
+    assert mudar_quantidade(p.pk, item.pk, 1, administrador).quantidade == 3
+    remover_item(p.pk, item.pk, vendedor)
+    with pytest.raises(RegraDeNegocio, match="Este item não está mais no pedido."):
+        mudar_quantidade(p.pk, item.pk, 1, vendedor)
 
 
 def test_remover_item_que_deixa_desconto_maior_que_o_subtotal(vendedor):  # Review Focus 4

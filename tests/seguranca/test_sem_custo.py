@@ -14,6 +14,10 @@ PAGINAS = [
     ("/pedidos/{rascunho}/", False),
     ("/pedidos/", True),
 ]
+PAGINAS += [
+    ("/pedidos/{rascunho}/editar/", False),
+    ("/pedidos/{rascunho}/sugestoes/produtos/?q=toner", True),
+]
 
 
 @pytest.fixture
