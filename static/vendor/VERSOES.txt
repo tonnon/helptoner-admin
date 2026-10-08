@@ -17,6 +17,19 @@ Inter 4.1 (fonte variável)
   Licença: static/fontes/OFL.txt (LICENSE.txt do zip, SIL Open Font License 1.1)
   SHA-256: 262481e844521b326f5ecd053e59b98c8b2da78c8ee1bdbb6e8174305e54935a
 
+Inter 4.1 (fontes estáticas dos PDFs; ficam no pacote Python, não em static/)
+  Origem: extras/ttf/ do mesmo zip da Inter acima (https://github.com/rsms/inter/releases/download/v4.1/Inter-4.1.zip).
+  Extraídas em 07/10/2026, no Linux, depois de conferir o SHA-256 do zip (igual ao de cima: 9883fdd4a49d4fb66bd8177ba6625ef9a64aa45899767dde3d36aa425756b11e).
+  Arquivo: apps/core/pdf_recursos/Inter-Regular.ttf (extras/ttf/Inter-Regular.ttf do zip)
+  SHA-256: 40d692fce188e4471e2b3cba937be967878f631ad3ebbbdcd587687c7ebe0c82
+  Arquivo: apps/core/pdf_recursos/Inter-SemiBold.ttf (extras/ttf/Inter-SemiBold.ttf do zip)
+  SHA-256: 78a843fade9d4612a5567302fb595b56976eb5fcebf4fea5a5912d638bafcde3
+  Licença: apps/core/pdf_recursos/OFL.txt (LICENSE.txt do zip, igual ao static/fontes/OFL.txt)
+  SHA-256: 262481e844521b326f5ecd053e59b98c8b2da78c8ee1bdbb6e8174305e54935a
+  Logo: apps/core/pdf_recursos/logo-helptoner.png (cópia de docs/assets/logo-helptoner.png, o PNG oficial)
+  SHA-256: d103b21f8275d7fd899bc62ff004e417172ca993031e46f565b52c80b20a448b
+  Usados pelo fpdf2 (apps/core/pdf.py) para montar os PDFs na memória.
+
 Tailwind CSS 4.3.3 (só no desenvolvimento e no CI; não vai para o navegador)
   Origem: https://github.com/tailwindlabs/tailwindcss/releases/download/v4.3.3/tailwindcss-linux-x64
   SHA-256: dc61b3ac6b8c9ca874c0cc4c57b2409791a64c5540404ca5f5367360babc313a

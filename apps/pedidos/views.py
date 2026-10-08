@@ -1,12 +1,15 @@
 import json
+import logging
 from dataclasses import dataclass
 from functools import wraps
 
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.http import content_disposition_header
 from django.views.decorators.http import require_GET, require_POST
 
 from apps.cadastros.buscas import buscar_clientes, buscar_produtos, normalizar_busca
@@ -28,7 +31,10 @@ from .forms import (
     QuantidadeForm,
 )
 from .models import Pedido
+from .pdf import gerar_pdf_pedido
 from .services import MOTIVO_MAXIMO, MSG_QUANTIDADE_MAXIMA, cancelar_pedido, pode_editar
+
+log_pdf = logging.getLogger("helptoner.pdf")
 
 POR_PAGINA = 20
 MESES_NO_FILTRO = 12
@@ -80,6 +86,33 @@ def detalhe(request, pk):
         contexto["titulo_cancelar"] = f"Cancelar pedido {numero_pedido(pedido.numero)}?"
         contexto["texto_cancelar"] = f"O estoque dos {len(itens)} produtos volta."
     return render(request, "pedidos/detalhe.html", contexto)
+
+
+@require_GET
+def baixar_pdf(request, pk):
+    """O PDF do pedido, para todos os perfis. O rascunho não tem número, então não tem PDF."""
+    pedido = get_object_or_404(
+        Pedido.objects.select_related("cliente", "criado_por", "cancelado_por"), pk=pk
+    )
+    if pedido.status == Pedido.Status.RASCUNHO:
+        return _voltar_ao_detalhe(
+            request, pedido, "O PDF fica disponível depois de confirmar o pedido."
+        )
+    try:
+        dados = gerar_pdf_pedido(pedido)
+    except Exception:
+        # O Sentry recebe pela integração de logging; o log leva só o id interno, sem dado pessoal.
+        log_pdf.exception("Falha ao gerar o PDF do pedido %s", pedido.pk)
+        return _voltar_ao_detalhe(
+            request,
+            pedido,
+            "Não foi possível gerar o PDF. Tente de novo; se continuar, avise o administrador.",
+        )
+    resposta = HttpResponse(dados, content_type="application/pdf")
+    resposta["Content-Disposition"] = content_disposition_header(
+        True, f"pedido-{pedido.numero}.pdf"
+    )
+    return resposta
 
 
 @requer_administrador

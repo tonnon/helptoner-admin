@@ -4,7 +4,7 @@ from playwright.sync_api import expect
 from tests.apoio import SENHA_TESTE, criar_usuario, totp_agora
 from tests.e2e.conftest import entrar
 
-pytestmark = [pytest.mark.e2e, pytest.mark.django_db(transaction=True)]
+pytestmark = [pytest.mark.e2e, pytest.mark.django_db(transaction=True, serialized_rollback=True)]
 
 
 def test_login_com_2fa(pagina, live_server, administrador):

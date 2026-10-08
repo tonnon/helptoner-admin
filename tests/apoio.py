@@ -6,6 +6,7 @@ import threading
 import time
 import uuid
 from decimal import Decimal
+from io import BytesIO
 from pathlib import Path
 
 from allauth.mfa.adapter import get_adapter as get_mfa_adapter
@@ -14,6 +15,7 @@ from allauth.mfa.recovery_codes.internal.auth import RecoveryCodes
 from allauth.mfa.totp.internal.auth import TOTP, generate_totp_secret, hotp_value
 from django.contrib.auth.models import Group
 from django.db import connection
+from pypdf import PdfReader
 
 from apps.cadastros.documentos import digitos_verificadores_cnpj, digitos_verificadores_cpf
 from apps.cadastros.models import Cliente, Produto
@@ -227,3 +229,8 @@ def rodar_juntos(*funcoes, espera: float = 30) -> list[object]:
     if paradas:
         raise AssertionError(f"As funções {paradas} não terminaram em {espera} s.")
     return resultados
+
+
+def texto_do_pdf(dados: bytes) -> str:
+    """Todo o texto de um PDF, página por página, para os testes conferirem o conteúdo."""
+    return "\n".join(pagina.extract_text() for pagina in PdfReader(BytesIO(dados)).pages)

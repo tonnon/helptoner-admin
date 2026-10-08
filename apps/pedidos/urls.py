@@ -8,6 +8,7 @@ urlpatterns = [
     path("pedidos/", views.lista, name="lista"),
     path("pedidos/novo/", views.novo, name="novo"),
     path("pedidos/<int:pk>/", views.detalhe, name="detalhe"),
+    path("pedidos/<int:pk>/pdf/", views.baixar_pdf, name="pdf"),
     path("pedidos/<int:pk>/cancelar/", views.cancelar, name="cancelar"),
     path("pedidos/<int:pk>/repetir/", views.repetir, name="repetir"),
     # Editor do rascunho

@@ -3,8 +3,8 @@
 {% comment %}
 Detalhe do pedido, em qualquer status (todos os perfis), como em docs/esbocos/telas.html.
 Lucro, margem e o botão de cancelar só existem no HTML do Administrador. "Continuar editando"
-aparece para quem pode editar o rascunho; "Repetir pedido", nos confirmados e cancelados. O PDF
-vem na Tarefa 20.
+aparece para quem pode editar o rascunho; "Repetir pedido" e "PDF" (o rascunho não tem número,
+então não tem PDF), nos confirmados e cancelados.
 {% endcomment %}
 {% block titulo %}{% if pedido.numero %}Pedido {{ pedido.numero|pedido_numero }}{% else %}Rascunho{% endif %} - Helptoner Pedidos{% endblock %}
 {% block trilha %}<a href="{% url 'pedidos:lista' %}">Pedidos</a> / {% if pedido.numero %}{{ pedido.numero|pedido_numero }}{% else %}Rascunho{% endif %}{% endblock %}
@@ -23,6 +23,7 @@ vem na Tarefa 20.
           {% csrf_token %}
           <button type="submit" class="btn-sec">Repetir pedido</button>
         </form>
+        <a href="{% url 'pedidos:pdf' pedido.pk %}" class="btn-sec"><span aria-hidden="true">⤓</span> PDF</a>
       {% endif %}
       {% if request.user.eh_administrador and pedido.status == "confirmado" %}
         <button type="button" class="btn-perigo" data-abrir-dialogo="cancelar-pedido">Cancelar pedido</button>
