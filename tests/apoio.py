@@ -5,6 +5,7 @@ import sys
 import threading
 import time
 import uuid
+from datetime import date
 from decimal import Decimal
 from io import BytesIO
 from pathlib import Path
@@ -20,6 +21,7 @@ from pypdf import PdfReader
 from apps.cadastros.documentos import digitos_verificadores_cnpj, digitos_verificadores_cpf
 from apps.cadastros.models import Cliente, Produto
 from apps.contas.models import VENDEDOR, Usuario
+from apps.relatorios.periodos import Agrupamento, Atalho, Filtros
 
 RAIZ = Path(__file__).resolve().parent.parent
 
@@ -234,3 +236,8 @@ def rodar_juntos(*funcoes, espera: float = 30) -> list[object]:
 def texto_do_pdf(dados: bytes) -> str:
     """Todo o texto de um PDF, página por página, para os testes conferirem o conteúdo."""
     return "\n".join(pagina.extract_text() for pagina in PdfReader(BytesIO(dados)).pages)
+
+
+def F(inicio: date, fim: date, agrupamento=Agrupamento.MES, funcionario_id=None) -> Filtros:
+    """Filtros de relatório com datas escolhidas à mão (atalho `datas`)."""
+    return Filtros(inicio, fim, agrupamento, funcionario_id, Atalho.DATAS)
