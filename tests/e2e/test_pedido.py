@@ -14,15 +14,25 @@ from tests.e2e.conftest import entrar
 pytestmark = [pytest.mark.e2e, pytest.mark.django_db(transaction=True, serialized_rollback=True)]
 
 
-def _esperar_o_htmx_assentar(pagina) -> None:
-    """Espera as trocas do HTMX terminarem de assentar na página.
+def _assentar_depois_de(pagina, acao) -> None:
+    """Roda `acao` e espera o HTMX assentar a troca que ela provoca (evento htmx:afterSettle).
 
     O HTMX só liga os atributos hx-* do que acabou de chegar, e devolve o foco ao campo com
-    autofocus, uns 20 ms depois da troca. Um teste é rápido o bastante para digitar nesse
-    intervalo: o campo perde o foco sem enviar nada e o desconto digitado não chega ao servidor.
+    autofocus, no fim da troca (uns 20 ms depois). Um teste é rápido o bastante para digitar
+    nesse intervalo e perder o desconto. Um contador de htmx:afterSettle, lido antes da ação,
+    dá uma espera exata, sem depender de classes do HTMX nem de pausas fixas.
     """
-    em_andamento = ".htmx-added, .htmx-settling, .htmx-swapping, .htmx-request"
-    pagina.wait_for_function(f"() => !document.querySelector('{em_andamento}')")
+    antes = pagina.evaluate(
+        """() => {
+            if (window.__assentamentos === undefined) {
+                window.__assentamentos = 0;
+                document.addEventListener("htmx:afterSettle", () => window.__assentamentos++);
+            }
+            return window.__assentamentos;
+        }"""
+    )
+    acao()
+    pagina.wait_for_function("antes => window.__assentamentos > antes", arg=antes)
 
 
 def _incluir_dois_toners(pagina) -> None:
@@ -40,9 +50,9 @@ def _incluir_dois_toners(pagina) -> None:
     expect(pagina.get_by_role("option", name=re.compile("CE285A"))).to_be_visible()
     campo.press("Enter")
     pagina.get_by_label("Quantidade").fill("2")
-    pagina.get_by_label("Quantidade").press("Enter")
+    # A resposta também redesenha o formulário do desconto: espera assentar antes de digitar nele.
+    _assentar_depois_de(pagina, lambda: pagina.get_by_label("Quantidade").press("Enter"))
     expect(pagina.locator("#itens")).to_contain_text("Toner HP 85A Preto")
-    _esperar_o_htmx_assentar(pagina)  # a resposta também redesenhou o formulário do desconto
 
 
 def test_pedido_do_comeco_ao_fim(pagina, live_server, administrador):
@@ -57,7 +67,7 @@ def test_pedido_do_comeco_ao_fim(pagina, live_server, administrador):
     # O título da página também diz "Pedido nº 1 Confirmado": o aviso é procurado só na sua área.
     expect(pagina.locator("#avisos").get_by_text("Pedido nº 1 confirmado")).to_be_visible()
     with pagina.expect_download() as baixado:
-        pagina.get_by_role("link", name="PDF").click()
+        pagina.get_by_role("link", name="PDF", exact=True).click()
     assert Path(baixado.value.path()).read_bytes().startswith(b"%PDF-")
     pagina.wait_for_load_state("load")  # "Cancelar pedido" abre o diálogo pelo app.js
     pagina.get_by_role("button", name="Cancelar pedido").click()
@@ -80,7 +90,7 @@ def test_desconto_invalido_nao_confirma_e_depois_confirma_com_o_desconto_digitad
     # Digita um desconto inválido e clica em Confirmar na hora, sem sair do campo antes: o pedido
     # continua rascunho, o campo mostra o erro e o estoque não mexe.
     desconto.fill("abc")
-    confirmar.click()
+    _assentar_depois_de(pagina, confirmar.click)
     expect(pagina.locator("#erro-desconto")).to_contain_text("Informe um número")
     expect(desconto).to_have_attribute("aria-invalid", "true")
     expect(confirmar).to_be_enabled()
@@ -89,7 +99,6 @@ def test_desconto_invalido_nao_confirma_e_depois_confirma_com_o_desconto_digitad
     prod.refresh_from_db()
     assert prod.estoque == 12
     # Corrigido o valor, o mesmo clique imediato confirma com o desconto que está na tela.
-    _esperar_o_htmx_assentar(pagina)
     desconto.fill("10")
     confirmar.click()
     expect(pagina.locator("#avisos").get_by_text("Pedido nº 1 confirmado")).to_be_visible()

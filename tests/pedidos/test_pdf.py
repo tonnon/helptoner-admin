@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from io import BytesIO
 from unittest.mock import Mock
 
@@ -5,6 +6,7 @@ import pytest
 from pypdf import PdfReader
 
 from apps.core.formatacao import data_hora_br
+from apps.pedidos.models import Pedido
 from apps.pedidos.pdf import gerar_pdf_pedido
 from apps.pedidos.services import cancelar_pedido, criar_rascunho
 from tests.apoio import (
@@ -54,6 +56,14 @@ def test_pdf_traz_a_data_da_confirmacao_e_os_itens_em_colunas(vendedor):
     for coluna in ["Código", "Descrição", "Qtd.", "Unit.", "Total"]:
         assert coluna in texto
     assert "CE285A" in texto and "R$ 125,00" in texto
+
+
+def test_pdf_usa_o_dia_de_brasilia_quando_em_utc_ja_e_o_dia_seguinte(vendedor):
+    ped = montar_pedido_confirmado(vendedor, itens=[(com_estoque(criar_produto(), 5), 1)])
+    # 01/11 às 01h30 em UTC ainda é 31/10 às 22h30 em Brasília.
+    Pedido.objects.filter(pk=ped.pk).update(confirmado_em=datetime(2026, 11, 1, 1, 30, tzinfo=UTC))
+    ped.refresh_from_db()
+    assert "Confirmado em 31/10/2026 22:30" in texto_do_pdf(gerar_pdf_pedido(ped))
 
 
 def test_pdf_traz_o_cliente_com_contato_e_endereco_completo(vendedor):
@@ -112,7 +122,7 @@ def test_pdf_mostra_o_desconto_como_na_tela_do_pedido(vendedor, desconto, rotulo
         desconto=desconto,
     )
     texto = texto_do_pdf(gerar_pdf_pedido(ped))
-    assert "Subtotal" in texto and "R$ 200,00" in texto
+    assert "Subtotal R$ 200,00" in texto
     assert rotulo in texto and valor in texto
     if desconto[0] == "reais":
         assert "Desconto (" not in texto
@@ -124,7 +134,7 @@ def test_pdf_sem_desconto_nao_tem_linha_de_desconto(vendedor):
     )
     texto = texto_do_pdf(gerar_pdf_pedido(ped))
     assert "Desconto" not in texto
-    assert "Subtotal" in texto and "Total" in texto and "R$ 200,00" in texto
+    assert "Subtotal R$ 200,00" in texto and "Total R$ 200,00" in texto
 
 
 def test_pdf_mostra_as_observacoes_so_quando_existem(vendedor):
@@ -175,6 +185,8 @@ def test_download_e_rascunho_sem_pdf(client_vendedor, vendedor):
     assert r["Content-Type"] == "application/pdf"
     assert r["Content-Disposition"] == 'attachment; filename="pedido-1.pdf"'
     assert r.content.startswith(b"%PDF-") and "Pedido nº 1" in texto_do_pdf(r.content)
+    controle = r["Cache-Control"]  # dados pessoais: nunca em cache (LGPD)
+    assert "no-store" in controle and "private" in controle
     rasc = criar_rascunho(vendedor)
     r = client_vendedor.get(f"/pedidos/{rasc.pk}/pdf/", follow=True)
     assert "O PDF fica disponível depois de confirmar o pedido." in r.content.decode()

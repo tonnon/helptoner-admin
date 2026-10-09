@@ -9,6 +9,7 @@ from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.cache import add_never_cache_headers, patch_cache_control
 from django.utils.http import content_disposition_header
 from django.views.decorators.http import require_GET, require_POST
 
@@ -112,6 +113,10 @@ def baixar_pdf(request, pk):
     resposta["Content-Disposition"] = content_disposition_header(
         True, f"pedido-{pedido.numero}.pdf"
     )
+    add_never_cache_headers(
+        resposta
+    )  # dados pessoais (LGPD): nada de cache do navegador ou de proxy
+    patch_cache_control(resposta, private=True)
     return resposta
 
 
