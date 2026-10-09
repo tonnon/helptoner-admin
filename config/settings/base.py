@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     "apps.cadastros",
     "apps.estoque",
     "apps.pedidos",
+    "apps.relatorios",
 ]
 
 MIDDLEWARE = [
