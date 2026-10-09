@@ -34,6 +34,8 @@ ROTAS_SO_ADMIN += [
 
 ROTAS_SO_ADMIN += [("post", "/pedidos/1/cancelar/")]
 
+ROTAS_SO_ADMIN += [("get", "/historico/")]
+
 
 @pytest.mark.parametrize(("metodo", "url"), ROTAS_SO_ADMIN)
 def test_vendedor_recebe_403(client_vendedor, metodo, url):

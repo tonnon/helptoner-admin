@@ -1,7 +1,9 @@
 import logging
 import secrets
+from datetime import date, timedelta
 
 from django.contrib.auth.decorators import login_not_required
+from django.core.paginator import Paginator
 from django.http import (
     Http404,
     HttpResponse,
@@ -15,10 +17,16 @@ from django.views.decorators.http import require_GET
 
 from apps.pedidos.consultas import numeros_do_mes, rascunhos_abertos, ultimos_pedidos
 
+from .datas import hoje
+from .historico import TIPOS, eventos
 from .htmx import eh_htmx
+from .permissoes import requer_administrador
 
 log_seguranca = logging.getLogger("helptoner.seguranca")
 log_erros = logging.getLogger("helptoner.erros")
+
+POR_PAGINA = 50
+DIAS_PADRAO = 30
 
 
 @login_not_required
@@ -38,6 +46,28 @@ def inicio(request):
         "ultimos": ultimos_pedidos(),
     }
     return render(request, "core/inicio.html#painel", contexto)
+
+
+def _data(texto: str | None, padrao: date) -> date:
+    try:
+        return date.fromisoformat(texto or "")
+    except ValueError:
+        return padrao
+
+
+@requer_administrador
+@require_GET
+def historico(request):
+    """Histórico de alterações e de acessos (padrão P18), só para o Administrador."""
+    fim = _data(request.GET.get("fim"), hoje())
+    inicio = _data(request.GET.get("inicio"), fim - timedelta(days=DIAS_PADRAO))
+    tipo = request.GET.get("tipo", "")
+    if not eh_htmx(request):
+        contexto = {"tipos": TIPOS, "tipo": tipo, "inicio": inicio, "fim": fim}
+        return render(request, "core/historico.html", contexto)
+    paginador = Paginator(eventos(tipo=tipo, inicio=inicio, fim=fim), POR_PAGINA)
+    contexto = {"pagina": paginador.get_page(request.GET.get("pagina"))}
+    return render(request, "core/historico.html#resultados", contexto)
 
 
 @login_not_required
