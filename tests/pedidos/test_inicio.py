@@ -11,9 +11,18 @@ from apps.pedidos.consultas import (
 )
 from apps.pedidos.models import Pedido
 from apps.pedidos.services import cancelar_pedido, criar_rascunho
-from tests.apoio import com_estoque, criar_produto, montar_pedido_confirmado, montar_rascunho
+from tests.apoio import (
+    com_estoque,
+    criar_cliente,
+    criar_produto,
+    montar_pedido_confirmado,
+    montar_rascunho,
+)
 
 pytestmark = pytest.mark.django_db
+
+HTMX = {"HX-Request": "true"}
+MAXIMO_DE_CONSULTAS = 9  # medido: sessão, usuário e as 4 consultas do painel, sem N+1
 
 
 def confirmar_em(pedido, quando):
@@ -96,3 +105,53 @@ def test_ultimos_pedidos_na_tela(client_vendedor, vendedor, administrador):
     ped = montar_pedido_confirmado(administrador, itens=[(prod, 1)])
     html = client_vendedor.get("/", headers={"HX-Request": "true"}).content.decode()
     assert f"/pedidos/{ped.pk}/" in html and "R$ 100,00" in html and "Confirmado" in html
+
+
+def test_rascunhos_do_mais_novo_ao_mais_antigo(vendedor):
+    r1, r2, r3 = (criar_rascunho(vendedor) for _ in range(3))
+    assert rascunhos_abertos(vendedor) == [r3, r2, r1]
+
+
+def test_ultimos_pedidos_seguem_a_confirmacao_e_nao_o_id(administrador):
+    prod = com_estoque(criar_produto(), 10, por=administrador)
+    velho_id = montar_pedido_confirmado(administrador, itens=[(prod, 1)])
+    novo_id = montar_pedido_confirmado(administrador, itens=[(prod, 1)])
+    confirmar_em(velho_id, datetime(2026, 10, 20, 12, 0, tzinfo=UTC))
+    confirmar_em(novo_id, datetime(2026, 10, 10, 12, 0, tzinfo=UTC))
+    assert velho_id.pk < novo_id.pk
+    assert ultimos_pedidos() == [velho_id, novo_id]
+
+
+def test_rascunhos_na_tela_sem_cliente_e_singular_plural(client_vendedor, vendedor, administrador):
+    prod = com_estoque(criar_produto(), 10, por=administrador)
+    montar_rascunho(vendedor, cliente=criar_cliente(), itens=[(prod, 1)])
+    montar_rascunho(vendedor, itens=[(prod, 2)])
+    montar_rascunho(
+        vendedor, itens=[(prod, 1), (com_estoque(criar_produto("B2"), 5, por=administrador), 1)]
+    )
+    html = client_vendedor.get("/", headers=HTMX).content.decode()
+    assert "Sem cliente" in html and "1 item<" in html and "2 itens" in html
+
+
+def test_painel_do_administrador_nao_mostra_rascunho_de_outro(client_admin, vendedor):
+    criar_rascunho(vendedor)
+    html = client_admin.get("/", headers=HTMX).content.decode()
+    assert "Nenhum rascunho em aberto." in html
+
+
+@pytest.mark.parametrize("perfil", ["client_admin", "client_vendedor"])
+def test_painel_nao_tem_consultas_por_linha(
+    perfil, request, administrador, vendedor, django_assert_max_num_queries
+):
+    cliente = request.getfixturevalue(perfil)
+    dono = vendedor if perfil == "client_vendedor" else administrador
+    prod = com_estoque(criar_produto(preco="50.00"), 50, por=administrador)
+    for i in range(4):
+        montar_rascunho(dono, cliente=criar_cliente() if i % 2 else None, itens=[(prod, 1)])
+    pedidos = [
+        montar_pedido_confirmado(dono, cliente=criar_cliente(), itens=[(prod, 1)]) for _ in range(3)
+    ]
+    cancelar_pedido(pedidos[0].pk, "x", administrador)
+    with django_assert_max_num_queries(MAXIMO_DE_CONSULTAS):
+        resposta = cliente.get("/", headers=HTMX)
+    assert resposta.status_code == 200
