@@ -1,4 +1,71 @@
 {% extends "base.html" %}
+{% load formato %}
+{% comment %}
+Início (todos os perfis), como em docs/esbocos/telas.html. Padrão P18: a página abre com a
+saudação e o esqueleto, e o HTMX busca o pedaço "painel" na mesma URL.
+{% endcomment %}
 {% block conteudo %}
-  <h1 class="fx">Olá, {{ user.primeiro_nome }}</h1>
+  <div class="fx flex flex-wrap items-center justify-between gap-3">
+    <h1>Olá, {{ user.primeiro_nome }}</h1>
+    <form method="post" action="{% url 'pedidos:novo' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn-pri">+ Novo pedido</button>
+    </form>
+  </div>
+  <div id="painel" class="mt-4" hx-get="{{ request.get_full_path }}" hx-trigger="load">
+    {% include "componentes/esqueleto_linhas.html" with linhas=5 %}
+  </div>
 {% endblock %}
+
+{% partialdef painel %}
+<div class="fx fx-1 grid gap-4 sm:grid-cols-2">
+  <div class="cartao">
+    <p class="text-texto-2">Pedidos em {{ numeros.nome_do_mes }}</p>
+    <p class="mt-1 text-xl font-bold num">{{ numeros.pedidos|inteiro }}</p>
+  </div>
+  <div class="cartao">
+    <p class="text-texto-2">Vendido em {{ numeros.nome_do_mes }}</p>
+    <p class="mt-1 text-xl font-bold num">{{ numeros.vendido|brl }}</p>
+  </div>
+</div>
+
+<div class="cartao fx fx-2 mt-4">
+  <h2 class="font-bold">Rascunhos em aberto</h2>
+  {% if rascunhos %}
+    <table class="tabela-responsiva mt-2">
+      <tbody>
+        {% for rascunho in rascunhos %}
+          <tr>
+            <td data-rotulo="Cliente">{{ rascunho.cliente.nome|default:"Sem cliente" }}</td>
+            <td data-rotulo="Itens" class="num">{{ rascunho.quantidade_itens|inteiro }} {% if rascunho.quantidade_itens == 1 %}item{% else %}itens{% endif %}</td>
+            <td data-rotulo="Total" class="num">{{ rascunho.total|brl }}</td>
+            <td data-rotulo="" class="num"><a href="{% url 'pedidos:editar' rascunho.pk %}" class="font-bold text-azul hover:underline">Continuar</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    {% include "componentes/vazio.html" with mensagem="Nenhum rascunho em aberto." %}
+  {% endif %}
+</div>
+
+<div class="cartao fx fx-3 mt-4">
+  <h2 class="font-bold">Últimos pedidos</h2>
+  {% if ultimos %}
+    <table class="tabela-responsiva mt-2">
+      <tbody>
+        {% for pedido in ultimos %}
+          <tr>
+            <td data-rotulo="Nº" class="num"><a href="{% url 'pedidos:detalhe' pedido.pk %}" class="font-semibold hover:text-azul hover:underline">{{ pedido.numero|pedido_numero }}</a></td>
+            <td data-rotulo="Cliente">{{ pedido.cliente.nome|default:"—" }}</td>
+            <td data-rotulo="Total" class="num">{{ pedido.total|brl }}</td>
+            <td data-rotulo="Status">{% include "componentes/selo_status.html" with status=pedido.status %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    {% include "componentes/vazio.html" with mensagem="Nenhum pedido ainda. Comece um novo pedido." %}
+  {% endif %}
+</div>
+{% endpartialdef %}

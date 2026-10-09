@@ -17,6 +17,7 @@ PAGINAS = [
 PAGINAS += [
     ("/pedidos/{rascunho}/editar/", False),
     ("/pedidos/{rascunho}/sugestoes/produtos/?q=toner", True),
+    ("/", True),
 ]
 
 

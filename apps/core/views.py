@@ -13,6 +13,8 @@ from django.shortcuts import render
 from django.template import loader
 from django.views.decorators.http import require_GET
 
+from apps.pedidos.consultas import numeros_do_mes, rascunhos_abertos, ultimos_pedidos
+
 from .htmx import eh_htmx
 
 log_seguranca = logging.getLogger("helptoner.seguranca")
@@ -27,8 +29,15 @@ def saude(request):
 
 
 def inicio(request):
-    """Página inicial provisória (a tela real chega na Tarefa 21)."""
-    return render(request, "core/inicio.html")
+    """Início (padrão P18): saudação e botão na página; o painel chega por HTMX."""
+    if not eh_htmx(request):
+        return render(request, "core/inicio.html")
+    contexto = {
+        "numeros": numeros_do_mes(request.user),
+        "rascunhos": rascunhos_abertos(request.user),
+        "ultimos": ultimos_pedidos(),
+    }
+    return render(request, "core/inicio.html#painel", contexto)
 
 
 @login_not_required
