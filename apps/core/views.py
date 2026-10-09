@@ -48,11 +48,15 @@ def inicio(request):
     return render(request, "core/inicio.html#painel", contexto)
 
 
+DATA_MINIMA, DATA_MAXIMA = date(2000, 1, 1), date(2100, 12, 31)
+
+
 def _data(texto: str | None, padrao: date) -> date:
     try:
-        return date.fromisoformat(texto or "")
+        valor = date.fromisoformat(texto or "")
     except ValueError:
         return padrao
+    return valor if DATA_MINIMA <= valor <= DATA_MAXIMA else padrao
 
 
 @requer_administrador

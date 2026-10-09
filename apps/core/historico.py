@@ -20,15 +20,16 @@ TIPOS = (
 )
 _VALORES_DE_TIPO = {valor for valor, _ in TIPOS}
 
-# (tipo, modelo, rótulo do objeto, atributo que o identifica, campos de situação, campos ignorados)
+# (tipo, modelo, rótulo do objeto, atributo que o identifica, campo de situação)
 _FONTES = (
-    ("cliente", Cliente, "Cliente", "nome", "ativo", ()),
-    ("produto", Produto, "Produto", "codigo", "ativo", ()),
-    # is_superuser anda junto com o perfil, que já vem no motivo do registro.
-    ("funcionario", Usuario, "Funcionário", "nome", "is_active", ("is_superuser",)),
+    ("cliente", Cliente, "Cliente", "nome", "ativo"),
+    ("produto", Produto, "Produto", "codigo", "ativo"),
+    ("funcionario", Usuario, "Funcionário", "nome", "is_active"),
 )
 _VERBO_DE_CRIACAO = {"cliente": "cadastrado", "produto": "cadastrado", "funcionario": "criado"}
 LIMITE_DO_TEXTO = 60
+# Campos do Django sem verbose_name em português.
+_ROTULOS = {"is_superuser": "superusuário (painel de manutenção)"}
 
 
 @dataclass(frozen=True)
@@ -81,7 +82,7 @@ def descrever_alteracao(registro, anterior=None) -> str | None:
 
     `anterior` é o registro anterior do mesmo objeto; sem ele, é buscado (uma consulta a mais).
     """
-    _, modelo, rotulo, atributo, situacao, ignorar = _fonte_de(registro)
+    _, modelo, rotulo, atributo, situacao = _fonte_de(registro)
     sujeito = f"{rotulo} {getattr(registro, atributo)}"
     tipo = _fonte_de(registro)[0]
     if registro.history_type == "+":
@@ -96,14 +97,13 @@ def descrever_alteracao(registro, anterior=None) -> str | None:
         return None
     partes = []
     for mudanca in registro.diff_against(anterior).changes:
-        if mudanca.field in ignorar:
-            continue
         if mudanca.field == situacao:
             partes.append("reativado" if mudanca.new else "inativado")
             continue
         campo = modelo._meta.get_field(mudanca.field)
         antes, depois = _valor(campo, mudanca.old), _valor(campo, mudanca.new)
-        partes.append(f"{str(campo.verbose_name).lower()} {antes} → {depois}")
+        rotulo_do_campo = _ROTULOS.get(mudanca.field, str(campo.verbose_name).lower())
+        partes.append(f"{rotulo_do_campo} {antes} → {depois}")
     if not partes:
         return None
     if partes == ["inativado"] or partes == ["reativado"]:
