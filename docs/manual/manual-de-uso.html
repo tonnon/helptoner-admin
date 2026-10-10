@@ -94,8 +94,32 @@ figure.foto figcaption { font-size: 10.5pt; color: var(--cinza); margin-top: 0.3
 .dupla figure.foto { margin: 0; }
 .dupla .legenda { font-size: 10.5pt; color: var(--cinza); text-align: center; margin-top: 0.3em; }
 .bloco { break-inside: avoid; }
+/* ---------- ilustrações (telas do celular desenhadas, em SVG, com 55 mm de largura) ---------- */
+figure.ilus { margin: 0.6em 0 1.1em; text-align: center; break-inside: avoid; }
+figure.ilus img { display: block; width: 55mm; height: auto; margin: 0 auto; }
+figure.ilus figcaption, .tira .legenda { font-size: 10.5pt; color: var(--cinza); margin: 0.35em 0 0; text-align: center; }
+.nota-ilus { font-size: 11.5pt; color: var(--cinza); border-left: 4px solid #8a8fa6; background: #f6f7fa; border-radius: 6px; padding: 0.45em 0.9em; margin: 0.5em 0 0.9em; }
+/* Passos em tira: o texto curto de cada passo fica em cima do seu celular, dois por linha. */
+.tira { display: grid; grid-template-columns: 1fr 1fr; column-gap: 10mm; margin: 0.7em 0 1em; break-inside: avoid; }
+.tira .passo { display: flex; flex-direction: column; }
+.tira .passo p { position: relative; padding-left: 2.35em; margin: 0 0 0.5em; }
+.tira .num {
+  position: absolute; left: 0; top: 0.02em; width: 1.6em; height: 1.6em; border-radius: 50%;
+  background: var(--azul); color: #fff; font-weight: 700; font-size: 0.9em; line-height: 1.6em; text-align: center;
+}
+.tira .passo img { display: block; width: 55mm; height: auto; margin: auto auto 0; }
+.tira .legenda { grid-column: 1 / -1; }
+/* Texto e celular lado a lado (capítulo 1). */
+.lado { display: flex; gap: 8mm; align-items: flex-start; break-inside: avoid; }
+.lado > .texto { flex: 1 1 auto; }
+.lado > .texto > h4:first-child { margin-top: 0.2em; }
+.lado > figure.ilus { flex: 0 0 55mm; margin: 0.4em 0 0; }
 /* O texto que apresenta uma foto não fica sozinho no fim da página. */
-p:has(+ figure.foto), p:has(+ .dupla), h3 + p, h4 + p, h3 + figure.foto { break-after: avoid; }
+p:has(+ figure.foto), p:has(+ .dupla), p:has(+ figure.ilus), p:has(+ .tira), h3 + p, h4 + p, h3 + figure.foto, h3 + .aviso, h3 + .nota-ilus, h3 + .lado { break-after: avoid; }
+/* Explicação de uma tira anterior: não precisa ir junto com a tira seguinte. */
+p.solto:has(+ .tira) { break-after: auto; }
+/* Frase que apresenta uma lista curta: fica junto da lista. */
+p.junto { break-after: avoid; }
 h3, h4 { break-after: avoid; }
 
 /* ---------- avisos ---------- */
@@ -155,20 +179,20 @@ table.simples td.c, table.simples th.c { text-align: center; }
   <ol class="sumario">
     <li><span class="num">1</span><span class="t">Antes de começar</span><span class="pontos"></span><span class="pg">4</span></li>
     <li><span class="num">2</span><span class="t">Primeiro acesso (uma vez só)</span><span class="pontos"></span><span class="pg">7</span></li>
-    <li><span class="num">3</span><span class="t">Entrar no dia a dia</span><span class="pontos"></span><span class="pg">14</span></li>
-    <li><span class="num">4</span><span class="t">A tela Início</span><span class="pontos"></span><span class="pg">18</span></li>
-    <li><span class="num">5</span><span class="t">Fazer um pedido</span><span class="pontos"></span><span class="pg">20</span></li>
-    <li><span class="num">6</span><span class="t">Pedidos: procurar, ver, repetir e cancelar</span><span class="pontos"></span><span class="pg">34</span></li>
-    <li><span class="num">7</span><span class="t">Clientes</span><span class="pontos"></span><span class="pg">41</span></li>
-    <li><span class="num">8</span><span class="t">Produtos</span><span class="pontos"></span><span class="pg">47</span></li>
-    <li><span class="num">9</span><span class="t">Estoque</span><span class="pontos"></span><span class="pg">52</span></li>
-    <li><span class="num">10</span><span class="t">Relatórios</span><span class="pontos"></span><span class="pg">58</span></li>
-    <li><span class="num">11</span><span class="t">Funcionários</span><span class="pontos"></span><span class="pg">68</span></li>
-    <li><span class="num">12</span><span class="t">Histórico de alterações</span><span class="pontos"></span><span class="pg">76</span></li>
-    <li><span class="num">13</span><span class="t">Minha conta</span><span class="pontos"></span><span class="pg">78</span></li>
-    <li><span class="num">14</span><span class="t">Usar no celular</span><span class="pontos"></span><span class="pg">82</span></li>
-    <li><span class="num">15</span><span class="t">Deu problema, e agora?</span><span class="pontos"></span><span class="pg">85</span></li>
-    <li><span class="num">16</span><span class="t">Contatos</span><span class="pontos"></span><span class="pg">91</span></li>
+    <li><span class="num">3</span><span class="t">Entrar no dia a dia</span><span class="pontos"></span><span class="pg">19</span></li>
+    <li><span class="num">4</span><span class="t">A tela Início</span><span class="pontos"></span><span class="pg">23</span></li>
+    <li><span class="num">5</span><span class="t">Fazer um pedido</span><span class="pontos"></span><span class="pg">25</span></li>
+    <li><span class="num">6</span><span class="t">Pedidos: procurar, ver, repetir e cancelar</span><span class="pontos"></span><span class="pg">39</span></li>
+    <li><span class="num">7</span><span class="t">Clientes</span><span class="pontos"></span><span class="pg">46</span></li>
+    <li><span class="num">8</span><span class="t">Produtos</span><span class="pontos"></span><span class="pg">52</span></li>
+    <li><span class="num">9</span><span class="t">Estoque</span><span class="pontos"></span><span class="pg">57</span></li>
+    <li><span class="num">10</span><span class="t">Relatórios</span><span class="pontos"></span><span class="pg">63</span></li>
+    <li><span class="num">11</span><span class="t">Funcionários</span><span class="pontos"></span><span class="pg">73</span></li>
+    <li><span class="num">12</span><span class="t">Histórico de alterações</span><span class="pontos"></span><span class="pg">81</span></li>
+    <li><span class="num">13</span><span class="t">Minha conta</span><span class="pontos"></span><span class="pg">83</span></li>
+    <li><span class="num">14</span><span class="t">Usar no celular</span><span class="pontos"></span><span class="pg">87</span></li>
+    <li><span class="num">15</span><span class="t">Deu problema, e agora?</span><span class="pontos"></span><span class="pg">90</span></li>
+    <li><span class="num">16</span><span class="t">Contatos</span><span class="pontos"></span><span class="pg">96</span></li>
   </ol>
 
   <h3>Como ler este manual</h3>
@@ -181,6 +205,7 @@ table.simples td.c, table.simples th.c { text-align: center; }
   <div class="aviso exemplo">
     <b>Sobre as fotos</b>
     <p>As fotos deste manual usam dados de exemplo. No seu sistema aparecem os seus clientes, produtos e o seu nome. Nas fotos, o Administrador se chama Roberto Almeida e a vendedora, Juliana Martins.</p>
+    <p>As telas do aplicativo autenticador no celular (capítulo 1 e itens 2.4 e 2.5) são desenhos, não fotos: no seu celular elas podem ser um pouco diferentes.</p>
   </div>
   <div class="aviso dica">
     <b>Quem cuida da parte técnica</b>
@@ -196,7 +221,7 @@ table.simples td.c, table.simples th.c { text-align: center; }
   <tr><th style="width:34%">O que</th><th>Onde conseguir</th></tr>
   <tr><td><b>O endereço do sistema</b></td><td>O endereço que o Lucas passar, por exemplo <b>https://helptoner-pedidos.vercel.app</b>. Escreva aqui o endereço certo: <span class="linha-telefone" style="min-width:60mm"></span></td></tr>
   <tr><td><b>Seu e-mail e a senha temporária</b></td><td>O Lucas cadastra você e passa uma senha temporária. Ela só serve para a primeira entrada: logo depois você cria a sua.</td></tr>
-  <tr><td><b>Um celular com aplicativo autenticador</b></td><td>Google Authenticator ou Microsoft Authenticator. Veja abaixo como instalar.</td></tr>
+  <tr><td><b>Um celular com aplicativo autenticador</b></td><td><b>Google Authenticator</b> (o mais simples) ou Microsoft Authenticator. Veja abaixo como instalar.</td></tr>
   <tr><td><b>Papel e caneta</b></td><td>Para anotar os códigos de recuperação (explicados no capítulo 2).</td></tr>
 </table>
 
@@ -208,20 +233,29 @@ table.simples td.c, table.simples th.c { text-align: center; }
 <h3>O que é o aplicativo autenticador</h3>
 <p>É um aplicativo gratuito do celular que mostra um número de 6 dígitos que muda a cada 30 segundos. Ao entrar no sistema, além da senha, você digita esse número. Assim, mesmo que alguém descubra a sua senha, não consegue entrar sem o seu celular. O sistema chama isso de <b>verificação em duas etapas</b> (às vezes aparece só <b>2FA</b>).</p>
 
+<h3>Qual aplicativo usar</h3>
+<p>Se ainda não tem nenhum, instale o <b>Google Authenticator</b> — é o mais simples. Se você já usa o <b>Microsoft Authenticator</b> no celular, pode usar ele mesmo: os dois funcionam com o sistema. Use só um dos dois para o Helptoner Pedidos.</p>
+
 <h3>Instalar o aplicativo no celular</h3>
-<h4>Celular Android (Samsung, Motorola, Xiaomi e outros)</h4>
-<ol class="passos">
-  <li>Abra a <b>Play Store</b> (o ícone de triângulo colorido).</li>
-  <li>Toque na busca, escreva <b>Google Authenticator</b> e toque no aplicativo do Google LLC.</li>
-  <li>Toque em <b>Instalar</b>. Quando terminar, toque em <b>Abrir</b> e, se ele pedir, em <b>Começar</b>. Não é preciso entrar com conta nenhuma: se perguntar, pode tocar em <b>Usar sem uma conta</b>.</li>
-</ol>
+<div class="lado">
+  <div class="texto">
+    <h4>Celular Android (Samsung, Motorola, Xiaomi e outros)</h4>
+    <ol class="passos">
+      <li>Abra a <b>Play Store</b> (o ícone de triângulo colorido).</li>
+      <li>Toque na busca, escreva <b>Google Authenticator</b> e toque no aplicativo do Google LLC.</li>
+      <li>Toque em <b>Instalar</b> <span class="n">1</span> e espere terminar.</li>
+    </ol>
+  </div>
+  <figure class="ilus"><img src="imagens/ilus-loja-instalar.svg" alt="Desenho da loja de aplicativos com o Google Authenticator encontrado na busca e o botão Instalar marcado com o número 1"><figcaption>Ilustração — a tela do seu celular pode ser um pouco diferente.</figcaption></figure>
+</div>
 <h4>iPhone</h4>
 <ol class="passos">
   <li>Abra a <b>App Store</b> (o ícone azul com um “A”).</li>
   <li>Toque em <b>Buscar</b>, escreva <b>Google Authenticator</b> e toque no aplicativo do Google LLC.</li>
-  <li>Toque em <b>Obter</b> e confirme com o Face ID ou a senha da Apple. Depois toque em <b>Abrir</b>.</li>
+  <li>Toque em <b>Obter</b> (no iPhone, é o botão de instalar) e confirme com o Face ID ou a senha da Apple.</li>
 </ol>
-<p>O Microsoft Authenticator também serve e funciona do mesmo jeito. Use só um deles.</p>
+<p>Vai usar o <b>Microsoft Authenticator</b>? Instale do mesmo jeito, buscando <b>Microsoft Authenticator</b> (da Microsoft Corporation).</p>
+<p>Por enquanto, não precisa mexer no aplicativo. Ele é configurado no primeiro acesso, com o computador mostrando o QR code (itens 2.3 a 2.5).</p>
 
 <div class="aviso atencao">
   <b>Atenção: o relógio do celular</b>
@@ -268,28 +302,81 @@ table.simples td.c, table.simples th.c { text-align: center; }
 </div>
 
 <h3>2.3 Ligar o aplicativo do celular</h3>
-<p>Na etapa <b>2 · Autenticador</b>, o sistema mostra um quadrado de pontinhos pretos, o <b>QR code</b> <span class="n">1</span>. O celular vai “fotografar” esse quadrado.</p>
-<figure class="foto "><img src="imagens/05-primeiro-acesso-autenticador.jpg" alt="Etapa 2: QR code, chave de texto, campo Código de 6 dígitos e botão Ativar e continuar" style="width:102.1mm"></figure>
-<ol class="passos">
-  <li>No celular, abra o <b>Google Authenticator</b>.</li>
-  <li>Toque no botão <b>+</b> (no canto de baixo) e depois em <b>Ler código QR</b> (ou <b>Escanear um código QR</b>). Se ele pedir permissão para usar a câmera, toque em <b>Permitir</b>.</li>
-  <li>Aponte a câmera do celular para o QR code da tela do computador <span class="n">1</span>, até ele ler sozinho.</li>
-  <li>No celular aparece <b>Helptoner Pedidos</b> com um número de 6 dígitos.</li>
-  <li>No computador, digite esse número no campo <b>Código de 6 dígitos</b> <span class="n">3</span>. Pode digitar os números juntos, sem espaço.</li>
-  <li>Clique em <b>Ativar e continuar</b> <span class="n">4</span>.</li>
-</ol>
+<p>Na etapa <b>2 · Autenticador</b>, o sistema mostra um quadrado de pontinhos pretos, o <b>QR code</b> <span class="n">1</span>. O celular vai “fotografar” esse quadrado. Embaixo dele ficam a chave em letras e números <span class="n">2</span> (só para quando a câmera não consegue ler), o campo <b>Código de 6 dígitos</b> <span class="n">3</span> e o botão <b>Ativar e continuar</b> <span class="n">4</span>.</p>
+<figure class="foto media"><img src="imagens/05-primeiro-acesso-autenticador.jpg" alt="Etapa 2: QR code, chave de texto, campo Código de 6 dígitos e botão Ativar e continuar" style="width:90.0mm"></figure>
+<p class="junto">Deixe essa tela aberta no computador e pegue o celular. O que fazer no celular depende do aplicativo que você instalou (capítulo 1):</p>
+<ul class="lista">
+  <li><b>Google Authenticator</b>: siga o item <b>2.4</b>, logo a seguir.</li>
+  <li><b>Microsoft Authenticator</b>: pule para o item <b>2.5</b>.</li>
+</ul>
+<p>Nos dois casos, o fim é igual: o celular mostra <b>6 números</b>, você digita esses números no campo <b>Código de 6 dígitos</b> <span class="n">3</span> e clica em <b>Ativar e continuar</b> <span class="n">4</span>.</p>
 
 <div class="aviso atencao">
   <b>Atenção: o número muda a cada 30 segundos</b>
-  <p>No celular, ao lado do número, há um pequeno relógio que vai se esvaziando. Se estiver quase no fim, espere o próximo número aparecer e digite o novo. Um número que já passou não vale mais.</p>
+  <p>No celular, ao lado do número, há um pequeno círculo que vai se esvaziando, como um relógio. Se estiver quase no fim, espere o próximo número aparecer e digite o novo. Um número que já passou não vale mais.</p>
 </div>
 
+<h3>2.4 No Google Authenticator</h3>
+<p class="nota-ilus">As telas abaixo são desenhos. Os nomes dos botões podem mudar um pouco conforme a versão do aplicativo e do celular. Procure o que tiver o mesmo sentido.</p>
+<div class="tira">
+  <div class="passo"><p><span class="num">1</span>Abra o <b>Google Authenticator</b> e toque em <b>Começar</b> <span class="n">1</span>.</p><img src="imagens/ilus-google-1-comecar.svg" alt="Desenho da tela de boas-vindas do Google Authenticator com o botão Começar marcado com o número 1"></div>
+  <div class="passo"><p><span class="num">2</span>Toque em <b>Usar sem uma conta</b> <span class="n">2</span>: é o mais simples.</p><img src="imagens/ilus-google-2-sem-conta.svg" alt="Desenho da pergunta sobre entrar com a Conta do Google, com Usar sem uma conta marcado com o número 2"></div>
+  <p class="legenda">Ilustração — a tela do seu celular pode ser um pouco diferente.</p>
+</div>
+<p class="solto">Sem conta, os números ficam só neste celular. Não tem problema: se um dia perder o celular, os códigos de recuperação (item 2.6) e o outro Administrador resolvem.</p>
+<div class="aviso dica">
+  <b>Já usou o Google Authenticator antes?</b>
+  <p>Então as telas dos passos 1 e 2 não aparecem: o aplicativo abre direto na lista de contas. Toque no botão <b>+</b>, no canto de baixo, à direita, e siga do passo 3. Se na lista houver uma <b>Helptoner Pedidos</b> antiga (por exemplo, depois de um <b>Zerar 2FA</b>), apague a antiga depois (veja “Tem mais de uma Helptoner Pedidos no aplicativo”, no capítulo 15).</p>
+</div>
+<div class="tira">
+  <div class="passo"><p><span class="num">3</span>Toque em <b>Ler um código QR</b> <span class="n">3</span>.</p><img src="imagens/ilus-google-3-ler-qr.svg" alt="Desenho da tela Configure a sua primeira conta, com Ler um código QR marcado com o número 3 e Inserir uma chave de configuração embaixo"></div>
+  <div class="passo"><p><span class="num">4</span>Se pedir a câmera, toque em <b>Durante o uso do app</b> <span class="n">4</span>. No iPhone: <b>OK</b>.</p><img src="imagens/ilus-camera-permitir.svg" alt="Desenho da pergunta do celular para usar a câmera, com Durante o uso do app marcado com o número 4"></div>
+  <p class="legenda">Ilustração — a tela do seu celular pode ser um pouco diferente.</p>
+</div>
+<div class="tira">
+  <div class="passo"><p><span class="num">5</span>Aponte a câmera para o QR code do computador, dentro da moldura <span class="n">5</span>.</p><img src="imagens/ilus-google-5-apontar.svg" alt="Desenho da câmera do celular apontada para o monitor do computador, com o QR code dentro da moldura marcada com o número 5"></div>
+  <div class="passo"><p><span class="num">6</span>Aparece <b>Helptoner Pedidos</b> com <b>6 números</b> e um pequeno círculo <span class="n">6</span>.</p><img src="imagens/ilus-google-6-codigo.svg" alt="Desenho da lista do Google Authenticator com a conta Helptoner Pedidos, o e-mail, o código 492 817 e o círculo do tempo, marcados com o número 6"></div>
+  <p class="legenda">Ilustração — a tela do seu celular pode ser um pouco diferente.</p>
+</div>
+<p>O aplicativo lê o QR code sozinho: não precisa apertar nada. Embaixo de <b>Helptoner Pedidos</b> aparece o seu e-mail. O círculo vai se esvaziando; quando acaba, aparecem 6 números novos.</p>
+<ol class="passos" style="counter-reset: passo 6">
+  <li>No computador, digite os 6 números no campo <b>Código de 6 dígitos</b>, sem espaço, antes de o círculo acabar. Clique em <b>Ativar e continuar</b>.</li>
+</ol>
+<p>Pronto: o celular está ligado ao sistema. Pule o item 2.5 e siga para o <b>2.6</b>.</p>
 <div class="aviso dica">
   <b>Dica: se a câmera não ler o QR code</b>
-  <p>No celular, toque em <b>+</b> e escolha <b>Inserir chave de configuração</b>. Em <b>Conta</b> (ou <b>Nome</b>), escreva <b>Helptoner</b>. Em <b>Chave</b>, digite as letras e números que aparecem na tela embaixo de “Não consegue ler o QR? Digite esta chave no aplicativo” <span class="n">2</span>. Se o aplicativo perguntar o tipo, deixe o que é <b>baseado no horário</b> e toque em <b>Adicionar</b>. (Os nomes das opções podem variar um pouco de um celular para outro.)</p>
+  <p>No lugar de <b>Ler um código QR</b>, toque em <b>Inserir uma chave de configuração</b>. Em <b>Conta</b>, escreva <b>Helptoner</b>. Em <b>Chave</b>, digite as letras e números que aparecem no computador embaixo de “Não consegue ler o QR? Digite esta chave no aplicativo” (<span class="n">2</span> na foto do item 2.3). Deixe o tipo <b>Baseada no horário</b> e toque em <b>Adicionar</b>.</p>
 </div>
 
-<h3>2.4 Guardar os códigos de recuperação</h3>
+<h3>2.5 No Microsoft Authenticator</h3>
+<p class="nota-ilus">As telas abaixo são desenhos. Os nomes dos botões podem mudar um pouco conforme a versão do aplicativo e do celular. Procure o que tiver o mesmo sentido.</p>
+<div class="tira">
+  <div class="passo"><p><span class="num">1</span>Abra o <b>Microsoft Authenticator</b> e toque em <b>Aceitar</b> <span class="n">1</span>. Se vier outro aviso, toque em <b>Continuar</b>.</p><img src="imagens/ilus-microsoft-1-aceitar.svg" alt="Desenho do aviso de privacidade do Microsoft Authenticator com o botão Aceitar marcado com o número 1"></div>
+  <div class="passo"><p><span class="num">2</span>Na tela de início, toque em <b>Digitalizar um código QR</b> <span class="n">2</span>. Depois, pule o passo 3.</p><img src="imagens/ilus-microsoft-2-inicio.svg" alt="Desenho da tela de início do Microsoft Authenticator com Digitalizar um código QR marcado com o número 2"></div>
+  <p class="legenda">Ilustração — a tela do seu celular pode ser um pouco diferente.</p>
+</div>
+<div class="tira">
+  <div class="passo"><p><span class="num">3</span>Só se a tela do passo 2 não aparecer: toque no <b>+</b>, no alto, e em <b>Outra conta (Google, Facebook etc.)</b> <span class="n">3</span>.</p><img src="imagens/ilus-microsoft-3-outra-conta.svg" alt="Desenho da tela Adicionar conta com Outra conta (Google, Facebook etc.) marcado com o número 3"></div>
+  <div class="passo"><p><span class="num">4</span>Se pedir a câmera, toque em <b>Durante o uso do app</b> <span class="n">4</span>. No iPhone: <b>OK</b>.</p><img src="imagens/ilus-camera-permitir.svg" alt="Desenho da pergunta do celular para usar a câmera, com Durante o uso do app marcado com o número 4"></div>
+  <p class="legenda">Ilustração — a tela do seu celular pode ser um pouco diferente.</p>
+</div>
+<div class="tira">
+  <div class="passo"><p><span class="num">5</span>Aponte a câmera para o QR code do computador, dentro da moldura <span class="n">5</span>.</p><img src="imagens/ilus-microsoft-5-apontar.svg" alt="Desenho da câmera do Microsoft Authenticator apontada para o monitor do computador, com o QR code dentro da moldura marcada com o número 5"></div>
+  <div class="passo"><p><span class="num">6</span>A lista mostra <b>Helptoner Pedidos</b>. <b>Toque na conta</b> <span class="n">6</span> para ver o número.</p><img src="imagens/ilus-microsoft-6-lista.svg" alt="Desenho da lista do Microsoft Authenticator com a conta Helptoner Pedidos marcada com o número 6"></div>
+  <p class="legenda">Ilustração — a tela do seu celular pode ser um pouco diferente.</p>
+</div>
+<div class="tira">
+  <div class="passo"><p><span class="num">7</span>Aparecem os <b>6 números</b> e um círculo com os segundos que faltam <span class="n">7</span>.</p><img src="imagens/ilus-microsoft-7-codigo.svg" alt="Desenho da conta Helptoner Pedidos aberta, com o código 492 817 e o círculo dos segundos marcados com o número 7"></div>
+  <div class="passo"><p><span class="num">8</span>No computador, digite os 6 números no campo <b>Código de 6 dígitos</b>, sem espaço, antes de o tempo acabar. Clique em <b>Ativar e continuar</b>.</p></div>
+  <p class="legenda">Ilustração — a tela do seu celular pode ser um pouco diferente.</p>
+</div>
+<p>Pronto: o celular está ligado ao sistema. Siga para o item <b>2.6</b>.</p>
+<div class="aviso dica">
+  <b>Dica: se a câmera não ler o QR code</b>
+  <p>Na tela da câmera, toque em <b>Ou inserir código manualmente</b>. Em <b>Nome da conta</b>, escreva <b>Helptoner</b>. Em <b>Chave secreta</b>, digite as letras e números que aparecem no computador embaixo de “Não consegue ler o QR? Digite esta chave no aplicativo” (<span class="n">2</span> na foto do item 2.3). Toque em <b>Concluir</b>.</p>
+</div>
+
+<h3>2.6 Guardar os códigos de recuperação</h3>
 <p>Na etapa <b>3 · Códigos de recuperação</b>, o sistema mostra <b>10 códigos de 8 números</b> <span class="n">1</span>. Eles são a “chave reserva” da sua conta: se um dia você perder o celular ou ele quebrar, você entra com um desses códigos no lugar do número do aplicativo. <b>Cada código vale uma vez só.</b></p>
 <figure class="foto "><img src="imagens/06-primeiro-acesso-codigos.jpg" alt="Etapa 3: lista de códigos de recuperação, botão Baixar e botão Guardei os códigos, continuar" style="width:102.1mm"></figure>
 <ol class="passos">
@@ -315,7 +402,11 @@ table.simples td.c, table.simples th.c { text-align: center; }
 <ol class="passos">
   <li>Abra o endereço do sistema. Aparece a tela <span class="tela">Entrar</span>.</li>
   <li>Digite o seu <b>E-mail</b> e a sua <b>Senha</b> e clique em <b>Entrar</b>.</li>
-  <li>Aparece a tela <span class="tela">Verificação em duas etapas</span>. Abra o aplicativo no celular e veja o número de <b>Helptoner Pedidos</b>.</li>
+  <li>Aparece a tela <span class="tela">Verificação em duas etapas</span>. Abra o aplicativo no celular e veja o número de <b>Helptoner Pedidos</b>:
+    <ul class="lista">
+      <li>no <b>Google Authenticator</b>, o número aparece direto na lista;</li>
+      <li>no <b>Microsoft Authenticator</b>, toque na conta <b>Helptoner Pedidos</b> para ver o número.</li>
+    </ul></li>
   <li>Digite o número no campo <b>Código</b> <span class="n">1</span> e clique em <b>Verificar</b> <span class="n">2</span>. Embaixo do campo, o sistema lembra o que vale ali: “Os 6 números do aplicativo ou um código de recuperação.”
   <figure class="foto "><img src="imagens/09-entrar-codigo.jpg" alt="Tela Verificação em duas etapas, com o campo Código, a ajuda embaixo dele, o botão Verificar e o link do código de recuperação" style="width:102.1mm"></figure></li>
 </ol>
@@ -899,7 +990,7 @@ table.simples td.c, table.simples th.c { text-align: center; }
   <li>Leia a pergunta e clique em <b>Zerar 2FA</b> <span class="n">1</span>.
   <figure class="foto "><img src="imagens/69-dialogo-zerar-2fa.jpg" alt="Pergunta Zerar a verificação em duas etapas? com o botão Zerar 2FA" style="width:116.2mm"></figure></li>
   <li>Aparece o aviso “Verificação em duas etapas zerada.”. O aplicativo antigo e os códigos de recuperação da pessoa deixam de valer, e ela sai do sistema na hora.</li>
-  <li>No próximo acesso, a pessoa entra com e-mail e senha e liga o aplicativo no celular novo (etapas 2 e 3 do capítulo 2).</li>
+  <li>No próximo acesso, a pessoa entra com e-mail e senha e liga o aplicativo no celular novo (etapas 2 e 3 do capítulo 2, itens 2.3 a 2.6).</li>
 </ol>
 <div class="aviso atencao">
   <b>Atenção: celular perdido ou roubado? Faça as duas coisas</b>
@@ -998,8 +1089,18 @@ table.simples td.c, table.simples th.c { text-align: center; }
 </div>
 <div class="pergunta">
   <h4>O código do celular não é aceito (“Código incorreto.”)</h4>
-  <p>Confira se o celular está com <b>data e hora automáticas</b>. Digite o número que está aparecendo <b>agora</b> e, se o relógio do aplicativo estiver quase acabando, espere o próximo. Confira se está olhando a conta <b>Helptoner Pedidos</b> no aplicativo. Cada número só vale uma vez.</p>
+  <p>Confira se o celular está com <b>data e hora automáticas</b>. Digite o número que está aparecendo <b>agora</b> e, se o círculo do aplicativo estiver quase acabando, espere o próximo. Cada número só vale uma vez.</p>
+  <p>Confira se está olhando a conta <b>Helptoner Pedidos</b> no aplicativo (no Microsoft Authenticator, toque nela para ver o número). Se houver mais de uma, veja a próxima pergunta.</p>
   <figure class="foto pequena"><img src="imagens/10-codigo-incorreto.jpg" alt="Mensagem Código incorreto, embaixo do campo do código" style="width:78.0mm"></figure>
+</div>
+<div class="pergunta">
+  <h4>Tem mais de uma Helptoner Pedidos no aplicativo</h4>
+  <p>Isso acontece quando o aplicativo foi ligado de novo (por exemplo, depois de um Zerar 2FA). Só a mais nova vale. Experimente o número de uma de cada vez: a que o sistema aceitar é a certa. Depois, apague as outras, para não confundir na próxima vez:</p>
+  <ul class="lista">
+    <li><b>Google Authenticator</b>: deslize a conta antiga para o lado (ou toque e segure nela), toque na lixeira ou em <b>Excluir</b> e confirme.</li>
+    <li><b>Microsoft Authenticator</b>: toque na conta antiga, depois na engrenagem, no alto, à direita, e em <b>Remover conta</b>. Confirme.</li>
+  </ul>
+  <p>Na dúvida, não apague nada e fale com o Lucas.</p>
 </div>
 <div class="pergunta">
   <h4>“E-mail ou senha incorretos.”</h4>
