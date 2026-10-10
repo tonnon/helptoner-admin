@@ -227,8 +227,17 @@ def test_campo_do_codigo_explica_que_aceita_codigo_de_recuperacao(client, client
         assert ">Código</label>" in html and "6 dígitos" not in html
         assert "Os 6 números do aplicativo ou um código de recuperação." in html
         assert "pattern=" not in html
+        assert 'aria-describedby="id_code_ajuda"' in html
         m = re.search(r'maxlength="(\d+)"', html)
         assert m and int(m.group(1)) >= 8
+
+
+def test_ajuda_do_codigo_continua_ligada_ao_campo_com_erro(client, db):
+    u = criar_usuario()
+    entrar_com_senha(client, u.email)
+    html = client.post("/contas/2fa/authenticate/", {"code": "000000"}).content.decode()
+    assert 'aria-describedby="id_code_error id_code_ajuda"' in html
+    assert 'id="id_code_ajuda"' in html
 
 
 @override_settings(ACCOUNT_RATE_LIMITS={"login": "1/m/ip"})

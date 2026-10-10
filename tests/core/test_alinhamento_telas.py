@@ -1,13 +1,14 @@
 """Alinhamento das telas: cabeçalho de tabela sobre os valores e cartões lado a lado."""
 
 import re
-from datetime import date
+from datetime import UTC, date, datetime
 from html.parser import HTMLParser
 from pathlib import Path
 
 import pytest
 
 from apps.core.datas import hoje
+from apps.pedidos.models import Pedido
 from apps.relatorios.consultas import montar_aba
 from tests.apoio import (
     F,
@@ -32,19 +33,22 @@ class _Tabelas(HTMLParser):
     def handle_starttag(self, tag, attrs):
         classes = (dict(attrs).get("class") or "").split()
         if tag == "table":
-            self.tabelas.append({"th": [], "td": None})
+            self.tabelas.append({"th": [], "td": None, "acao": False})
         elif tag == "tr":
             self._linha = []
         elif tag in ("th", "td") and self._linha is not None:
-            self._linha.append((tag, "num" in classes))
+            self._linha.append([tag, "num" in classes, False])
+        elif tag == "span" and "sr-only" in classes and self._linha and self._linha[-1][0] == "th":
+            self._linha[-1][2] = True  # cabeçalho só para leitor de tela (coluna de ação)
 
     def handle_endtag(self, tag):
         if tag == "tr" and self._linha:
             tabela = self.tabelas[-1]
             if self._linha[0][0] == "th":
-                tabela["th"] = [num for _, num in self._linha]
+                tabela["th"] = [num for _, num, _ in self._linha]
+                tabela["acao"] = self._linha[-1][2]
             elif tabela["td"] is None:
-                tabela["td"] = [num for _, num in self._linha]
+                tabela["td"] = [num for _, num, _ in self._linha]
             self._linha = None
 
 
@@ -58,10 +62,11 @@ def _conferir(html: str):
     tabelas = _tabelas(html)
     assert tabelas, "nenhuma tabela com cabeçalho e linhas"
     for t in tabelas:
-        # A coluna de ação (Repetir pedido) tem cabeçalho só para leitor de tela.
-        n = len(t["th"])
-        assert len(t["td"]) == n
-        assert t["th"] == t["td"], f"cabeçalho e valores desalinhados: {t}"
+        # A coluna de ação (Repetir pedido) tem cabeçalho só para leitor de tela: fica de fora.
+        td = t["td"][:-1] if t.get("acao") else t["td"]
+        th = t["th"][:-1] if t.get("acao") else t["th"]
+        assert len(td) == len(th)
+        assert th == td, f"cabeçalho e valores desalinhados: {t}"
 
 
 @pytest.fixture
@@ -80,8 +85,6 @@ def test_cabecalho_acompanha_o_alinhamento_dos_valores(client_admin, dados, url)
 
 
 def test_cabecalho_do_detalhe_do_pedido(client_admin, dados):
-    from apps.pedidos.models import Pedido
-
     pedido = Pedido.objects.get()
     _conferir(client_admin.get(f"/pedidos/{pedido.pk}/").content.decode())
 
@@ -89,8 +92,16 @@ def test_cabecalho_do_detalhe_do_pedido(client_admin, dados):
 @pytest.mark.parametrize("aba", ["vendas", "clientes", "produtos", "funcionarios", "estoque"])
 def test_cabecalho_das_tabelas_dos_relatorios(client_admin, dados, aba):
     r = client_admin.get(f"/relatorios/{aba}/?atalho=ano", headers=HX)
-    html = r.content.decode()
-    if "<table" in html:
+    _conferir(r.content.decode())
+
+
+def test_tabela_sem_comprar_com_coluna_de_acao(client_admin, administrador, dados):
+    # Um pedido antigo de cliente ativo: a tabela "sem comprar" tem linhas e o botão de repetir.
+    Pedido.objects.update(confirmado_em=datetime(2020, 1, 1, 12, tzinfo=UTC))
+    for aba in ("resumo", "clientes"):
+        html = client_admin.get(f"/relatorios/{aba}/?atalho=ano", headers=HX).content.decode()
+        assert "Repetir pedido" in html
+        assert any(t.get("acao") for t in _tabelas(html))
         _conferir(html)
 
 
