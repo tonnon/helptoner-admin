@@ -132,13 +132,15 @@ class Produto(models.Model):
     def save(self, *args, **kwargs):
         self.codigo = (self.codigo or "").strip().upper()
         if (
-            not self._state.adding
+            self.pk is not None
             and kwargs.get("update_fields") is None
             and not kwargs.get("force_insert")
         ):
             # Um save() completo (formulário, painel de manutenção) regravaria o estoque e o custo
             # lidos quando a instância foi carregada e desfaria um movimento feito nesse meio
             # tempo. Esses dois só são gravados pelos movimentos (update() em estoque/services.py).
+            # Vale pelo pk, não por _state.adding: o "reverter" do simple-history monta uma
+            # instância nova com o pk de um produto existente.
             adiados = self.get_deferred_fields()
             kwargs["update_fields"] = [
                 campo.name

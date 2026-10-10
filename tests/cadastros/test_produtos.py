@@ -234,3 +234,13 @@ def test_editar_pela_tela_nao_desfaz_inativacao_feita_em_outra_tela(client_admin
     p.refresh_from_db()
     assert (p.preco, p.ativo) == (Decimal("199.90"), False)
     assert p.history.first().ativo is False  # o histórico não registra reativação que não houve
+
+
+def test_reverter_pelo_historico_do_painel_nao_desfaz_estoque(administrador):
+    # O "reverter" do painel (simple-history) monta um Produto novo com o pk de um existente.
+    p = com_estoque(criar_produto(), 10, por=administrador)
+    versao = p.history.earliest().instance
+    com_estoque(p, 5, custo="200.00", por=administrador)
+    versao.save()
+    p.refresh_from_db()
+    assert (p.estoque, p.custo_medio) == (15, Decimal("133.3333"))
