@@ -327,7 +327,7 @@ Depois, `exit`.
 3. Menu **Funcionários** → **+ Novo funcionário**: nome, e-mail e perfil **Administrador**. O sistema mostra uma senha temporária uma única vez; repasse pessoalmente.
 4. O segundo administrador faz o próprio primeiro acesso, com o celular dele.
 
-**Confiar neste computador:** depois de digitar o código, o login pergunta se o computador é de confiança. Com **Confiar neste computador**, o código só é pedido de novo daqui a 30 dias; nos outros dias, basta e-mail e senha. Com **Agora não**, o código é pedido em todo login. **Redefinir senha** e **Zerar 2FA** cancelam essa confiança (e a troca da própria senha também): o próximo login volta a pedir o código.
+**Confiar neste computador:** depois de digitar o código, o login pergunta se o computador é de confiança. Com **Confiar neste computador**, o código só é pedido de novo daqui a 30 dias; nos outros dias, basta e-mail e senha. Com **Agora não**, o código é pedido em todo login. **Redefinir senha** e **Zerar 2FA** cancelam essa confiança (e a troca da própria senha também): o próximo login volta a pedir o código. A confiança vale também para o login do painel de manutenção. No computador da loja, se duas pessoas confiarem nele, qualquer um que sentar ali entra só com o e-mail e a senha da pessoa; a confiança de cada pessoa é separada.
 
 Os dois administradores cobrem um ao outro: se um perder o celular, o outro usa **Zerar 2FA** na tela do funcionário; se um esquecer a senha, o outro usa **Redefinir senha**.
 

@@ -12,7 +12,7 @@ from django.conf import settings
 
 from apps.contas import services
 from apps.contas.models import RegistroAcesso
-from tests.apoio import codigo_totp, criar_usuario
+from tests.apoio import SENHA_TESTE, codigo_totp, criar_usuario
 from tests.contas.test_login import codigo_de_recuperacao, entrar_com_senha
 
 COOKIE = "mfa_trusted"
@@ -100,6 +100,20 @@ def test_a_pergunta_exige_ter_passado_pela_senha(client, db):
     assert COOKIE not in client.post(CONFIAR, {"action": "trust"}).cookies
 
 
+def test_so_com_a_senha_a_pergunta_nao_vale_nem_grava_cookie(client, db):
+    # A sessão parou no código (mfa_authenticate): a pergunta de confiança não pode ser usada
+    # para pular o código nem para gravar o cookie.
+    u = criar_usuario(email="carla@helptoner.com.br")
+    r = entrar_com_senha(client, u.email)
+    assert r["Location"] == "/contas/2fa/authenticate/"
+    r = client.get(CONFIAR)
+    assert r.status_code == 302 and r["Location"] != CONFIAR
+    r = client.post(CONFIAR, {"action": "trust"})
+    assert r.status_code == 302 and r["Location"] != CONFIAR
+    assert COOKIE not in r.cookies and COOKIE not in client.cookies
+    assert client.get("/").status_code == 302 and "/contas/login" in client.get("/")["Location"]
+
+
 def test_redefinir_senha_cancela_a_confianca(client, db, administrador):
     u = criar_usuario(email="carla@helptoner.com.br")
     confiar(client, u)
@@ -113,11 +127,14 @@ def test_redefinir_senha_cancela_a_confianca(client, db, administrador):
 def test_trocar_a_propria_senha_cancela_a_confianca(client, db):
     u = criar_usuario(email="carla@helptoner.com.br")
     confiar(client, u)
+    nova = "outra-senha-bem-longa-9"
+    r = client.post(
+        "/contas/password/change/",
+        {"oldpassword": SENHA_TESTE, "password1": nova, "password2": nova},
+    )
+    assert r.status_code == 302
     client.post("/contas/logout/")
-    u.refresh_from_db()
-    u.set_password("outra-senha-bem-longa-9")
-    u.save()
-    r = entrar_com_senha(client, u.email, "outra-senha-bem-longa-9")
+    r = entrar_com_senha(client, u.email, nova)
     assert r["Location"] == "/contas/2fa/authenticate/"
 
 
