@@ -22,8 +22,9 @@ runs:
         SENHA: ${{ inputs.senha }}
       run: |
         set -euo pipefail
+        pg_dump --version
         pg_dump --format=custom --no-owner --no-privileges "$URL" -f backup.dump
-        gpg --batch --yes --pinentry-mode loopback --passphrase "$SENHA" --symmetric --cipher-algo AES256 -o backup.dump.gpg backup.dump
+        gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 --symmetric --cipher-algo AES256 -o backup.dump.gpg backup.dump <<<"$SENHA"
         rm backup.dump
         ls -l backup.dump.gpg
     - uses: actions/upload-artifact@v4
