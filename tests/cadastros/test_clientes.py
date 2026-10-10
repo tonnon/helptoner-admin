@@ -187,3 +187,22 @@ def test_vazio_com_clientes_inativos_nao_diz_que_nao_ha_clientes(client_vendedor
     texto = client_vendedor.get("/clientes/", headers={"HX-Request": "true"}).content.decode()
     assert "Nenhum cliente encontrado." in texto
     assert "Nenhum cliente ainda" not in texto
+
+
+def test_editar_nao_desfaz_inativacao_feita_em_outra_tela(client_vendedor, monkeypatch):
+    # Revisão final (M4): a tela de edição abriu com o cliente ativo; outra pessoa o inativou
+    # antes de salvar. Salvar a edição grava só os campos da tela.
+    c = criar_cliente()
+    original = ClienteForm.is_valid
+
+    def is_valid(self):
+        valido = original(self)
+        Cliente.objects.filter(pk=c.pk).update(ativo=False)
+        return valido
+
+    monkeypatch.setattr(ClienteForm, "is_valid", is_valid)
+    dados = {"tipo": c.tipo, "nome": "Novo nome", "documento": c.documento}
+    assert client_vendedor.post(f"/clientes/{c.pk}/", dados).status_code == 302
+    c.refresh_from_db()
+    assert (c.nome, c.ativo) == ("Novo nome", False)
+    assert c.history.first().ativo is False  # o histórico não registra reativação que não houve

@@ -31,11 +31,32 @@ def clientes(request):
     return render(request, "cadastros/clientes.html#resultados", contexto)
 
 
+def _gravar(form) -> None:
+    """Grava o formulário (chamar dentro de transaction.atomic). Na edição, só os campos da tela.
+
+    Os outros campos (situação, estoque, custo médio) podem ter mudado em outra tela depois que
+    esta abriu. Eles são relidos do banco com a linha travada até o fim da transação, para que
+    nem o banco nem o histórico voltem ao valor antigo.
+    """
+    objeto = form.instance
+    if objeto.pk is None:
+        form.save()
+        return
+    campos = list(form._meta.fields)
+    outros = [
+        campo.name
+        for campo in objeto._meta.concrete_fields
+        if not campo.primary_key and campo.name not in campos
+    ]
+    objeto.refresh_from_db(fields=outros, from_queryset=type(objeto).objects.select_for_update())
+    objeto.save(update_fields=[*campos, "atualizado_em"])
+
+
 def _salvar(form) -> bool:
     """Grava o formulário. Documento criado por outro envio nesse meio tempo vira erro de campo."""
     try:
         with transaction.atomic():
-            form.save()
+            _gravar(form)
     except IntegrityError:
         outro = Cliente.objects.filter(documento=form.cleaned_data["documento"]).first()
         form.add_error("documento", mensagem_documento_repetido(outro))
@@ -111,7 +132,7 @@ def _salvar_produto(form) -> bool:
     """Grava o formulário. Código criado por outro envio nesse meio tempo vira erro de campo."""
     try:
         with transaction.atomic():
-            form.save()
+            _gravar(form)
     except IntegrityError:
         form.add_error("codigo", Produto._meta.get_field("codigo").error_messages["unique"])
         return False

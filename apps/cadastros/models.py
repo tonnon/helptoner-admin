@@ -89,6 +89,9 @@ class Cliente(models.Model):
             raise ValidationError(erros)
 
 
+CAMPOS_DOS_MOVIMENTOS = frozenset({"estoque", "custo_medio"})
+
+
 class Produto(models.Model):
     codigo = models.CharField(
         "Código",
@@ -128,4 +131,20 @@ class Produto(models.Model):
 
     def save(self, *args, **kwargs):
         self.codigo = (self.codigo or "").strip().upper()
+        if (
+            not self._state.adding
+            and kwargs.get("update_fields") is None
+            and not kwargs.get("force_insert")
+        ):
+            # Um save() completo (formulário, painel de manutenção) regravaria o estoque e o custo
+            # lidos quando a instância foi carregada e desfaria um movimento feito nesse meio
+            # tempo. Esses dois só são gravados pelos movimentos (update() em estoque/services.py).
+            adiados = self.get_deferred_fields()
+            kwargs["update_fields"] = [
+                campo.name
+                for campo in self._meta.concrete_fields
+                if not campo.primary_key
+                and campo.name not in CAMPOS_DOS_MOVIMENTOS
+                and campo.attname not in adiados
+            ]
         super().save(*args, **kwargs)

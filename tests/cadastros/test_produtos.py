@@ -6,7 +6,8 @@ from django.db import IntegrityError, transaction
 
 from apps.cadastros.forms import ProdutoForm
 from apps.cadastros.models import Produto
-from tests.apoio import criar_produto
+from apps.estoque.models import MovimentoEstoque
+from tests.apoio import com_estoque, criar_produto, montar_pedido_confirmado
 
 DADOS = {"codigo": "CE285A", "descricao": "Toner HP 85A Preto", "marca": "HP", "preco": "189,90"}
 
@@ -161,3 +162,75 @@ def test_corrida_no_codigo_ao_editar_vira_erro_de_campo(client_admin, monkeypatc
     r = client_admin.post(f"/produtos/{p.pk}/", DADOS)
     assert r.status_code == 200
     assert "Já existe um produto com este código." in r.content.decode()
+
+
+# Perda de atualização (revisão final, C1): estoque e custo médio só mudam por movimento. Quem
+# abriu o produto antes de um movimento não pode gravar por cima o estoque e o custo que leu.
+
+
+def _corrida_com_entrada(monkeypatch, produto, por):
+    """Uma entrada de estoque acontece depois da conferência do formulário e antes do save."""
+    original = ProdutoForm.is_valid
+
+    def is_valid(self):
+        valido = original(self)
+        if valido:
+            com_estoque(produto, 5, custo="200.00", por=por)
+        return valido
+
+    monkeypatch.setattr(ProdutoForm, "is_valid", is_valid)
+
+
+def test_formulario_aberto_antes_de_venda_e_entrada_nao_desfaz_o_estoque(administrador):
+    p = com_estoque(criar_produto(), 10, por=administrador)
+    form = ProdutoForm({**DADOS, "preco": "199,90"}, instance=Produto.objects.get(pk=p.pk))
+    assert form.is_valid()
+    montar_pedido_confirmado(administrador, itens=[(p, 4)])
+    com_estoque(p, 5, custo="200.00", por=administrador)
+    form.save()
+    p.refresh_from_db()
+    ultimo = MovimentoEstoque.objects.filter(produto=p).latest("pk")
+    assert (p.preco, p.estoque, p.custo_medio) == (Decimal("199.90"), 11, Decimal("145.4545"))
+    assert (p.estoque, p.custo_medio) == (ultimo.estoque_apos, ultimo.custo_medio_apos)
+
+
+def test_editar_pela_tela_durante_uma_entrada_mantem_estoque_e_custo(
+    client_admin, administrador, monkeypatch
+):
+    p = com_estoque(criar_produto(), 10, por=administrador)
+    _corrida_com_entrada(monkeypatch, p, administrador)
+    r = client_admin.post(f"/produtos/{p.pk}/", {**DADOS, "preco": "199,90"})
+    assert r.status_code == 302
+    p.refresh_from_db()
+    assert (p.preco, p.estoque, p.custo_medio) == (Decimal("199.90"), 15, Decimal("133.3333"))
+
+
+def test_save_completo_de_instancia_antiga_nao_grava_estoque_nem_custo(administrador):
+    # O caminho do painel de manutenção (ProdutoAdmin) e de qualquer outro save() completo.
+    p = com_estoque(criar_produto(), 10, por=administrador)
+    antigo = Produto.objects.get(pk=p.pk)
+    com_estoque(p, 5, custo="200.00", por=administrador)
+    antigo.descricao = "Toner HP 85A Preto Original"
+    antigo.save()
+    p.refresh_from_db()
+    assert (p.descricao, p.estoque, p.custo_medio) == (
+        "Toner HP 85A Preto Original",
+        15,
+        Decimal("133.3333"),
+    )
+
+
+def test_editar_pela_tela_nao_desfaz_inativacao_feita_em_outra_tela(client_admin, monkeypatch):
+    p = criar_produto()
+    original = ProdutoForm.is_valid
+
+    def is_valid(self):
+        valido = original(self)
+        Produto.objects.filter(pk=p.pk).update(ativo=False)
+        return valido
+
+    monkeypatch.setattr(ProdutoForm, "is_valid", is_valid)
+    assert client_admin.post(f"/produtos/{p.pk}/", {**DADOS, "preco": "199,90"}).status_code == 302
+    p.refresh_from_db()
+    assert (p.preco, p.ativo) == (Decimal("199.90"), False)
+    assert p.history.first().ativo is False  # o histórico não registra reativação que não houve
