@@ -132,7 +132,7 @@ hx-swap-oob quando saem nessa resposta. As buscas com sugestões usam static/js/
   <div class="busca" data-sugestoes data-sugestoes-escolhido="produto-id" data-sugestoes-info="info-produto" data-sugestoes-foco="quantidade">
     <label class="campo{% if novo_item.campo_com_erro == 'produto' %} campo-invalido{% endif %}" for="busca-produto">
       {% include "icones/buscar.svg" %}
-      <input id="busca-produto" type="text" name="q" value="{{ novo_item.busca }}" maxlength="100" placeholder="Buscar produto por código ou nome" aria-label="Buscar produto por código ou nome" autocomplete="off"
+      <input id="busca-produto" type="text" name="q" value="{{ novo_item.busca }}" maxlength="100" placeholder="Código ou nome do produto" aria-label="Buscar produto por código ou nome" autocomplete="off"
              role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="sugestoes-produto" aria-describedby="msg-produto" data-sugestoes-campo
              hx-get="{% url 'pedidos:sugestoes_produto' pedido.pk %}" hx-trigger="input changed delay:300ms, focus" hx-target="#sugestoes-produto" hx-swap="innerHTML" hx-sync="this:replace" hx-indicator="closest [data-sugestoes]"{% if novo_item.campo_com_erro == 'produto' %} aria-invalid="true"{% endif %}{% if novo_item.foco == 'produto' %} autofocus{% endif %}>
     </label>

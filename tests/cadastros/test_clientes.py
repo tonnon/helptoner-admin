@@ -206,3 +206,9 @@ def test_editar_nao_desfaz_inativacao_feita_em_outra_tela(client_vendedor, monke
     c.refresh_from_db()
     assert (c.nome, c.ativo) == ("Novo nome", False)
     assert c.history.first().ativo is False  # o histórico não registra reativação que não houve
+
+
+def test_uf_vazia_aparece_em_portugues_e_curta(client_vendedor):
+    html = client_vendedor.get("/clientes/novo/").content.decode()
+    assert "Select an option" not in html
+    assert '<option value="" selected>—</option>' in html

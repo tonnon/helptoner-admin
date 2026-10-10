@@ -27,8 +27,8 @@ Estoque e custo médio nunca são campos: só mudam por movimento de estoque. O 
           </div>
           {% if produto %}
             <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-              <div><dt class="rotulo">Estoque</dt><dd class="num">{{ produto.estoque|inteiro }}</dd></div>
-              <div><dt class="rotulo">Custo médio</dt><dd class="num">{{ produto.custo_medio|brl }}</dd></div>
+              <div><dt class="rotulo">Estoque</dt><dd class="font-semibold tabular-nums">{{ produto.estoque|inteiro }}</dd></div>
+              <div><dt class="rotulo">Custo médio</dt><dd class="font-semibold tabular-nums">{{ produto.custo_medio|brl }}</dd></div>
             </dl>
             <p class="ajuda mt-2">O estoque muda só por movimentos (Estoque → Entrada ou Ajuste).</p>
           {% endif %}
@@ -42,8 +42,8 @@ Estoque e custo médio nunca são campos: só mudam por movimento de estoque. O 
           <div><dt class="rotulo">Código</dt><dd>{{ produto.codigo }}</dd></div>
           <div><dt class="rotulo">Marca</dt><dd>{{ produto.marca }}</dd></div>
           <div class="sm:col-span-2"><dt class="rotulo">Descrição</dt><dd>{{ produto.descricao }}</dd></div>
-          <div><dt class="rotulo">Preço</dt><dd class="num">{{ produto.preco|brl }}</dd></div>
-          <div><dt class="rotulo">Estoque</dt><dd class="num">{{ produto.estoque|inteiro }}</dd></div>
+          <div><dt class="rotulo">Preço</dt><dd class="font-semibold tabular-nums">{{ produto.preco|brl }}</dd></div>
+          <div><dt class="rotulo">Estoque</dt><dd class="font-semibold tabular-nums">{{ produto.estoque|inteiro }}</dd></div>
         </dl>
         <div class="mt-6"><a href="{% url 'cadastros:produtos' %}" class="btn-sec">Voltar</a></div>
       {% endif %}

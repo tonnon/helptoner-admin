@@ -287,6 +287,11 @@
     margin-top: 16px;
   }
 
+  /* Em grades e linhas flexíveis o espaço vem do gap; sem isto o segundo cartão desce. */
+  :is(.grid, .flex) > .cartao + .cartao {
+    margin-top: 0;
+  }
+
   .rotulo {
     display: block;
     margin-bottom: 8px;

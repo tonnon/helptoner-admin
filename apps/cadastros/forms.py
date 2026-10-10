@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from apps.core.dinheiro import CENTAVO, ler_decimal_br
 
 from .documentos import normalizar_documento, validar_documento
-from .models import Cliente, Produto
+from .models import UFS, Cliente, Produto
 
 
 def mensagem_documento_repetido(outro) -> str:
@@ -41,6 +41,8 @@ class ClienteForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Sem a opção em branco do seletor segmentado.
         self.fields["tipo"].choices = [c for c in self.fields["tipo"].choices if c[0]]
+        # O Django 6.1 traz a opção vazia em inglês ("- Select an option -"), que não cabe.
+        self.fields["uf"].choices = [("", "—"), *UFS]
         for nome, mascara in (("documento", "cnpj"), ("cep", "cep"), ("telefone", "telefone")):
             self.fields[nome].widget.attrs["data-mascara"] = mascara
         self.fields["nome"].widget.attrs["autocomplete"] = "off"

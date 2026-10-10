@@ -44,7 +44,7 @@ def _incluir_dois_toners(pagina) -> None:
     pagina.wait_for_url(re.compile(r"/pedidos/\d+/editar/"))
     pagina.get_by_placeholder("Buscar cliente por nome, CPF ou CNPJ").fill("papel")
     pagina.get_by_role("option", name=re.compile("Papelaria Central")).click()
-    campo = pagina.get_by_placeholder("Buscar produto por código ou nome")
+    campo = pagina.get_by_placeholder("Código ou nome do produto")
     campo.fill("ce285")
     # A busca espera 300 ms depois da última tecla: o Enter só escolhe com a lista na tela.
     expect(pagina.get_by_role("option", name=re.compile("CE285A"))).to_be_visible()

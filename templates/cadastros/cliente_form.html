@@ -46,7 +46,9 @@ por inativar e reativar (com confirmação). As máscaras vêm de static/js/masc
           {% include "componentes/campo.html" with campo=form.cidade %}
           {% include "componentes/campo.html" with campo=form.uf %}
         </div>
-        {% include "componentes/campo.html" with campo=form.observacoes %}
+        <div class="mt-3.5">
+          {% include "componentes/campo.html" with campo=form.observacoes %}
+        </div>
         <div class="mt-6 flex flex-wrap gap-2">
           <button type="submit" class="btn-pri">Salvar</button>
           <a href="{% url 'cadastros:clientes' %}" class="btn-sec">Voltar</a>
