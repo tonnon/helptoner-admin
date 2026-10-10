@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load static formato %}
+{% comment %}
+Relatórios (só Administrador), como em docs/esbocos/relatorios.html. Padrão P18: a página abre com
+as abas, a barra de filtros e o esqueleto, e o HTMX busca o pedaço "conteudo" na mesma URL.
+Ao trocar um filtro, o formulário busca o pedaço de novo: #relatorio fica no lugar, apagado
+(.htmx-request, por hx-indicator), até os números chegarem, sem esqueleto. As abas e os links de
+exportação voltam junto (hx-swap-oob), já com os filtros novos.
+O id é "relatorio" (e não "conteudo") porque o <main> do base.html já é o #conteudo.
+{% endcomment %}
+{% block titulo %}{{ titulo }} - Relatórios - Helptoner Pedidos{% endblock %}
+{% block trilha %}Relatórios{% endblock %}
+{% block conteudo %}
+  <h1 class="fx">{{ titulo }}</h1>
+  {% partial abas %}
+  <form method="get" action="{{ request.path }}" class="filtros-relatorio fx fx-1" role="search" aria-label="Filtros do relatório"
+        hx-get="{{ request.path }}" hx-trigger="change, submit" hx-target="#relatorio" hx-push-url="true" hx-indicator="#relatorio">
+    <label class="filtro">Período
+      <span class="campo">
+        <select name="atalho">
+          {% for valor, nome in periodos %}<option value="{{ valor }}"{% if f.atalho == valor %} selected{% endif %}>{{ nome }}</option>{% endfor %}
+        </select>
+      </span>
+    </label>
+    <div class="filtro-datas">
+      <label class="filtro">De
+        <span class="campo"><input type="date" name="inicio" value="{{ f.inicio|date:'Y-m-d' }}"></span>
+      </label>
+      <label class="filtro">até
+        <span class="campo"><input type="date" name="fim" value="{{ f.fim|date:'Y-m-d' }}"></span>
+      </label>
+    </div>
+    <label class="filtro">Agrupar por
+      <span class="campo">
+        <select name="agrupamento">
+          {% for valor, nome in agrupamentos %}<option value="{{ valor }}"{% if f.agrupamento == valor %} selected{% endif %}>{{ nome }}</option>{% endfor %}
+        </select>
+      </span>
+    </label>
+    <label class="filtro">Funcionário
+      <span class="campo">
+        <select name="funcionario">
+          <option value="">Todos</option>
+          {% for pk, nome in funcionarios %}<option value="{{ pk }}"{% if f.funcionario_id == pk %} selected{% endif %}>{{ nome }}</option>{% endfor %}
+        </select>
+      </span>
+    </label>
+    {% if aba == "clientes" %}
+      <label class="filtro">Sem comprar há mais de
+        <span class="campo campo-dias"><input type="text" name="dias" value="{{ dias }}" inputmode="numeric" maxlength="4" autocomplete="off"></span>
+        dias
+      </label>
+    {% endif %}
+    {% partial exportar %}
+  </form>
+  <div id="relatorio" class="relatorio mt-4" hx-get="{{ request.get_full_path }}" hx-trigger="load" hx-indicator="#relatorio-esqueleto">
+    <div id="relatorio-esqueleto">{% include "componentes/esqueleto_linhas.html" with linhas=6 %}</div>
+  </div>
+  <script src="{% static 'js/graficos.js' %}" defer></script>
+{% endblock %}
+
+{% partialdef abas %}
+<nav id="abas-relatorio" class="abas" aria-label="Relatórios"{% if oob %} hx-swap-oob="innerHTML"{% endif %}>
+  {% for link in abas %}<a href="{{ link.url }}" class="aba{% if link.ativa %} ativa{% endif %}"{% if link.ativa %} aria-current="page"{% endif %}>{{ link.nome }}</a>{% endfor %}
+</nav>
+{% endpartialdef %}
+
+{% partialdef exportar %}
+<div id="exportar-relatorio" class="exportar"{% if oob %} hx-swap-oob="innerHTML"{% endif %}>
+  {% for link in exportacoes %}<a href="{{ link.url }}" class="btn-sec">{{ link.nome }}</a>{% endfor %}
+</div>
+{% endpartialdef %}
+
+{% partialdef conteudo %}
+{% with oob=True %}{% partial abas %}{% partial exportar %}{% endwith %}
+{% if erros %}
+  <div class="alerta-aviso mb-4" role="alert">{% for erro in erros %}<p>{{ erro }}</p>{% endfor %}</div>
+{% endif %}
+<p class="periodo-relatorio">De {{ f.inicio|data_br }} a {{ f.fim|data_br }}</p>
+{% if aba == "resumo" %}
+  {% include "relatorios/_resumo.html" %}
+{% else %}
+  {% for tabela in rel.tabelas %}
+    <section class="cartao" aria-labelledby="tabela-{{ forloop.counter }}">
+      <h2 id="tabela-{{ forloop.counter }}" class="titulo-cartao">{{ tabela.titulo }}</h2>
+      {% include "componentes/tabela.html" with tabela=tabela %}
+    </section>
+  {% endfor %}
+{% endif %}
+{% endpartialdef %}

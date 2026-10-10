@@ -46,7 +46,7 @@ def test_menu_mostra_so_as_rotas_que_existem(client_admin):
     html = client_admin.get("/").content.decode()
     assert 'href="/" class="item-menu ativo" aria-current="page"' in html
     assert '<a href="/funcionarios/" class="item-menu">' in html and "Funcionários" in html
-    assert "Relatórios" not in html  # rota ainda não existe
+    assert '<a href="/relatorios/" class="item-menu">' in html and "Relatórios" in html
     assert '<a href="/minha-conta/" class="item-menu">' in html and "Minha conta" in html
 
 

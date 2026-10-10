@@ -9,6 +9,7 @@ from apps.relatorios.periodos import (
     Filtros,
     descricao_comparacao,
     deslocar_meses,
+    ler_dias_sem_comprar,
     ler_filtros,
     periodo_anterior,
     periodo_do_atalho,
@@ -132,3 +133,20 @@ def test_querystring_ida_e_volta(dados):
     volta, erros = ler_filtros(dict(parse_qsl(f.como_querystring())), HOJE)
     assert erros == []
     assert volta == f
+
+
+@pytest.mark.parametrize(
+    ("dados", "esperado"),
+    [
+        ({}, (60, [])),
+        ({"dias": " 40 "}, (40, [])),
+        ({"dias": "3650"}, (3650, [])),
+        ({"dias": "0"}, (60, ["Número de dias inválido."])),
+        ({"dias": "3651"}, (60, ["Número de dias inválido."])),
+        ({"dias": "-5"}, (60, ["Número de dias inválido."])),
+        ({"dias": "٤٠"}, (60, ["Número de dias inválido."])),  # dígitos não ASCII
+        ({"dias": "9" * 5000}, (60, ["Número de dias inválido."])),
+    ],
+)
+def test_dias_sem_comprar(dados, esperado):
+    assert ler_dias_sem_comprar(dados) == esperado

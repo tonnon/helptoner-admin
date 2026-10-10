@@ -1356,6 +1356,352 @@
     }
   }
 
+  /* ---------- Relatórios, como em docs/esbocos/relatorios.html ---------- */
+  .abas {
+    display: flex;
+    gap: 4px;
+    margin-top: 12px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--color-linha);
+  }
+
+  .aba {
+    padding: 10px 14px;
+    border-bottom: 2.5px solid transparent;
+    color: var(--color-texto-2);
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .aba:hover {
+    color: var(--color-tinta);
+  }
+
+  .aba.ativa {
+    border-bottom-color: var(--color-azul);
+    color: var(--color-azul);
+  }
+
+  /* Filtros: uma linha acima de tudo, que vale para a página inteira. */
+  .filtros-relatorio {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 18px;
+    margin-top: 16px;
+  }
+
+  .filtro {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-texto-2);
+    font-size: 13.5px;
+    font-weight: 500;
+  }
+
+  .filtro .campo {
+    padding: 8px 10px;
+  }
+
+  .campo-dias {
+    width: 64px;
+  }
+
+  /* As datas só aparecem com "Escolher datas…" no período (sem JavaScript). */
+  .filtro-datas {
+    display: none;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+  }
+
+  .filtros-relatorio:has(select[name="atalho"] option[value="datas"]:checked) .filtro-datas {
+    display: flex;
+  }
+
+  .exportar {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  .exportar:empty {
+    display: none;
+  }
+
+  .exportar .btn-sec {
+    padding: 9px 13px;
+    font-size: 13.5px;
+  }
+
+  /* Ao trocar o filtro, o relatório fica no lugar, apagado, até os números novos chegarem. */
+  .relatorio {
+    transition: opacity 0.25s;
+  }
+
+  .relatorio.htmx-request {
+    opacity: 0.55;
+    pointer-events: none;
+  }
+
+  .periodo-relatorio {
+    margin-bottom: 12px;
+    color: var(--color-texto-2);
+    font-size: 13px;
+  }
+
+  .titulo-cartao {
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .cartao > .titulo-cartao {
+    margin-bottom: 8px;
+  }
+
+  .cab-cartao {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .cab-cartao p {
+    margin-top: 3px;
+    color: var(--color-texto-2);
+    font-size: 13px;
+  }
+
+  /* Indicadores do Resumo, com a variação contra o período anterior. */
+  .indicadores {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 12px;
+  }
+
+  .indicador {
+    min-width: 0;
+    padding: 14px 16px;
+    border-radius: var(--radius-cartao);
+    background: #fff;
+    box-shadow: var(--shadow-cartao);
+  }
+
+  .indicador-rotulo {
+    color: var(--color-texto-2);
+    font-size: 13px;
+  }
+
+  .indicador-valor {
+    margin: 4px 0 6px;
+    font-size: clamp(20px, 1.9vw, 23px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+
+  .indicador.principal .indicador-valor {
+    font-size: clamp(22px, 2.2vw, 26px);
+  }
+
+  .delta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 4px;
+    color: var(--color-texto-2);
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+
+  .delta.sobe {
+    color: var(--color-verde);
+  }
+
+  .delta.desce {
+    color: var(--color-vermelho-texto);
+  }
+
+  .delta small {
+    flex-basis: 100%;
+    color: var(--color-texto-2);
+    font-size: 12.5px;
+    font-weight: 500;
+  }
+
+  .legenda {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 16px;
+    color: var(--color-texto-2);
+    font-size: 13px;
+  }
+
+  .chave-linha {
+    display: inline-block;
+    width: 16px;
+    height: 2px;
+    margin-right: 6px;
+    border-radius: 2px;
+    vertical-align: middle;
+  }
+
+  .chave-serie-1 {
+    background: var(--color-azul);
+  }
+
+  .chave-serie-2 {
+    background: var(--color-serie-2);
+  }
+
+  /* Chave "Gráfico | Tabela" (static/js/graficos.js alterna o atributo hidden). */
+  .alternar {
+    display: inline-flex;
+    padding: 2px;
+    border: 1px solid var(--color-linha);
+    border-radius: 9px;
+  }
+
+  .alternar button {
+    padding: 5px 10px;
+    border-radius: 7px;
+    color: var(--color-texto-2);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .alternar button[aria-pressed="true"] {
+    background: var(--color-azul-50);
+    color: var(--color-azul);
+  }
+
+  /* Gráficos em SVG, desenhados por static/js/graficos.js. */
+  .grafico {
+    border-radius: 8px;
+  }
+
+  .grafico svg {
+    display: block;
+  }
+
+  .grafico text {
+    font-family: var(--font-sans);
+  }
+
+  .grafico .tick {
+    fill: #858AA0;
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .grafico .grade {
+    stroke: #ECEEF4;
+  }
+
+  .grafico .eixo,
+  .grafico .mira,
+  .grafico .guia {
+    stroke: #C9CCD8;
+  }
+
+  .grafico .rotulo-fim {
+    fill: var(--color-tinta);
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+
+  .grafico .rotulo-fim-sub {
+    fill: var(--color-texto-2);
+    font-size: 11.5px;
+  }
+
+  .grafico .rotulo-barra {
+    fill: var(--color-tinta);
+    font-size: 12.5px;
+  }
+
+  .grafico .valor-barra {
+    fill: var(--color-tinta);
+    font-size: 11.5px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .grafico .barra {
+    fill: var(--color-azul);
+    transition: fill-opacity 0.15s;
+  }
+
+  .grafico .barra.apagada {
+    fill-opacity: 0.35;
+  }
+
+  /* Caixa de valores que acompanha a mira (posição por elemento.style, que a CSP permite). */
+  .caixa-valores {
+    position: absolute;
+    z-index: 5;
+    min-width: 190px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 12px 32px rgb(14 16 36 / 0.18), 0 0 0 1px var(--color-linha);
+    font-size: 13px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.12s, visibility 0.12s;
+  }
+
+  .caixa-valores.visivel {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .caixa-valores .tit {
+    margin-bottom: 6px;
+    color: var(--color-texto-2);
+    font-size: 12px;
+  }
+
+  .caixa-valores .lin {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .caixa-valores .lin i {
+    flex: none;
+    width: 12px;
+    height: 2px;
+    border-radius: 2px;
+  }
+
+  .caixa-valores .lin b {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .caixa-valores .lin span {
+    color: var(--color-texto-2);
+  }
+
+  .link-acao {
+    color: var(--color-azul);
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .link-acao:hover {
+    text-decoration: underline;
+  }
+
   /* O HTMX roda com includeIndicatorStyles: false; estas são as regras que ele injetaria. */
   .htmx-indicator {
     opacity: 0;

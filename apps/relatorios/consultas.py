@@ -442,6 +442,7 @@ class Relatorio:
 
 
 def _tabela_sem_comprar(dias: int, hoje: date, f: Filtros, titulo: str) -> Tabela:
+    clientes = clientes_sem_comprar(dias, hoje, f.funcionario_id)
     return Tabela(
         titulo,
         [
@@ -450,10 +451,8 @@ def _tabela_sem_comprar(dias: int, hoje: date, f: Filtros, titulo: str) -> Tabel
             Coluna("Dias sem comprar", "inteiro"),
             Coluna("Produtos", "texto"),
         ],
-        [
-            [c["nome"], c["ultimo_pedido"], c["dias"], ", ".join(c["produtos"])]
-            for c in clientes_sem_comprar(dias, hoje, f.funcionario_id)
-        ],
+        [[c["nome"], c["ultimo_pedido"], c["dias"], ", ".join(c["produtos"])] for c in clientes],
+        pedidos_a_repetir=[c["ultimo_pedido_id"] for c in clientes],
     )
 
 
@@ -490,6 +489,7 @@ def _resumo(f: Filtros, hoje: date) -> Relatorio:
     comparacao = comparar(f)
     atual = comparacao.atual
     pontos = serie(f)
+    mais_vendidos = top_produtos(f)
     tabelas = [
         Tabela(
             "Indicadores",
@@ -530,12 +530,13 @@ def _resumo(f: Filtros, hoje: date) -> Relatorio:
                     p["lucro"],
                     p["margem"],
                 ]
-                for p in top_produtos(f)
+                for p in mais_vendidos
             ],
         ),
         _tabela_sem_comprar(60, hoje, f, "Clientes sem comprar há mais de 60 dias"),
     ]
-    return Relatorio("resumo", ABAS["resumo"], tabelas, comparacao, {"serie": pontos})
+    graficos = {"serie": pontos, "produtos": mais_vendidos}
+    return Relatorio("resumo", ABAS["resumo"], tabelas, comparacao, graficos)
 
 
 def _tabelas_clientes(f: Filtros, hoje: date, dias: int) -> list[Tabela]:

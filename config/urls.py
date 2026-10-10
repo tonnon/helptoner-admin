@@ -51,6 +51,7 @@ urlpatterns = [
     path("", include("apps.cadastros.urls")),
     path("", include("apps.estoque.urls")),
     path("", include("apps.pedidos.urls")),
+    path("", include("apps.relatorios.urls")),
     path("", include("apps.core.urls")),
 ]
 

@@ -1,0 +1,73 @@
+{% comment %}
+Aba Resumo (parte do pedaço "conteudo" de relatorios/pagina.html), como em docs/esbocos/relatorios.html:
+indicadores com a variação, o gráfico de linhas, as barras dos produtos que mais faturaram e os
+clientes sem comprar. Os gráficos são desenhados por static/js/graficos.js com os dados dos
+json_script; cada um tem a versão em tabela, que vem pronta do servidor (a chave
+"Gráfico | Tabela" só alterna o atributo hidden).
+{% endcomment %}
+<div class="indicadores">
+  {% for ind in indicadores %}
+    <div class="indicador{% if ind.principal %} principal{% endif %}">
+      <p class="indicador-rotulo">{{ ind.rotulo }}</p>
+      <p class="indicador-valor">{{ ind.valor }}</p>
+      <p class="delta{% if ind.sentido %} {{ ind.sentido }}{% endif %}">{% if ind.sentido == "sobe" %}<span aria-hidden="true">▲</span> {% elif ind.sentido == "desce" %}<span aria-hidden="true">▼</span> {% endif %}{{ ind.variacao }} <small>{{ rel.comparacao.descricao }}</small></p>
+    </div>
+  {% endfor %}
+</div>
+
+<section class="cartao relative mt-4" data-vistas aria-labelledby="titulo-grafico-linha">
+  <div class="cab-cartao">
+    <div>
+      <h2 id="titulo-grafico-linha" class="titulo-cartao">Faturamento líquido e lucro bruto por {{ nome_do_agrupamento }}</h2>
+      <p>Valores após descontos. Lucro = faturamento − custo médio dos produtos vendidos.</p>
+    </div>
+    <div class="flex flex-wrap items-center gap-3.5">
+      <div class="legenda">
+        {% for serie in dados_linha.series %}<span><i class="chave-linha chave-serie-{{ forloop.counter }}" aria-hidden="true"></i>{{ serie.nome }}</span>{% endfor %}
+      </div>
+      {% partial alternar %}
+    </div>
+  </div>
+  <div class="grafico" data-grafico="linha" data-dados="dados-grafico-linha" tabindex="0" role="group"
+       aria-label="Gráfico de faturamento líquido e lucro bruto por {{ nome_do_agrupamento }}. Use as setas para ver os valores de cada período."></div>
+  <div data-vista-tabela hidden>{% include "componentes/tabela.html" with tabela=rel.tabelas.1 %}</div>
+  <div class="caixa-valores" data-caixa aria-live="polite"></div>
+  {{ dados_linha|json_script:"dados-grafico-linha" }}
+</section>
+
+<div class="mt-4 grid gap-4 xl:grid-cols-[1.15fr_1fr]">
+  <section class="cartao relative" data-vistas aria-labelledby="titulo-grafico-barras">
+    <div class="cab-cartao">
+      <div>
+        <h2 id="titulo-grafico-barras" class="titulo-cartao">{{ rel.tabelas.2.titulo }}</h2>
+        <p>Faturamento líquido no período. Passe o mouse ou use as setas para ver lucro e margem.</p>
+      </div>
+      {% if dados_barras.itens %}{% partial alternar %}{% endif %}
+    </div>
+    {% if dados_barras.itens %}
+      <div class="grafico" data-grafico="barras" data-dados="dados-grafico-barras" tabindex="0" role="group"
+           aria-label="Gráfico dos produtos que mais faturaram. Use as setas para ver os valores de cada produto."></div>
+      <div data-vista-tabela hidden>{% include "componentes/tabela.html" with tabela=rel.tabelas.2 %}</div>
+      <div class="caixa-valores" data-caixa aria-live="polite"></div>
+      {{ dados_barras|json_script:"dados-grafico-barras" }}
+    {% else %}
+      {% include "componentes/vazio.html" with mensagem="Nenhuma venda no período." %}
+    {% endif %}
+  </section>
+  <section class="cartao mt-0" aria-labelledby="titulo-sem-comprar">
+    <div class="cab-cartao">
+      <div>
+        <h2 id="titulo-sem-comprar" class="titulo-cartao">{{ rel.tabelas.3.titulo }}</h2>
+        <p>Bons candidatos para oferecer recompra de toner.</p>
+      </div>
+    </div>
+    {% include "componentes/tabela.html" with tabela=rel.tabelas.3 vazio="Nenhum cliente sem comprar há mais de 60 dias." %}
+  </section>
+</div>
+
+{% partialdef alternar %}
+<div class="alternar" role="group" aria-label="Ver como">
+  <button type="button" data-vista="grafico" aria-pressed="true">Gráfico</button>
+  <button type="button" data-vista="tabela" aria-pressed="false">Tabela</button>
+</div>
+{% endpartialdef %}

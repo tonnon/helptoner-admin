@@ -10,6 +10,8 @@ from urllib.parse import urlencode
 DATA_MINIMA = date(2000, 1, 1)
 DATA_MAXIMA = date(2100, 12, 31)
 MAXIMO_DIAS_POR_DIA = 366
+DIAS_SEM_COMPRAR = 60
+MAXIMO_DIAS_SEM_COMPRAR = 3650
 
 
 class Atalho(StrEnum):
@@ -151,3 +153,15 @@ def ler_filtros(dados: Mapping[str, str], hoje: date) -> tuple[Filtros, list[str
             erros.append("Funcionário inválido.")
 
     return Filtros(inicio, fim, agrupamento, funcionario_id, atalho), erros
+
+
+def ler_dias_sem_comprar(dados: Mapping[str, str]) -> tuple[int, list[str]]:
+    """O X de "clientes sem comprar há mais de X dias" (aba Clientes); se vier errado, fica 60."""
+    bruto = (dados.get("dias") or "").strip()
+    if not bruto:
+        return DIAS_SEM_COMPRAR, []
+    if bruto.isascii() and bruto.isdigit() and len(bruto) <= 4:
+        dias = int(bruto)
+        if 1 <= dias <= MAXIMO_DIAS_SEM_COMPRAR:
+            return dias, []
+    return DIAS_SEM_COMPRAR, ["Número de dias inválido."]

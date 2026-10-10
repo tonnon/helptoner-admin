@@ -145,7 +145,26 @@ def test_montar_aba(cenario, aba):
 def test_resumo_tem_comparacao_e_graficos(cenario):
     rel = montar_aba("resumo", TUDO, date(2026, 12, 1))
     assert rel.comparacao is not None and rel.graficos is not None
+    assert [p["rotulo"] for p in rel.graficos["serie"]] == ["set/26", "out/26"]
+    assert [(p["codigo"], p["faturamento"]) for p in rel.graficos["produtos"]] == [
+        ("CE285A", Decimal("280.00")),
+        ("TN-1060", Decimal("180.00")),
+    ]
     assert montar_aba("estoque", TUDO, date(2026, 12, 1)).graficos is None
+
+
+@pytest.mark.parametrize(("aba", "indice"), [("resumo", 3), ("clientes", 1)])
+def test_clientes_sem_comprar_levam_o_pedido_a_repetir(cenario, aba, indice):
+    tabela = montar_aba(aba, TUDO, date(2026, 12, 1)).tabelas[indice]
+    assert [linha[0] for linha in tabela.linhas] == ["Clínica Bem Viver"]
+    assert tabela.pedidos_a_repetir == [cenario.pedido2.pk]
+    celulas, pedido = tabela.linhas_da_tela()[0]
+    assert [(coluna.rotulo, valor) for coluna, valor in celulas][:2] == [
+        ("Cliente", "Clínica Bem Viver"),
+        ("Último pedido", date(2026, 9, 30)),
+    ]
+    assert pedido == cenario.pedido2.pk
+    assert montar_aba("vendas", TUDO, date(2026, 12, 1)).tabelas[0].pedidos_a_repetir is None
 
 
 def test_clientes_sem_comprar_usa_os_dias_pedidos(cenario):
