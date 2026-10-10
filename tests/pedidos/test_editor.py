@@ -4,7 +4,7 @@ from decimal import Decimal
 
 import pytest
 
-from apps.cadastros.models import Produto
+from apps.cadastros.models import Cliente, Produto
 from apps.pedidos.models import ContadorPedido, Pedido
 from apps.pedidos.services import cancelar_pedido, criar_rascunho
 from tests.apoio import (
@@ -185,7 +185,7 @@ def test_editor_mostra_o_rascunho(client_vendedor, vendedor):
         'data-valor-centavos="37980"',
         'id="barra-celular"',
         'placeholder="Buscar cliente por nome, CPF ou CNPJ"',
-        'placeholder="Buscar produto por código ou nome"',
+        'placeholder="Código ou nome do produto"',
         '<label for="quantidade"',
         '<label class="rotulo" for="desconto">Desconto</label>',
         "Estoque e total conferidos ao confirmar",
@@ -496,6 +496,18 @@ def test_repetir_rascunho_nao_vale(client_vendedor, rascunho):
     r = client_vendedor.post(f"/pedidos/{rascunho.pk}/repetir/", follow=True)
     assert r.redirect_chain[0][0] == f"/pedidos/{rascunho.pk}/"
     assert "Só pedidos confirmados ou cancelados podem ser repetidos." in r.content.decode()
+
+
+def test_repetir_pedido_de_cliente_inativo_volta_ao_detalhe_com_mensagem(client_vendedor, vendedor):
+    ped = montar_pedido_confirmado(
+        vendedor, cliente=criar_cliente(), itens=[(com_estoque(criar_produto(), 5), 1)]
+    )
+    Cliente.objects.filter(pk=ped.cliente_id).update(ativo=False)
+    antes = Pedido.objects.count()
+    r = client_vendedor.post(f"/pedidos/{ped.pk}/repetir/", follow=True)
+    assert r.redirect_chain[0][0] == f"/pedidos/{ped.pk}/"
+    assert "Reative o cliente antes de repetir o pedido." in r.content.decode()
+    assert Pedido.objects.count() == antes
 
 
 @pytest.mark.parametrize(

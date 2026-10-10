@@ -200,7 +200,8 @@ def clientes_sem_comprar(dias: int, hoje: date, funcionario_id: int | None = Non
     Com `funcionario_id`, o "último pedido" é o último pedido confirmado emitido POR ELE (a
     carteira dele): um cliente que comprou depois com outro funcionário continua na lista.
     """
-    pedidos = Pedido.objects.filter(status=Pedido.Status.CONFIRMADO, cliente__isnull=False)
+    # Cliente inativo fica de fora: "Repetir pedido" geraria um rascunho que não se confirma.
+    pedidos = Pedido.objects.filter(status=Pedido.Status.CONFIRMADO, cliente__ativo=True)
     if funcionario_id is not None:
         pedidos = pedidos.filter(criado_por=funcionario_id)
     ultimos = (
@@ -329,7 +330,9 @@ def funcionarios(f: Filtros) -> list[dict]:
     """Por quem emitiu: pedidos, valor, lucro e desconto médio (Σ desconto ÷ Σ subtotal)."""
     grupos = (
         itens_confirmados(f)
-        .values("pedido__criado_por_id", "pedido__criado_por__nome")
+        .values(
+            "pedido__criado_por_id", "pedido__criado_por__nome", "pedido__criado_por__is_active"
+        )
         .annotate(
             pedidos=Count("pedido", distinct=True),
             receita_total=Sum("receita"),
@@ -349,6 +352,7 @@ def funcionarios(f: Filtros) -> list[dict]:
             {
                 "usuario_id": g["pedido__criado_por_id"],
                 "nome": g["pedido__criado_por__nome"],
+                "ativo": g["pedido__criado_por__is_active"],
                 "pedidos": g["pedidos"],
                 "valor": arredondar(g["receita_total"]),
                 "lucro": arredondar(g["receita_total"] - g["custo_total"]),
@@ -606,7 +610,13 @@ def _tabelas_funcionarios(f: Filtros) -> list[Tabela]:
                 Coluna("Desconto médio", "percentual"),
             ],
             [
-                [x["nome"], x["pedidos"], x["valor"], x["lucro"], x["desconto_medio"]]
+                [
+                    x["nome"] if x["ativo"] else f"{x['nome']} (inativo)",
+                    x["pedidos"],
+                    x["valor"],
+                    x["lucro"],
+                    x["desconto_medio"],
+                ]
                 for x in funcionarios(f)
             ],
         )

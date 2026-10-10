@@ -75,6 +75,22 @@ def test_repetir_grava_o_rascunho_sem_numero_desconto_nem_observacoes(vendedor):
     assert ContadorPedido.objects.get().ultimo_numero == 1
 
 
+def test_repetir_recusa_pedido_de_cliente_inativo(vendedor):
+    # O rascunho de um cliente inativo não pode ser confirmado: melhor recusar na hora.
+    cliente = criar_cliente()
+    original = montar_pedido_confirmado(
+        vendedor, cliente=cliente, itens=[(com_estoque(criar_produto(), 5), 1)]
+    )
+    Cliente.objects.filter(pk=cliente.pk).update(ativo=False)
+    antes = Pedido.objects.count()
+    with pytest.raises(
+        RegraDeNegocio,
+        match="O cliente Papelaria Central Ltda está inativo. Reative o cliente antes de repetir",
+    ):
+        repetir_pedido(original.pk, vendedor)
+    assert Pedido.objects.count() == antes
+
+
 def test_repetir_traz_itens_inativos_ou_sem_estoque_com_aviso(vendedor):
     """Decisão P7: o rascunho nasce com tudo e os avisos mostram o que impede a confirmação."""
     cliente = criar_cliente()
@@ -84,13 +100,10 @@ def test_repetir_traz_itens_inativos_ou_sem_estoque_com_aviso(vendedor):
         vendedor, cliente=cliente, itens=[(inativo, 2), (vai_acabar, 3)]
     )
     Produto.objects.filter(pk=inativo.pk).update(ativo=False)
-    Cliente.objects.filter(pk=cliente.pk).update(ativo=False)
     novo = repetir_pedido(original.pk, vendedor)
     i1, i2 = novo.itens.all()
     avisos = avisos_do_rascunho(novo)
-    assert avisos.gerais == [
-        "O cliente Papelaria Central Ltda foi inativado. Escolha outro cliente."
-    ]
+    assert avisos.gerais == []
     assert avisos.por_item == {
         i1.pk: "O produto CE285A foi inativado. Remova-o do pedido.",
         i2.pk: "Sem estoque.",

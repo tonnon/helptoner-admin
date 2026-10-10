@@ -1,6 +1,7 @@
 from datetime import date
 from decimal import Decimal
 
+from apps.cadastros.models import Cliente
 from apps.relatorios.consultas import Indicadores, clientes_sem_comprar, comparar, indicadores
 from tests.apoio import F
 
@@ -61,3 +62,10 @@ def test_clientes_sem_comprar_ignora_cancelado_e_filtra_funcionario(cenario):
     ]
     so_carla = clientes_sem_comprar(59, date(2026, 12, 1), cenario.carla.pk)
     assert [x["nome"] for x in so_carla] == ["Papelaria Central Ltda"]
+
+
+def test_clientes_sem_comprar_ignora_cliente_inativo(cenario):
+    # "Repetir pedido" de um cliente inativo gera um rascunho que não se confirma: fica fora.
+    Cliente.objects.filter(pk=cenario.c2.pk).update(ativo=False)
+    r = clientes_sem_comprar(59, date(2026, 12, 1))
+    assert [x["nome"] for x in r] == ["Papelaria Central Ltda"]

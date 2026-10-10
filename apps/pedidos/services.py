@@ -414,11 +414,17 @@ def repetir_pedido(pedido_id: int, usuario) -> Pedido:
 
     Os itens recebem o código, a descrição e o preço atuais do produto. Desconto e observações
     não são copiados. Produtos inativos ou sem estoque entram assim mesmo: os avisos do rascunho
-    mostram o que impede a confirmação.
+    mostram o que impede a confirmação. Cliente inativo é recusado: o rascunho nunca poderia ser
+    confirmado (§3.7).
     """
-    original = Pedido.objects.get(pk=pedido_id)
+    original = Pedido.objects.select_related("cliente").get(pk=pedido_id)
     if original.status not in (Pedido.Status.CONFIRMADO, Pedido.Status.CANCELADO):
         raise RegraDeNegocio("Só pedidos confirmados ou cancelados podem ser repetidos.")
+    if original.cliente is not None and not original.cliente.ativo:
+        raise RegraDeNegocio(
+            f"O cliente {original.cliente.nome} está inativo. "
+            "Reative o cliente antes de repetir o pedido."
+        )
     with transaction.atomic():
         novo = criar_rascunho(usuario)
         novo.cliente_id = original.cliente_id

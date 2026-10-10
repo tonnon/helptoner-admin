@@ -1,9 +1,13 @@
+from dataclasses import replace
 from datetime import date, timedelta
 from decimal import Decimal
+from io import BytesIO
 
 import pytest
+from openpyxl import load_workbook
 
-from apps.cadastros.models import Produto
+from apps.cadastros.models import Cliente, Produto
+from apps.contas.models import Usuario
 from apps.core.datas import hoje
 from apps.relatorios.consultas import (
     ABAS,
@@ -15,7 +19,8 @@ from apps.relatorios.consultas import (
     produtos,
     ranking_clientes,
 )
-from tests.apoio import F
+from apps.relatorios.exportacao import para_excel, para_pdf
+from tests.apoio import F, texto_do_pdf
 
 TUDO = F(date(2026, 9, 1), date(2026, 10, 31))
 TIPOS = {
@@ -54,6 +59,12 @@ def test_funcionarios(cenario):
         ("Carla Souza", 2, Decimal("360.00"), Decimal("160.00"), Decimal("0.1000")),
         ("Lucas Tonnon", 1, Decimal("100.00"), Decimal("40.00"), Decimal("0.0000")),
     ]
+
+
+def test_aba_funcionarios_marca_o_funcionario_inativo(cenario):
+    Usuario.objects.filter(pk=cenario.carla.pk).update(is_active=False)
+    tabela = montar_aba("funcionarios", TUDO, date(2026, 12, 1)).tabelas[0]
+    assert [linha[0] for linha in tabela.linhas] == ["Carla Souza (inativo)", "Lucas Tonnon"]
 
 
 def test_ranking_de_clientes(cenario):
@@ -166,6 +177,21 @@ def test_clientes_sem_comprar_levam_o_pedido_a_repetir(cenario, aba, indice):
     ]
     assert pedido == cenario.pedido2.pk
     assert montar_aba("vendas", TUDO, date(2026, 12, 1)).tabelas[0].pedidos_a_repetir is None
+
+
+@pytest.mark.parametrize(("aba", "indice"), [("resumo", 3), ("clientes", 1)])
+def test_clientes_sem_comprar_nao_lista_inativo_nem_na_tela_nem_nas_exportacoes(
+    cenario, aba, indice
+):
+    Cliente.objects.filter(pk=cenario.c2.pk).update(ativo=False)
+    relatorio = montar_aba(aba, TUDO, date(2026, 12, 1))
+    tabela = relatorio.tabelas[indice]
+    assert tabela.linhas == [] and tabela.pedidos_a_repetir == []
+    # O Excel e o PDF saem da mesma tabela: sem a linha, o nome não aparece em nenhum.
+    relatorio = replace(relatorio, tabelas=[tabela])
+    wb = load_workbook(BytesIO(para_excel(relatorio, TUDO)))
+    assert "Clínica Bem Viver" not in {c.value for ws in wb for r in ws.iter_rows() for c in r}
+    assert "Clínica Bem Viver" not in texto_do_pdf(para_pdf(relatorio, TUDO))
 
 
 def test_clientes_sem_comprar_usa_os_dias_pedidos(cenario):
