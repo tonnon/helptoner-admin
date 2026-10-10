@@ -115,3 +115,14 @@ def test_pagina_completa_traz_os_filtros(client_vendedor):
 def test_busca_com_digitos_nao_ascii_nao_quebra(client_vendedor, busca):
     resposta = client_vendedor.get("/pedidos/", {"busca": busca}, headers=HTMX)
     assert resposta.status_code == 200
+
+
+@pytest.mark.parametrize("cabecalhos", [{}, HTMX], ids=["pagina", "htmx"])
+@pytest.mark.parametrize("mes", ["9999-12", "0001-01", "lixo"])
+def test_mes_fora_de_2000_a_2100_vale_como_invalido(client_vendedor, vendedor, mes, cabecalhos):
+    # Revisão final (M1): o mês é ignorado, sem erro 500.
+    ped = montar_pedido_confirmado(vendedor, itens=[(com_estoque(criar_produto(), 5), 1)])
+    r = client_vendedor.get(f"/pedidos/?mes={mes}", headers=cabecalhos)
+    assert r.status_code == 200
+    if cabecalhos:
+        assert f"/pedidos/{ped.pk}/" in r.content.decode()

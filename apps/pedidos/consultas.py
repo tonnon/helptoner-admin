@@ -1,6 +1,6 @@
 import re
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import datetime
 from decimal import Decimal
 
 from django.db.models import Count, QuerySet, Sum
@@ -8,7 +8,7 @@ from django.db.models.functions import Coalesce
 
 from apps.cadastros.buscas import normalizar_busca
 from apps.cadastros.models import Cliente
-from apps.core.datas import hoje, intervalo_de_datas, mes_de
+from apps.core.datas import hoje, intervalo_de_datas, ler_mes, mes_de
 from apps.core.dinheiro import arredondar
 from apps.core.formatacao import inteiro_br
 from apps.core.permissoes import eh_administrador
@@ -59,18 +59,11 @@ def _numero_da_busca(busca: str) -> int | None:
     return int(digitos) if re.fullmatch(r"[0-9]+", digitos) else None
 
 
-def _mes_valido(mes: str) -> date | None:
-    try:
-        return datetime.strptime(mes, "%Y-%m").date()
-    except ValueError:
-        return None
-
-
 def filtrar_pedidos(*, busca: str = "", status: str = "", mes: str = "") -> QuerySet[Pedido]:
     """Pedidos por número ou cliente, status e mês (de Brasília), do mais recente ao mais antigo.
 
     A data de referência é a confirmação ou, no rascunho, a criação. Filtros inválidos
-    (status desconhecido, mês fora de "AAAA-MM") são ignorados.
+    (status desconhecido, mês fora de "AAAA-MM" ou de 2000 a 2100) são ignorados.
     """
     pedidos = (
         Pedido.objects.select_related("cliente", "criado_por")
@@ -88,7 +81,7 @@ def filtrar_pedidos(*, busca: str = "", status: str = "", mes: str = "") -> Quer
             pedidos = pedidos.filter(numero=numero)
     if status in Pedido.Status.values:
         pedidos = pedidos.filter(status=status)
-    primeiro_dia = _mes_valido(mes)
+    primeiro_dia = ler_mes(mes)
     if primeiro_dia is not None:
         inicio, fim = intervalo_de_datas(*mes_de(primeiro_dia))
         pedidos = pedidos.filter(data_referencia__gte=inicio, data_referencia__lt=fim)

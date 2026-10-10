@@ -85,7 +85,11 @@ def detalhe(request, pk):
             contexto["lucro"], contexto["margem"] = lucro_do_pedido(pedido)
         contexto["motivo_max"] = MOTIVO_MAXIMO
         contexto["titulo_cancelar"] = f"Cancelar pedido {numero_pedido(pedido.numero)}?"
-        contexto["texto_cancelar"] = f"O estoque dos {len(itens)} produtos volta."
+        contexto["texto_cancelar"] = (
+            "O estoque do produto volta."
+            if len(itens) == 1
+            else f"O estoque dos {len(itens)} produtos volta."
+        )
     return render(request, "pedidos/detalhe.html", contexto)
 
 

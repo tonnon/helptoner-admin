@@ -59,7 +59,7 @@ def test_administrador_ve_lucro_e_cancela_com_motivo(client_admin, vendedor):
     )
     html = client_admin.get(f"/pedidos/{ped.pk}/").content.decode()
     assert "Lucro bruto R$ 40,00 · margem 40,0%" in html
-    assert "Cancelar pedido" in html and "O estoque dos 1 produtos volta." in html
+    assert "Cancelar pedido" in html and "O estoque do produto volta." in html
     resposta = client_admin.post(f"/pedidos/{ped.pk}/cancelar/", {"motivo": ""}, follow=True)
     assert "Informe o motivo do cancelamento." in resposta.content.decode()
     resposta = client_admin.post(
@@ -90,3 +90,14 @@ def test_vendedor_abre_rascunho_de_outro_usuario_so_para_ler(client_vendedor, ad
     html = resposta.content.decode()
     assert resposta.status_code == 200
     assert "Cancelar pedido" not in html and "/ Rascunho" in html
+
+
+def test_aviso_do_cancelamento_no_plural(client_admin, vendedor):
+    # Revisão final (M11): "O estoque dos 1 produtos volta." no pedido de um item só.
+    a = com_estoque(criar_produto("CE285A"), 5)
+    b = com_estoque(criar_produto("TN-1060", descricao="Toner Brother", marca="Brother"), 5)
+    ped = montar_pedido_confirmado(vendedor, itens=[(a, 1), (b, 2)])
+    assert (
+        "O estoque dos 2 produtos volta."
+        in client_admin.get(f"/pedidos/{ped.pk}/").content.decode()
+    )

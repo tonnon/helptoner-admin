@@ -18,7 +18,7 @@ from django.views.decorators.http import require_GET
 
 from apps.pedidos.consultas import numeros_do_mes, rascunhos_abertos, ultimos_pedidos
 
-from .datas import hoje
+from .datas import hoje, ler_data
 from .historico import TIPOS, eventos
 from .htmx import eh_htmx
 from .permissoes import requer_administrador
@@ -49,15 +49,8 @@ def inicio(request):
     return render(request, "core/inicio.html#painel", contexto)
 
 
-DATA_MINIMA, DATA_MAXIMA = date(2000, 1, 1), date(2100, 12, 31)
-
-
 def _data(texto: str | None, padrao: date) -> date:
-    try:
-        valor = date.fromisoformat(texto or "")
-    except ValueError:
-        return padrao
-    return valor if DATA_MINIMA <= valor <= DATA_MAXIMA else padrao
+    return ler_data(texto) or padrao
 
 
 @requer_administrador

@@ -147,3 +147,14 @@ def test_historico_mostra_o_numero_do_pedido_na_devolucao(client_vendedor, vende
     html = client_vendedor.get("/estoque/", headers={"HX-Request": "true"}).content.decode()
     assert "Saída · pedido nº 1.042" in html and "−3" in html
     assert "Devolução · pedido nº 1.042" in html and "+3" in html
+
+
+@pytest.mark.parametrize("cabecalhos", [{}, {"HX-Request": "true"}], ids=["pagina", "htmx"])
+@pytest.mark.parametrize("q", ["fim=9999-12-31", "inicio=9999-12-31", "fim=lixo"])
+def test_data_fora_de_2000_a_2100_vale_como_invalida(client_vendedor, q, cabecalhos):
+    # Revisão final (M1): a data volta ao padrão (últimos 30 dias), sem erro 500.
+    com_estoque(criar_produto(), 5)
+    r = client_vendedor.get(f"/estoque/?{q}", headers=cabecalhos)
+    assert r.status_code == 200
+    if cabecalhos:
+        assert "CE285A" in r.content.decode()

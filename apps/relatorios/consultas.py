@@ -360,16 +360,21 @@ def funcionarios(f: Filtros) -> list[dict]:
 
 
 def estoque(f: Filtros) -> dict:
-    """Situação atual dos produtos ativos e os movimentos de estoque do período."""
+    """Situação atual dos produtos e os movimentos de estoque do período.
+
+    Entram os produtos ativos e os inativos que ainda têm estoque: o valor em estoque é o das
+    mercadorias que estão na prateleira.
+    """
     linhas = [
         {
             "codigo": p.codigo,
             "descricao": p.descricao,
+            "ativo": p.ativo,
             "estoque": p.estoque,
             "custo_medio": p.custo_medio,
             "valor_em_estoque": arredondar(p.estoque * p.custo_medio),
         }
-        for p in Produto.objects.filter(ativo=True).order_by("codigo")
+        for p in Produto.objects.filter(Q(ativo=True) | Q(estoque__gt=0)).order_by("codigo")
     ]
     inicio, fim = intervalo_de_datas(f.inicio, f.fim)
     movimentos = MovimentoEstoque.objects.filter(criado_em__gte=inicio, criado_em__lt=fim)
@@ -628,7 +633,13 @@ def _tabelas_estoque(f: Filtros) -> list[Tabela]:
                 Coluna("Valor em estoque", "dinheiro"),
             ],
             [
-                [p["codigo"], p["descricao"], p["estoque"], p["custo_medio"], p["valor_em_estoque"]]
+                [
+                    p["codigo"],
+                    p["descricao"] if p["ativo"] else f"{p['descricao']} (inativo)",
+                    p["estoque"],
+                    p["custo_medio"],
+                    p["valor_em_estoque"],
+                ]
                 for p in dados["produtos"]
             ],
         ),

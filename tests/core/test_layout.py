@@ -122,3 +122,12 @@ def test_campo_com_erro(rf):
     html = _componente(rf, "campo", campo=Formulario({"nome": ""})["nome"])
     assert ">Nome</label>" in html and "campo-invalido" in html
     assert 'id="id_nome_error"' in html and 'aria-describedby="id_nome_error"' in html
+
+
+def test_favicon_proprio_nas_duas_bases(client, client_vendedor):
+    # Revisão final (M8): sem o link, o navegador pede /favicon.ico, que passa pelo Django
+    # (sessão, banco e uma página 404 inteira).
+    icone = '<link rel="icon" type="image/png" sizes="32x32" href="/static/img/favicon.png">'
+    assert icone in client_vendedor.get("/").content.decode()
+    assert icone in client.get("/contas/login/").content.decode()
+    assert client.get("/static/img/favicon.png").status_code == 200

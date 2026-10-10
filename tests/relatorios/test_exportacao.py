@@ -6,6 +6,7 @@ from unittest.mock import Mock
 import pytest
 from openpyxl import load_workbook
 
+from apps.cadastros.models import Produto
 from apps.core.datas import hoje
 from apps.core.formatacao import brl
 from apps.core.pdf import CORPO, FONTE, DocumentoPDF
@@ -185,3 +186,14 @@ def test_larguras_de_tabela_sem_linhas():
     colunas = [Coluna("Nome", "texto"), Coluna("Valor", "dinheiro")]
     larguras = _larguras(DocumentoPDF("t", orientacao="L"), colunas, [])
     assert all(w > 0 for w in larguras)
+
+
+def test_excel_e_pdf_do_estoque_incluem_inativo_com_estoque(cenario):
+    # Revisão final (M2): a tela, o Excel e o PDF usam as mesmas tabelas.
+    Produto.objects.filter(pk=cenario.ce285a.pk).update(ativo=False)
+    ws = _planilhas("estoque", SET)["Valor total em estoque"]
+    assert Decimal(str(ws["A4"].value)) == Decimal("7740.00")
+    celulas = [c.value for r in _planilhas("estoque", SET).worksheets[0].iter_rows() for c in r]
+    assert "Toner HP 85A Preto (inativo)" in celulas
+    texto = texto_do_pdf(para_pdf(montar_aba("estoque", SET, FIM_DO_ANO), SET))
+    assert "R$ 7.740,00" in texto and "(inativo)" in texto

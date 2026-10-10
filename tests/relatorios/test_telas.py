@@ -5,6 +5,7 @@ from decimal import Decimal
 
 import pytest
 
+from apps.cadastros.models import Produto
 from apps.relatorios.consultas import ABAS, Comparacao, Indicadores
 from apps.relatorios.views import _blocos_de_indicadores
 
@@ -220,3 +221,10 @@ def test_aba_clientes_com_dias_ajustaveis(client_admin, cenario, monkeypatch):
 
 def test_resposta_varia_com_o_htmx(client_admin):
     assert "HX-Request" in client_admin.get("/relatorios/")["Vary"]
+
+
+def test_aba_estoque_mostra_produto_inativo_com_estoque(client_admin, cenario):
+    # Revisão final (M2).
+    Produto.objects.filter(pk=cenario.ce285a.pk).update(ativo=False)
+    html = _pedaco(client_admin, "/relatorios/estoque/")
+    assert "Toner HP 85A Preto (inativo)" in html and "R$ 7.740,00" in html

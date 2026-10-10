@@ -3,6 +3,7 @@ from decimal import Decimal
 
 import pytest
 
+from apps.cadastros.models import Produto
 from apps.core.datas import hoje
 from apps.relatorios.consultas import (
     ABAS,
@@ -177,3 +178,18 @@ def test_aba_estoque_mostra_o_valor_total_a_custo_medio(cenario):
     total = tabelas["Valor total em estoque"]
     assert [c.tipo for c in total.colunas] == ["dinheiro"]
     assert total.linhas == [[Decimal("7740.00")]]
+
+
+def test_estoque_inclui_produto_inativo_que_ainda_tem_estoque(cenario):
+    # Revisão final (M2): o valor em estoque é o das mercadorias que estão na prateleira.
+    Produto.objects.filter(pk=cenario.ce285a.pk).update(ativo=False)
+    e = estoque(TUDO)
+    assert [(p["codigo"], p["ativo"]) for p in e["produtos"]] == [
+        ("CE285A", False),
+        ("CF217A", True),
+        ("TN-1060", True),
+    ]
+    assert e["zerados"] == ["CF217A"] and e["valor_total"] == Decimal("7740.00")
+    tabelas = {t.titulo: t for t in montar_aba("estoque", TUDO, date(2026, 12, 1)).tabelas}
+    assert tabelas["Estoque atual"].linhas[0][:3] == ["CE285A", "Toner HP 85A Preto (inativo)", 97]
+    assert tabelas["Valor total em estoque"].linhas == [[Decimal("7740.00")]]

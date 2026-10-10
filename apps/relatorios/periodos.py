@@ -7,8 +7,8 @@ from datetime import date, timedelta
 from enum import StrEnum
 from urllib.parse import urlencode
 
-DATA_MINIMA = date(2000, 1, 1)
-DATA_MAXIMA = date(2100, 12, 31)
+from apps.core.datas import ler_data
+
 MAXIMO_DIAS_POR_DIA = 366
 DIAS_SEM_COMPRAR = 60
 MAXIMO_DIAS_SEM_COMPRAR = 3650
@@ -100,17 +100,6 @@ def descricao_comparacao(f: Filtros) -> str:
     return f"vs {f.dias} dias anteriores"
 
 
-def _ler_data(texto: str) -> date | None:
-    texto = (texto or "").strip()
-    if len(texto) != 10:
-        return None
-    try:
-        dia = date.fromisoformat(texto)
-    except ValueError:
-        return None
-    return dia if DATA_MINIMA <= dia <= DATA_MAXIMA else None
-
-
 def ler_filtros(dados: Mapping[str, str], hoje: date) -> tuple[Filtros, list[str]]:
     """Lê os filtros da querystring; o que vier errado gera mensagem e volta ao padrão."""
     erros: list[str] = []
@@ -124,8 +113,8 @@ def ler_filtros(dados: Mapping[str, str], hoje: date) -> tuple[Filtros, list[str
             erros.append("Período inválido.")
 
     if atalho == Atalho.DATAS:
-        data_inicial = _ler_data(dados.get("inicio", ""))
-        data_final = _ler_data(dados.get("fim", ""))
+        data_inicial = ler_data(dados.get("inicio", ""))
+        data_final = ler_data(dados.get("fim", ""))
         erros_datas = []
         if data_inicial is None:
             erros_datas.append("Data inicial inválida.")

@@ -7,7 +7,7 @@ from django.shortcuts import redirect, render
 from django.views.decorators.http import require_GET, require_http_methods
 
 from apps.cadastros.models import Produto
-from apps.core.datas import hoje, intervalo_de_datas
+from apps.core.datas import hoje, intervalo_de_datas, ler_data
 from apps.core.erros import RegraDeNegocio
 from apps.core.htmx import eh_htmx
 from apps.core.permissoes import requer_administrador
@@ -21,10 +21,7 @@ DIAS_PADRAO = 30
 
 
 def _data(texto: str | None, padrao: date) -> date:
-    try:
-        return date.fromisoformat(texto or "")
-    except ValueError:
-        return padrao
+    return ler_data(texto) or padrao
 
 
 def _periodo(request) -> tuple[date, date]:
