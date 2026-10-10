@@ -14,7 +14,7 @@ O id é "relatorio" (e não "conteudo") porque o <main> do base.html já é o #c
   <h1 class="fx">{{ titulo }}</h1>
   {% partial abas %}
   <form method="get" action="{{ request.path }}" class="filtros-relatorio fx fx-1" role="search" aria-label="Filtros do relatório"
-        hx-get="{{ request.path }}" hx-trigger="change, submit" hx-target="#relatorio" hx-push-url="true" hx-indicator="#relatorio">
+        hx-get="{{ request.path }}" hx-trigger="change delay:400ms, submit" hx-target="#relatorio" hx-push-url="true" hx-indicator="#relatorio">
     <label class="filtro">Período
       <span class="campo">
         <select name="atalho">

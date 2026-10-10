@@ -36,6 +36,8 @@ ROTAS_SO_ADMIN += [("post", "/pedidos/1/cancelar/")]
 
 ROTAS_SO_ADMIN += [("get", "/historico/")]
 
+ROTAS_SO_ADMIN += [("get", "/relatorios/vendas/excel/"), ("get", "/relatorios/vendas/pdf/")]
+
 ROTAS_SO_ADMIN += [("get", "/relatorios/")] + [
     ("get", f"/relatorios/{aba}/")
     for aba in ["vendas", "clientes", "produtos", "funcionarios", "estoque", "cancelamentos"]

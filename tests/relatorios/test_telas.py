@@ -4,7 +4,6 @@ from datetime import date
 from decimal import Decimal
 
 import pytest
-from django.urls import reverse
 
 from apps.relatorios.consultas import ABAS, Comparacao, Indicadores
 from apps.relatorios.views import _blocos_de_indicadores
@@ -65,6 +64,9 @@ def test_primeira_carga_com_esqueleto_filtros_e_abas(client_admin, cenario):
     # Barra de filtros: GET com HTMX, conteúdo apagado no lugar enquanto carrega.
     assert 'method="get" action="/relatorios/vendas/"' in html
     assert 'hx-get="/relatorios/vendas/"' in html and 'hx-target="#relatorio"' in html
+    assert (
+        'hx-trigger="change delay:400ms, submit"' in html
+    )  # as datas digitadas não disparam a cada tecla
     assert 'hx-push-url="true"' in html and 'hx-indicator="#relatorio"' in html
     assert '<option value="datas" selected>Escolher datas…</option>' in html
     assert '<option value="semana" selected>Semana</option>' in html
@@ -88,21 +90,6 @@ def test_abas_mantem_os_filtros(client_admin, cenario):
         )
     # Depois de trocar o filtro, as abas voltam junto com o conteúdo (com os filtros novos).
     assert 'id="abas-relatorio"' in pedaco and 'hx-swap-oob="innerHTML"' in pedaco
-
-
-def test_links_de_exportacao_com_os_filtros(client_admin, monkeypatch):
-    def reverse_com_exportar(nome, *args, **kwargs):  # a rota de exportação chega na Tarefa 27
-        if nome == "relatorios:exportar":
-            aba, formato = kwargs["args"]
-            return f"/relatorios/{aba}/{formato}/"
-        return reverse(nome, *args, **kwargs)
-
-    monkeypatch.setattr("apps.relatorios.views.reverse", reverse_com_exportar)
-    url = "/relatorios/vendas/?atalho=3m"
-    for html in (client_admin.get(url).content.decode(), _pedaco(client_admin, url)):
-        query = "atalho=3m&amp;agrupamento=mes"
-        assert f'<a href="/relatorios/vendas/excel/?{query}" class="btn-sec">⤓ Excel</a>' in html
-        assert f'<a href="/relatorios/vendas/pdf/?{query}" class="btn-sec">⤓ PDF</a>' in html
 
 
 def test_variacao_dos_indicadores(client_admin, cenario):

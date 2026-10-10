@@ -170,3 +170,10 @@ def test_clientes_sem_comprar_levam_o_pedido_a_repetir(cenario, aba, indice):
 def test_clientes_sem_comprar_usa_os_dias_pedidos(cenario):
     rel = montar_aba("clientes", TUDO, date(2026, 11, 10), dias_sem_comprar=40)
     assert [linha[0] for linha in rel.tabelas[1].linhas] == ["Clínica Bem Viver"]
+
+
+def test_aba_estoque_mostra_o_valor_total_a_custo_medio(cenario):
+    tabelas = {t.titulo: t for t in montar_aba("estoque", TUDO, date(2026, 12, 1)).tabelas}
+    total = tabelas["Valor total em estoque"]
+    assert [c.tipo for c in total.colunas] == ["dinheiro"]
+    assert total.linhas == [[Decimal("7740.00")]]

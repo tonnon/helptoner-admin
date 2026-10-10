@@ -5,13 +5,17 @@ Padrão P18: a primeira carga traz as abas, os filtros e o esqueleto; o HTMX bus
 a tela mostra (blocos de indicadores e os dados dos gráficos).
 """
 
+import logging
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
 
-from django.http import Http404
-from django.shortcuts import render
-from django.urls import NoReverseMatch, reverse
+from django.contrib import messages
+from django.http import Http404, HttpResponse
+from django.shortcuts import redirect, render
+from django.urls import reverse
+from django.utils.cache import add_never_cache_headers, patch_cache_control
+from django.utils.http import content_disposition_header
 from django.views.decorators.http import require_GET
 from django.views.decorators.vary import vary_on_headers
 
@@ -22,6 +26,7 @@ from apps.core.htmx import eh_htmx
 from apps.core.permissoes import requer_administrador
 
 from .consultas import ABAS, Comparacao, montar_aba
+from .exportacao import para_excel, para_pdf
 from .periodos import (
     DIAS_SEM_COMPRAR,
     Agrupamento,
@@ -30,6 +35,8 @@ from .periodos import (
     ler_dias_sem_comprar,
     ler_filtros,
 )
+
+log_exportacao = logging.getLogger("helptoner.relatorios")
 
 # Cores das séries (§7): azul da marca e laranja, aprovadas pelo validador de cores.
 COR_FATURAMENTO = "#0200FF"
@@ -173,15 +180,11 @@ def _abas(atual: str, query: str) -> list[Link]:
 
 
 def _exportacoes(aba: str, query: str) -> list[Link]:
-    """Os links "⤓ Excel" e "⤓ PDF" com os filtros; ficam de fora enquanto a rota não existe."""
-    links = []
-    for formato, nome in EXPORTACOES:
-        try:
-            url = reverse("relatorios:exportar", args=[aba, formato])
-        except NoReverseMatch:
-            return []
-        links.append(Link(nome, f"{url}?{query}"))
-    return links
+    """Os links "⤓ Excel" e "⤓ PDF" com os filtros."""
+    return [
+        Link(nome, f"{reverse('relatorios:exportar', args=[aba, formato])}?{query}")
+        for formato, nome in EXPORTACOES
+    ]
 
 
 def _opcoes_de_periodo(dia: date) -> list[tuple[str, str]]:
@@ -200,6 +203,13 @@ def _funcionarios() -> list[tuple[int, str]]:
     ]
 
 
+def _dias_da_aba(aba: str, dados) -> tuple[int, list[str]]:
+    """Só a aba Clientes tem o "sem comprar há mais de X dias" ajustável."""
+    if aba == "clientes":
+        return ler_dias_sem_comprar(dados)
+    return DIAS_SEM_COMPRAR, []
+
+
 @requer_administrador
 @require_GET
 @vary_on_headers("HX-Request")
@@ -209,13 +219,10 @@ def relatorio(request, aba: str = "resumo"):
         raise Http404
     dia = hoje()
     f, erros = ler_filtros(request.GET, dia)
-    dias = DIAS_SEM_COMPRAR
+    dias, erros_dias = _dias_da_aba(aba, request.GET)
+    erros += erros_dias
     query = f.como_querystring()
-    query_exportar = query
-    if aba == "clientes":  # só a aba Clientes tem o "sem comprar há mais de X dias" ajustável
-        dias, erros_dias = ler_dias_sem_comprar(request.GET)
-        erros += erros_dias
-        query_exportar += f"&dias={dias}"
+    query_exportar = query + (f"&dias={dias}" if aba == "clientes" else "")
     contexto = {
         "aba": aba,
         "titulo": ABAS[aba],
@@ -250,3 +257,40 @@ def _contexto_do_resumo(rel, f: Filtros) -> dict:
         "dados_linha": _dados_do_grafico_de_linhas(rel.graficos["serie"]),
         "dados_barras": _dados_do_grafico_de_barras(rel.graficos["produtos"]),
     }
+
+
+# Formato da URL → (extensão, tipo do arquivo).
+FORMATOS = {
+    "excel": ("xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+    "pdf": ("pdf", "application/pdf"),
+}
+
+
+@requer_administrador
+@require_GET
+def exportar(request, aba: str, formato: str):
+    """Baixa a aba em Excel ou PDF, com os mesmos filtros da tela."""
+    if aba not in ABAS or formato not in FORMATOS:
+        raise Http404
+    dia = hoje()
+    f, _ = ler_filtros(request.GET, dia)
+    dias, _ = _dias_da_aba(aba, request.GET)
+    try:
+        gerar = para_excel if formato == "excel" else para_pdf
+        dados = gerar(montar_aba(aba, f, dia, dias), f)
+    except Exception:
+        # O Sentry recebe pela integração de logging; o log não leva dado pessoal nem filtros.
+        log_exportacao.exception("Falha ao exportar o relatório %s em %s", aba, formato)
+        messages.error(
+            request,
+            "Não foi possível gerar o arquivo. Tente de novo; se continuar, avise o administrador.",
+        )
+        query = f.como_querystring() + (f"&dias={dias}" if aba == "clientes" else "")
+        return redirect(f"{_url_da_aba(aba)}?{query}")
+    extensao, tipo = FORMATOS[formato]
+    nome = f"relatorio-{aba}-{f.inicio.isoformat()}-a-{f.fim.isoformat()}.{extensao}"
+    resposta = HttpResponse(dados, content_type=tipo)
+    resposta["Content-Disposition"] = content_disposition_header(True, nome)
+    add_never_cache_headers(resposta)  # dados pessoais e financeiros: nada de cache
+    patch_cache_control(resposta, private=True)
+    return resposta

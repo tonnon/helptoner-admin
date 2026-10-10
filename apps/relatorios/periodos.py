@@ -88,6 +88,8 @@ def descricao_comparacao(f: Filtros) -> str:
         return "vs 12 meses anteriores"
     if f.atalho == Atalho.ANO:
         return f"vs mesmo período de {f.inicio.year - 1}"
+    if f.dias == 1:
+        return "vs 1 dia anterior"
     return f"vs {f.dias} dias anteriores"
 
 

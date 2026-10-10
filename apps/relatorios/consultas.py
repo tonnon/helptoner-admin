@@ -632,6 +632,11 @@ def _tabelas_estoque(f: Filtros) -> list[Tabela]:
                 for p in dados["produtos"]
             ],
         ),
+        Tabela(
+            "Valor total em estoque",
+            [Coluna("Valor total em estoque", "dinheiro")],
+            [[dados["valor_total"]]],
+        ),
         Tabela("Produtos zerados", [Coluna("Código", "texto")], [[c] for c in dados["zerados"]]),
         Tabela(
             "Movimentos no período",
