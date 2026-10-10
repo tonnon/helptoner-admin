@@ -144,11 +144,16 @@ def _larguras(pdf: DocumentoPDF, colunas: list[Coluna], linhas: list[list[str]])
     minimo_texto = {j: min(desejada[j], MINIMO_DO_TEXTO) for j in texto}
     sobra = disponivel - sum(desejada[j] for j in numeros)
     if sobra < sum(minimo_texto.values()):
-        fator = max(disponivel - sum(minimo_texto.values()), 0) / sum(desejada[j] for j in numeros)
+        # Os números encolhem juntos para dar o mínimo ao texto, sem passar do cabeçalho.
+        total_numeros = sum(desejada[j] for j in numeros)
+        fator = max(disponivel - sum(minimo_texto.values()), 0) / total_numeros if numeros else 0
         for j in numeros:
             larguras[j] = max(desejada[j] * fator, cabecalho[j])
+        # Se nem assim couber, o texto divide o que restou, na proporção do mínimo de cada um.
+        resto = max(disponivel - sum(larguras[j] for j in numeros), 1.0)
+        escala = min(1.0, resto / sum(minimo_texto.values()))
         for j in texto:
-            larguras[j] = minimo_texto[j]
+            larguras[j] = minimo_texto[j] * escala
         return larguras
     peso = sum(desejada[j] for j in texto)
     for j in texto:

@@ -170,3 +170,18 @@ def test_nomes_de_planilha_unicos_com_ate_31_caracteres():
     titulo = "Clientes sem comprar há mais de 60 dias"
     nomes = [_nome_da_planilha(titulo, usados) for _ in range(3)]
     assert len(set(nomes)) == 3 and all(len(n) <= 31 for n in nomes)
+
+
+@pytest.mark.parametrize("quantidade", [1, 12])
+def test_larguras_de_tabela_so_de_texto(quantidade):
+    colunas = [Coluna(f"Coluna {i}", "texto") for i in range(quantidade)]
+    pdf = DocumentoPDF("t", orientacao="L")
+    larguras = _larguras(pdf, colunas, [["texto bem comprido " * 5] * quantidade])
+    assert len(larguras) == quantidade and all(w > 0 for w in larguras)
+    assert sum(larguras) <= pdf.epw + 0.001
+
+
+def test_larguras_de_tabela_sem_linhas():
+    colunas = [Coluna("Nome", "texto"), Coluna("Valor", "dinheiro")]
+    larguras = _larguras(DocumentoPDF("t", orientacao="L"), colunas, [])
+    assert all(w > 0 for w in larguras)
