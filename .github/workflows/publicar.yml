@@ -1,0 +1,62 @@
+name: Publicar
+on: { workflow_dispatch: {} }
+concurrency: { group: publicar, cancel-in-progress: false }
+permissions: { contents: read }
+jobs:
+  testes:
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/ci.yml
+  backup:
+    if: github.ref == 'refs/heads/main'
+    needs: testes
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/backup
+        with:
+          nome: backup-antes-de-publicar-${{ github.run_id }}
+          database-url: ${{ secrets.DATABASE_URL_DIRETA }}
+          senha: ${{ secrets.BACKUP_SENHA }}
+  migrar:
+    if: github.ref == 'refs/heads/main'
+    needs: backup
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.producao
+      DATABASE_URL: ${{ secrets.DATABASE_URL_DIRETA }}
+      DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+      DJANGO_ALLOWED_HOSTS: localhost
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with: { enable-cache: true }
+      - run: uv python install 3.14
+      - run: uv sync --locked --no-dev
+      - run: uv run --no-dev python manage.py migrate --noinput
+  publicar:
+    if: github.ref == 'refs/heads/main'
+    needs: migrar
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      URL_PRODUCAO: ${{ vars.URL_PRODUCAO }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Publicar na Vercel
+        run: |
+          set -euo pipefail
+          URL_DEPLOY="$(npx --yes vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN")"
+          echo "Publicado em: $URL_DEPLOY"
+      - name: Conferir o sistema no ar
+        run: |
+          set -euo pipefail
+          if [ -z "$URL_PRODUCAO" ]; then
+            echo "A variável URL_PRODUCAO do repositório está vazia (ex.: https://helptoner-pedidos.vercel.app, sem barra no fim)." >&2
+            exit 1
+          fi
+          curl -fsS --retry 5 --retry-delay 5 --retry-all-errors "${URL_PRODUCAO}/saude/"

@@ -1,0 +1,33 @@
+name: Backup cifrado do banco
+description: >-
+  Faz o pg_dump do banco, cifra com gpg (AES256) e envia como artefato por 30 dias.
+inputs:
+  nome:
+    description: Nome do artefato.
+    required: true
+  database-url:
+    description: Conexão direta (sem pooler) com o banco.
+    required: true
+  senha:
+    description: Senha de cifragem do backup.
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: ./.github/actions/cliente-postgres
+    - name: Gerar e cifrar o backup
+      shell: bash
+      env:
+        URL: ${{ inputs.database-url }}
+        SENHA: ${{ inputs.senha }}
+      run: |
+        set -euo pipefail
+        pg_dump --format=custom --no-owner --no-privileges "$URL" -f backup.dump
+        gpg --batch --yes --pinentry-mode loopback --passphrase "$SENHA" --symmetric --cipher-algo AES256 -o backup.dump.gpg backup.dump
+        rm backup.dump
+        ls -l backup.dump.gpg
+    - uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.nome }}
+        path: backup.dump.gpg
+        retention-days: 30

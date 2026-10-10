@@ -1,0 +1,54 @@
+name: Teste de restauração
+on:
+  schedule:
+    - cron: "0 9 1 * *"
+  workflow_dispatch: {}
+permissions: { actions: read, contents: read }
+jobs:
+  restaurar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:18
+        env: { POSTGRES_USER: helptoner, POSTGRES_PASSWORD: helptoner, POSTGRES_DB: helptoner }
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U helptoner" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://helptoner:helptoner@localhost:5432/helptoner
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      BACKUP_SENHA: ${{ secrets.BACKUP_SENHA }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/cliente-postgres
+      - uses: astral-sh/setup-uv@v6
+        with: { enable-cache: true }
+      - run: uv python install 3.14
+      - name: Baixar o último backup
+        run: |
+          set -euo pipefail
+          ID="$(gh run list --workflow backup.yml --status success --limit 1 --json databaseId -q '.[0].databaseId')"
+          if [ -z "$ID" ]; then
+            echo "Nenhuma execução bem-sucedida do backup.yml foi encontrada." >&2
+            exit 1
+          fi
+          gh run download "$ID" --dir restauracao
+          ARQUIVOS="$(find restauracao -name backup.dump.gpg)"
+          if [ "$(printf '%s\n' "$ARQUIVOS" | grep -c .)" -ne 1 ]; then
+            echo "Esperava exatamente um backup.dump.gpg, achei:" >&2
+            echo "$ARQUIVOS" >&2
+            exit 1
+          fi
+          echo "ARQUIVO_GPG=$ARQUIVOS" >> "$GITHUB_ENV"
+      - name: Decifrar
+        run: |
+          set -euo pipefail
+          gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_SENHA" -d "$ARQUIVO_GPG" > backup.dump
+      - name: Restaurar no PostgreSQL local
+        run: |
+          set -euo pipefail
+          pg_restore --no-owner --no-privileges -d "$DATABASE_URL" backup.dump
+      - run: uv sync --locked
+      - name: Conferir os dados restaurados
+        run: uv run python manage.py shell -c "from apps.pedidos.models import Pedido; from apps.cadastros.models import Cliente, Produto; print(Pedido.objects.count(), Cliente.objects.count(), Produto.objects.count())"
