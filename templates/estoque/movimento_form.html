@@ -14,7 +14,7 @@ resumo com os mesmos dados escondidos e confirmar=1; o segundo grava.
       {% if confirmacao %}
         <form method="post" action="{{ request.path }}" class="mt-4">
           {% csrf_token %}
-          <div class="alerta-erro" role="alert"><p>{{ confirmacao }}</p></div>
+          <div class="alerta-aviso mb-3.5" role="status"><p>{{ confirmacao }}</p></div>
           <input type="hidden" name="codigo" value="{{ form.cleaned_data.codigo }}">
           <input type="hidden" name="sentido" value="{{ form.cleaned_data.sentido }}">
           <input type="hidden" name="quantidade" value="{{ form.cleaned_data.quantidade }}">

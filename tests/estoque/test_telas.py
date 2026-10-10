@@ -45,7 +45,10 @@ def test_ajuste_pede_confirmacao(client_admin):
     p = com_estoque(criar_produto(), 5, "60.00")
     dados = {"codigo": "CE285A", "sentido": "menos", "quantidade": "1", "motivo": "avaria"}
     r = client_admin.post("/estoque/ajuste/", dados)
-    assert "Confirme o ajuste" in r.content.decode() and p.movimentos.count() == 1
+    html = r.content.decode()
+    assert "Confirme o ajuste" in html and p.movimentos.count() == 1
+    # É uma pergunta, não um erro: caixa âmbar de aviso, nunca a vermelha.
+    assert 'class="alerta-aviso mb-3.5" role="status"' in html and "alerta-erro" not in html
     client_admin.post("/estoque/ajuste/", dados | {"confirmar": "1"})
     assert p.movimentos.count() == 2
 
