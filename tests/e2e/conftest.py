@@ -15,7 +15,8 @@ def permitir_django_no_laco_assincrono(monkeypatch):
 
 @pytest.fixture
 def pagina(page, live_server):
-    """A página do navegador. No fim do teste, falha se o console acusou violação de CSP."""
+    """A página do navegador. No fim do teste, falha se o console acusou violação de CSP ou se
+    algum JavaScript da página deu erro."""
     mensagens: list[str] = []
     erros: list[str] = []
     page.on("console", lambda mensagem: mensagens.append(mensagem.text))
@@ -23,6 +24,7 @@ def pagina(page, live_server):
     yield page
     violacoes = [m for m in mensagens if any(marca in m for marca in MARCAS_DE_CSP)]
     assert not violacoes, f"Violação de CSP no console: {violacoes}"
+    assert not erros, f"Erro de JavaScript na página: {erros}"
 
 
 def entrar(pagina, live_server, usuario) -> None:

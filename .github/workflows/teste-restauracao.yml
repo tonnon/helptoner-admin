@@ -52,5 +52,12 @@ jobs:
           pg_restore --version
           pg_restore --no-owner --no-privileges -d "$DATABASE_URL" backup.dump
       - run: uv sync --locked
+      # Falha se o banco restaurado não registra todas as migrações do código: restauração vazia
+      # ou pela metade. Também falha se o backup é anterior a uma publicação com migração nova;
+      # nesse caso, rode de novo depois do backup da noite.
+      - name: Conferir as migrações
+        run: |
+          set -euo pipefail
+          uv run python manage.py migrate --check
       - name: Conferir os dados restaurados
         run: uv run python manage.py shell -c "from apps.pedidos.models import Pedido; from apps.cadastros.models import Cliente, Produto; print(Pedido.objects.count(), Cliente.objects.count(), Produto.objects.count())"
