@@ -43,7 +43,7 @@ class RecusarNuloMiddleware:
 
     def __call__(self, request):
         if _tem_nulo(request.GET) or _tem_nulo(request.POST):
-            log_seguranca.warning("caractere nulo recusado caminho=%s", request.path)
+            log_seguranca.warning("caractere nulo recusado caminho=%r", request.path)
             resposta = erro_400(request)
             for middleware in self.cabecalhos:
                 resposta = middleware.process_response(request, resposta)

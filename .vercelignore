@@ -1,0 +1,6 @@
+tests/
+docs/
+tailwind/
+.github/
+.ferramentas/
+test-results/

@@ -2,6 +2,7 @@ import logging
 import secrets
 from datetime import date, timedelta
 
+import sentry_sdk
 from django.contrib.auth.decorators import login_not_required
 from django.core.paginator import Paginator
 from django.http import (
@@ -88,7 +89,7 @@ def erro_400(request, exception=None):
 def erro_403(request, exception=None):
     usuario = getattr(request, "user", None)
     log_seguranca.warning(
-        "acesso negado usuario=%s caminho=%s",
+        "acesso negado usuario=%s caminho=%r",
         getattr(usuario, "pk", None),
         request.path,
     )
@@ -100,8 +101,9 @@ def erro_404(request, exception=None):
 
 
 def erro_500(request):
-    codigo = secrets.token_hex(4)
-    log_erros.error("erro interno codigo=%s caminho=%s", codigo, request.path, exc_info=True)
+    # Com o Sentry ligado, o código de referência é o id do evento, para achar o erro lá.
+    codigo = sentry_sdk.last_event_id() or secrets.token_hex(4)
+    log_erros.error("erro interno codigo=%s caminho=%r", codigo, request.path, exc_info=True)
     # Sem o request, nenhum context processor roda: a página não depende da sessão nem do
     # banco (que podem ser a causa do erro) e não consome as mensagens da próxima página.
     return HttpResponseServerError(loader.render_to_string("500.html", {"codigo": codigo}))
