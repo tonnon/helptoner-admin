@@ -146,6 +146,20 @@ def test_zerar_2fa_pela_tela(client_admin, vendedor):
     assert not Authenticator.objects.filter(user=vendedor).exists()
 
 
+def test_zerar_o_proprio_2fa_pela_tela_sai_do_sistema(client_admin, administrador):
+    # As sessões do próprio Administrador também acabam (o celular dele pode ser o perdido).
+    r = client_admin.post(f"/funcionarios/{administrador.pk}/zerar-2fa/", follow=True)
+    assert r.status_code == 200 and r.redirect_chain[-1][0] == "/contas/login/"
+    assert "Entre de novo para configurar o aplicativo autenticador." in r.content.decode()
+    assert not Authenticator.objects.filter(user=administrador).exists()
+    assert client_admin.get("/")["Location"].startswith("/contas/login/")
+
+
+def test_dialogo_de_zerar_2fa_lembra_de_redefinir_a_senha(client_admin, vendedor):
+    html = client_admin.get(f"/funcionarios/{vendedor.pk}/").content.decode()
+    assert "Celular perdido ou roubado? Use também Redefinir senha." in html
+
+
 def test_desativar_pela_tela(client_admin, vendedor):
     r = client_admin.post(f"/funcionarios/{vendedor.pk}/desativar/", follow=True)
     assert r.redirect_chain[-1][0] == "/funcionarios/"

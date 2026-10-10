@@ -147,15 +147,15 @@ def test_redefinir_senha_derruba_a_sessao(client, administrador, vendedor):
 
 
 def test_zerar_2fa_leva_de_volta_a_configuracao(client, administrador, vendedor):
-    client.force_login(vendedor)
     zerar_2fa(vendedor, por=administrador)
     assert not Authenticator.objects.filter(user=vendedor).exists()  # TOTP e códigos
-    assert client.get("/")["Location"] == "/contas/2fa/totp/activate/"
     vendedor.refresh_from_db()
     assert not vendedor.codigos_recuperacao_entregues
     registro = vendedor.history.first()
     assert registro.history_change_reason == "Verificação em duas etapas zerada"
     assert registro.history_user == administrador
+    client.force_login(vendedor)  # o próximo acesso
+    assert client.get("/")["Location"] == "/contas/2fa/totp/activate/"
 
 
 def test_desativar_tira_o_acesso_na_hora(client, administrador, vendedor):
@@ -219,6 +219,18 @@ def test_desativar_encerra_as_sessoes_abertas(client, client_admin, administrado
     # Reativado depois (pelo painel), a sessão antiga não volta a valer.
     Usuario.objects.filter(pk=vendedor.pk).update(is_active=True)
     assert client.get("/")["Location"].startswith("/contas/login/")
+
+
+def test_zerar_2fa_encerra_as_sessoes_abertas(client, client_admin, administrador, vendedor):
+    # Revisão final (I1): o celular perdido ou roubado não continua logado. Senão, ele seria
+    # levado à ativação do autenticador e poderia cadastrar outro aplicativo na conta.
+    client.force_login(vendedor)
+    Client().force_login(vendedor)  # outro navegador
+    assert len(_sessoes_de(vendedor)) == 2
+    zerar_2fa(vendedor, por=administrador)
+    assert _sessoes_de(vendedor) == [] and _sessoes_de(administrador)
+    assert client.get("/")["Location"].startswith("/contas/login/")
+    assert client_admin.get("/").status_code == 200
 
 
 # Ruling R15: um Administrador comum que zera o 2FA, redefine a senha ou rebaixa um superusuário

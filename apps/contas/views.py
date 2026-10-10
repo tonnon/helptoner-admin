@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth import logout, update_session_auth_hash
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.cache import add_never_cache_headers
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
@@ -126,6 +126,16 @@ def funcionario_redefinir_senha(request, pk):
 def funcionario_zerar_2fa(request, pk):
     funcionario = get_object_or_404(Usuario, pk=pk)
     zerar_2fa(funcionario, por=request.user)
+    if funcionario.pk == request.user.pk:
+        # A sessão atual já foi apagada no banco: sem o logout, o SessionMiddleware tentaria
+        # regravá-la (SESSION_SAVE_EVERY_REQUEST) e a resposta seria um erro 400.
+        logout(request)
+        messages.success(
+            request,
+            "Verificação em duas etapas zerada. Entre de novo para configurar o aplicativo "
+            "autenticador.",
+        )
+        return redirect("account_login")
     messages.success(request, "Verificação em duas etapas zerada.")
     return redirect("contas:funcionario_editar", pk=pk)
 

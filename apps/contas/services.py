@@ -160,9 +160,13 @@ def redefinir_senha(usuario: Usuario, *, por) -> str:
 
 
 def zerar_2fa(usuario: Usuario, *, por) -> None:
-    """Apaga o autenticador e os códigos de recuperação (celular perdido).
+    """Apaga o autenticador e os códigos de recuperação (celular perdido) e encerra as sessões.
 
-    O funcionário volta à etapa 2 do primeiro acesso e configura o aplicativo de novo.
+    Uma sessão que continuasse aberta no celular perdido seria levada à ativação do autenticador
+    e poderia cadastrar outro aplicativo na conta. No próximo acesso, o funcionário entra com a
+    senha e volta à etapa 2 do primeiro acesso. Quando o Administrador zera o próprio 2FA, as
+    sessões dele também acabam, inclusive a atual (o celular perdido pode ser o dele): a view o
+    leva ao login.
     """
     exigir_administrador(por)
     with transaction.atomic():
@@ -175,6 +179,7 @@ def zerar_2fa(usuario: Usuario, *, por) -> None:
             campos=["codigos_recuperacao_entregues"],
         )
         _gravar(usuario, por=por, motivo=motivo, campos=campos)
+        _encerrar_sessoes(usuario)
 
 
 def desativar_funcionario(usuario: Usuario, *, por) -> None:

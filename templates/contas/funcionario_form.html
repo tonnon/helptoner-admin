@@ -55,7 +55,7 @@ cada uma com confirmação (componentes/dialogo.html). Ninguém desativa a si me
           <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p class="flex items-center gap-2 text-sm font-semibold">Verificação em duas etapas {% if funcionario.codigos_recuperacao_entregues %}<span class="etiqueta-verde">Ativo</span>{% else %}<span class="etiqueta-ambar">Pendente</span>{% endif %}</p>
-              <p class="text-[13px] text-texto-2">Para quando o celular for perdido: no próximo acesso, {{ funcionario.primeiro_nome }} configura o aplicativo autenticador de novo.</p>
+              <p class="text-[13px] text-texto-2">Para quando o celular for perdido: {{ funcionario.primeiro_nome }} sai do sistema na hora e configura o aplicativo autenticador de novo no próximo acesso.</p>
             </div>
             <button type="button" class="btn-sec" data-abrir-dialogo="zerar-2fa">Zerar 2FA</button>
           </div>
@@ -77,7 +77,7 @@ cada uma com confirmação (componentes/dialogo.html). Ninguém desativa a si me
         {% url 'contas:funcionario_redefinir_senha' funcionario.pk as url_redefinir %}
         {% include "componentes/dialogo.html" with id="redefinir-senha" titulo="Redefinir a senha de "|add:funcionario.nome|add:"?" texto="O sistema gera uma senha temporária nova, e o acesso atual acaba na hora." acao_url=url_redefinir botao="Redefinir senha" %}
         {% url 'contas:funcionario_zerar_2fa' funcionario.pk as url_zerar %}
-        {% include "componentes/dialogo.html" with id="zerar-2fa" titulo="Zerar a verificação em duas etapas?" texto="O aplicativo autenticador e os códigos de recuperação de "|add:funcionario.nome|add:" deixam de valer. No próximo acesso, é preciso configurar tudo de novo." acao_url=url_zerar botao="Zerar 2FA" perigo=True %}
+        {% include "componentes/dialogo.html" with id="zerar-2fa" titulo="Zerar a verificação em duas etapas?" texto="O aplicativo autenticador e os códigos de recuperação de "|add:funcionario.nome|add:" deixam de valer e o acesso atual acaba na hora. No próximo acesso, é preciso configurar tudo de novo. Celular perdido ou roubado? Use também Redefinir senha." acao_url=url_zerar botao="Zerar 2FA" perigo=True %}
         {% if funcionario.pk != user.pk %}
           {% url 'contas:funcionario_desativar' funcionario.pk as url_desativar %}
           {% include "componentes/dialogo.html" with id="desativar" titulo="Desativar "|add:funcionario.nome|add:"?" texto="O acesso acaba na hora. O histórico continua guardado." acao_url=url_desativar botao="Desativar" perigo=True %}
