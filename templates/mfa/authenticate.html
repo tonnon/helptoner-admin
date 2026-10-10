@@ -12,7 +12,7 @@ O mesmo campo aceita o código de 6 dígitos do aplicativo e um código de recup
   <form method="post" action="{% url 'mfa_authenticate' %}" class="mt-5">
     {% csrf_token %}
     {% include "componentes/erros_do_formulario.html" %}
-    {% include "componentes/campo_codigo.html" with campo=form.code autofoco=True %}
+    {% include "componentes/campo_codigo.html" with campo=form.code autofoco=True recuperacao=True %}
     <button type="submit" class="btn-pri mt-6 w-full">Verificar</button>
   </form>
   <details class="dica mt-5 text-center">

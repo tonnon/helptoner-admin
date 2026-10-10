@@ -36,7 +36,7 @@ def test_confiar_neste_computador_dispensa_o_codigo_no_proximo_login(
     pagina.get_by_label("E-mail").fill(administrador.email)
     pagina.get_by_label("Senha").fill(SENHA_TESTE)
     pagina.get_by_role("button", name="Entrar").click()
-    pagina.get_by_label("Código de 6 dígitos").fill(codigo_totp(administrador))
+    pagina.get_by_label("Código", exact=True).fill(codigo_totp(administrador))
     pagina.get_by_role("button", name="Verificar").click()
     expect(pagina.get_by_role("heading", name="Confiar neste computador?")).to_be_visible()
     pagina.get_by_role("button", name="Confiar neste computador").click()

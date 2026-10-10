@@ -1,3 +1,4 @@
+import re
 import time
 from datetime import UTC, datetime
 
@@ -208,9 +209,26 @@ def test_textos_das_telas_de_login_e_de_verificacao(client, db):
     u = criar_usuario()
     entrar_com_senha(client, u.email)
     html = client.get("/contas/2fa/authenticate/").content.decode()
-    assert "Verificação em duas etapas" in html and ">Código de 6 dígitos</label>" in html
+    assert "Verificação em duas etapas" in html and ">Código</label>" in html
     assert ">Verificar</button>" in html
     assert "Perdeu o celular? Use um código de recuperação" in html
+
+
+def test_campo_do_codigo_explica_que_aceita_codigo_de_recuperacao(client, client_vendedor, db):
+    # O mesmo campo recebe o código do aplicativo (6 números) e o de recuperação (8 caracteres):
+    # o rótulo não pode dizer "6 dígitos" e o campo não pode barrar o código mais longo.
+    u = criar_usuario()
+    entrar_com_senha(client, u.email)
+    paginas = [
+        client.get("/contas/2fa/authenticate/").content.decode(),
+        client_vendedor.get("/contas/2fa/reauthenticate/").content.decode(),
+    ]
+    for html in paginas:
+        assert ">Código</label>" in html and "6 dígitos" not in html
+        assert "Os 6 números do aplicativo ou um código de recuperação." in html
+        assert "pattern=" not in html
+        m = re.search(r'maxlength="(\d+)"', html)
+        assert m and int(m.group(1)) >= 8
 
 
 @override_settings(ACCOUNT_RATE_LIMITS={"login": "1/m/ip"})
