@@ -244,3 +244,19 @@ def test_reverter_pelo_historico_do_painel_nao_desfaz_estoque(administrador):
     versao.save()
     p.refresh_from_db()
     assert (p.estoque, p.custo_medio) == (15, Decimal("133.3333"))
+
+
+def test_reverter_produto_apagado_pelo_historico_do_painel_recria_o_produto(db):
+    # Rodada residual (R40): o "reverter" do painel de um produto apagado chama save() de uma
+    # instância cuja linha não existe mais; o guarda do save() (update_fields) levantava
+    # NotUpdated e o painel dava erro 500.
+    p = criar_produto(codigo="ce285a", descricao="Toner antigo", preco="150.00")
+    pk = p.pk
+    p.delete()
+    assert not Produto.objects.filter(pk=pk).exists()
+    versao = Produto.history.filter(id=pk).latest().instance  # o que o painel monta
+    versao.estoque, versao.custo_medio = 99, Decimal("77")  # valores velhos não podem voltar
+    versao.save()
+    p = Produto.objects.get(pk=pk)
+    assert (p.codigo, p.descricao, p.preco) == ("CE285A", "Toner antigo", Decimal("150.00"))
+    assert (p.estoque, p.custo_medio) == (0, 0)

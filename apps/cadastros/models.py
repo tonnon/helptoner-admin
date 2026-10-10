@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from simple_history.models import HistoricalRecords
 
 from .documentos import normalizar_documento, validar_documento
@@ -149,4 +149,19 @@ class Produto(models.Model):
                 and campo.name not in CAMPOS_DOS_MOVIMENTOS
                 and campo.attname not in adiados
             ]
+            try:
+                # Savepoint: o save_base marca a transação como quebrada ao levantar o erro.
+                with transaction.atomic(using=kwargs.get("using")):
+                    super().save(*args, **kwargs)
+            except self.NotUpdated:
+                # A linha não existe mais: o "reverter" do painel (simple-history) de um produto
+                # apagado. Recria o produto com estoque e custo zerados (o padrão do modelo), e não
+                # com o que a instância histórica carrega: como as chaves estrangeiras dos
+                # movimentos são PROTECT, um produto que pôde ser apagado nunca teve movimento.
+                kwargs.pop("update_fields")
+                self.estoque = self._meta.get_field("estoque").get_default()
+                self.custo_medio = self._meta.get_field("custo_medio").get_default()
+                kwargs["force_insert"] = True
+                super().save(*args, **kwargs)
+            return
         super().save(*args, **kwargs)
