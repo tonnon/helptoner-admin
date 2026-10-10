@@ -81,15 +81,31 @@ def ativar_2fa(usuario) -> str:
     return segredo
 
 
-def totp_agora(segredo: str) -> str:
-    """O código de 6 dígitos do momento. O allauth recusa o mesmo código duas vezes em 30 s."""
-    return f"{hotp_value(segredo, int(time.time()) // 30):06d}"
+def _passo_totp_atual() -> int:
+    """O passo de 30 s do momento.
+
+    Faltando menos de 2 s para o próximo passo, espera por ele: o código ainda precisa chegar ao
+    servidor (nos testes no navegador, depois de digitado).
+    """
+    resto = 30 - time.time() % 30
+    if resto < 2:
+        time.sleep(resto + 0.01)
+    return int(time.time()) // 30
 
 
-def codigo_totp(usuario) -> str:
+def totp_agora(segredo: str, *, passos_atras: int = 0) -> str:
+    """O código de 6 dígitos do momento (ou de `passos_atras` passos de 30 s antes).
+
+    O allauth recusa o mesmo código duas vezes em 30 s.
+    """
+    return f"{hotp_value(segredo, _passo_totp_atual() - passos_atras):06d}"
+
+
+def codigo_totp(usuario, *, passos_atras: int = 0) -> str:
     """O código de 6 dígitos do momento para o TOTP já ativo do usuário."""
     totp = Authenticator.objects.get(user=usuario, type=Authenticator.Type.TOTP)
-    return totp_agora(get_mfa_adapter().decrypt(totp.data["secret"]))
+    segredo = get_mfa_adapter().decrypt(totp.data["secret"])
+    return totp_agora(segredo, passos_atras=passos_atras)
 
 
 _proximo_documento = itertools.count(1)

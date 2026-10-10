@@ -158,6 +158,10 @@ ACCOUNT_RATE_LIMITS = {"login": "30/m/ip", "login_failed": "10/m/ip,5/5m/key"}
 MFA_SUPPORTED_TYPES = ["totp", "recovery_codes"]
 MFA_TOTP_ISSUER = "Helptoner Pedidos"
 MFA_RECOVERY_CODE_COUNT = 10
+# Aceita também o código do passo de 30 s anterior e do seguinte (prática da RFC 6238): um código
+# lido no fim do passo ainda vale depois de digitado, e cada código recusado conta para o
+# bloqueio da conta (ACCOUNT_RATE_LIMITS). O allauth recusa o mesmo código nos 30 s seguintes.
+MFA_TOTP_TOLERANCE = 1
 # O sistema não verifica e-mails (quem cadastra é o Administrador) e não cria EmailAddress do
 # allauth. Se um aparecer não verificado (pelo painel, por exemplo), o allauth recusaria ativar o
 # autenticador e o primeiro acesso ficaria num laço entre a ativação e a tela do 2FA.

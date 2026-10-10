@@ -26,6 +26,17 @@ def test_login_com_senha_e_codigo(client, db):
     assert RegistroAcesso.objects.filter(usuario=u, sucesso=True).count() == 1
 
 
+def test_codigo_do_passo_anterior_vale_e_o_de_dois_passos_atras_nao(client, db):
+    # Revisão final (I3, MFA_TOTP_TOLERANCE = 1): um código lido no fim dos 30 s ainda vale
+    # depois de digitado. Cada código recusado conta para o bloqueio da conta (5 em 5 minutos).
+    u = criar_usuario()
+    entrar_com_senha(client, u.email)
+    r = client.post("/contas/2fa/authenticate/", {"code": codigo_totp(u, passos_atras=2)})
+    assert r.status_code == 200 and r.context["form"].errors
+    r = client.post("/contas/2fa/authenticate/", {"code": codigo_totp(u, passos_atras=1)})
+    assert r.status_code == 302 and r["Location"] == "/"
+
+
 def test_codigo_errado_nao_entra_e_fica_registrado(client, db):
     u = criar_usuario(email="carla@helptoner.com.br")
     entrar_com_senha(client, u.email)
