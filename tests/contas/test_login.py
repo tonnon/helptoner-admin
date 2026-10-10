@@ -22,11 +22,18 @@ def codigo_de_recuperacao(usuario) -> str:
     return codigos.wrap().get_unused_codes()[0]
 
 
+def agora_nao(client):
+    """Responde "Agora não" à pergunta "Confiar neste computador?" (vem depois do código)."""
+    return client.post("/contas/2fa/trust/", {"action": "skip"})
+
+
 def test_login_com_senha_e_codigo(client, db):
     u = criar_usuario(email="carla@helptoner.com.br")
     r = entrar_com_senha(client, "CARLA@helptoner.com.br")
     assert r.status_code == 302 and r["Location"] == "/contas/2fa/authenticate/"
     r = client.post("/contas/2fa/authenticate/", {"code": codigo_totp(u)})
+    assert r.status_code == 302 and r["Location"] == "/contas/2fa/trust/"
+    r = agora_nao(client)
     assert r.status_code == 302 and r["Location"] == "/"
     assert client.get("/").status_code == 200
     assert RegistroAcesso.objects.filter(usuario=u, sucesso=True).count() == 1
@@ -40,7 +47,8 @@ def test_codigo_do_passo_anterior_vale_e_o_de_dois_passos_atras_nao(client, db):
     r = client.post("/contas/2fa/authenticate/", {"code": codigo_totp(u, passos_atras=2)})
     assert r.status_code == 200 and r.context["form"].errors
     r = client.post("/contas/2fa/authenticate/", {"code": codigo_totp(u, passos_atras=1)})
-    assert r.status_code == 302 and r["Location"] == "/"
+    assert r.status_code == 302 and r["Location"] == "/contas/2fa/trust/"
+    assert agora_nao(client)["Location"] == "/"
 
 
 def test_codigo_errado_nao_entra_e_fica_registrado(client, db):
@@ -179,7 +187,8 @@ def test_codigo_de_recuperacao_entra_pelo_mesmo_campo(client, db):
     u = criar_usuario()
     entrar_com_senha(client, u.email)
     r = client.post("/contas/2fa/authenticate/", {"code": codigo_de_recuperacao(u)})
-    assert r.status_code == 302 and r["Location"] == "/"
+    assert r.status_code == 302 and r["Location"] == "/contas/2fa/trust/"
+    assert agora_nao(client)["Location"] == "/"
 
 
 def test_depois_do_codigo_volta_para_a_pagina_pedida(client, db):
@@ -188,7 +197,8 @@ def test_depois_do_codigo_volta_para_a_pagina_pedida(client, db):
     u = criar_usuario()
     client.post("/contas/login/?next=/pedidos/7/", {"login": u.email, "password": SENHA_TESTE})
     r = client.post("/contas/2fa/authenticate/", {"code": codigo_totp(u)})
-    assert r["Location"] == "/pedidos/7/"
+    assert r["Location"] == "/contas/2fa/trust/"
+    assert agora_nao(client)["Location"] == "/pedidos/7/"
 
 
 def test_textos_das_telas_de_login_e_de_verificacao(client, db):

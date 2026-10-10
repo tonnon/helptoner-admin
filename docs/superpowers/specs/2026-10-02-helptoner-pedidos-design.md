@@ -188,6 +188,7 @@ Também faltam operações básicas: não dá para editar cadastros, repor estoq
 - **Login:**
   - e-mail e senha, seguidos do código de 6 dígitos;
   - **verificação em duas etapas obrigatória para todos**;
+  - depois do código, o login oferece **"confiar neste computador" por 30 dias**: nesse computador, nos outros dias, entra com e-mail e senha. A confiança é cancelada sozinha quando a senha ou os autenticadores da conta mudam (redefinir senha, zerar o 2FA);
   - limite de tentativas erradas por conta e por IP, que bloqueia temporariamente com aviso claro. A contagem fica no PostgreSQL (cache do Django no banco), para valer entre os processos do servidor e continuar depois de um reinício. O IP é o do usuário, lido do cabeçalho confiável da hospedagem, sem aceitar valor forjado pelo navegador.
 - **Senhas:**
   - no mínimo 12 caracteres;
@@ -519,6 +520,7 @@ Valores em dinheiro usam `DecimalField`. Datas são gravadas com fuso horário (
 | 23 | Preço alterado durante o rascunho: a confirmação atualiza o item para o preço atual e pede para confirmar de novo | Revisão de 03/10/2026, aprovada por Lucas |
 | 24 | Cliente ou produto inativado: o rascunho não pode ser confirmado, e a tela explica o motivo | Revisão de 03/10/2026, aprovada por Lucas |
 | 25 | Estoque inicial uma vez só por produto; ajuste positivo só depois de um estoque inicial ou de uma entrada | Revisão de 03/10/2026, aprovada por Lucas |
+| 26 | Confiar neste computador por 30 dias (2FA continua obrigatório) | Pedido do Lucas, 10/10/2026 |
 
 ## 14. Pontos em aberto (revisão final)
 

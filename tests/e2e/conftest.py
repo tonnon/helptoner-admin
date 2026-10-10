@@ -35,4 +35,5 @@ def entrar(pagina, live_server, usuario) -> None:
     pagina.get_by_role("button", name="Entrar").click()
     pagina.get_by_label("Código de 6 dígitos").fill(codigo_totp(usuario))
     pagina.get_by_role("button", name="Verificar").click()
+    pagina.get_by_role("button", name="Agora não").click()  # "Confiar neste computador?"
     expect(pagina.get_by_text(f"Olá, {usuario.primeiro_nome}")).to_be_visible()

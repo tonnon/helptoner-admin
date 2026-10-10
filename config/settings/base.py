@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from pathlib import Path
 
 import dj_database_url
@@ -167,6 +168,13 @@ MFA_TOTP_TOLERANCE = 1
 # allauth. Se um aparecer não verificado (pelo painel, por exemplo), o allauth recusaria ativar o
 # autenticador e o primeiro acesso ficaria num laço entre a ativação e a tela do 2FA.
 MFA_ALLOW_UNVERIFIED_EMAIL = True
+# "Confiar neste computador": o 2FA continua obrigatório, mas depois de digitar o código a pessoa
+# pode marcar o computador como de confiança e só digita o código de novo daqui a 30 dias (nos
+# outros dias, e-mail e senha). O allauth anula a confiança sozinho quando a senha ou os
+# autenticadores da conta mudam ("Redefinir senha", "Zerar 2FA", troca de senha). O cookie herda
+# os da sessão (HttpOnly, SameSite Lax e Secure em produção), então nada mais precisa ser ajustado.
+MFA_TRUST_ENABLED = True
+MFA_TRUST_COOKIE_AGE = timedelta(days=30)
 ALLAUTH_TRUSTED_CLIENT_IP_HEADER = None  # em produção: "x-vercel-forwarded-for" (Tarefa 28)
 
 

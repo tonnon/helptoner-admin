@@ -1,0 +1,17 @@
+{% extends "mfa/base_entrance.html" %}
+{% comment %}
+Pergunta que vem depois do código de verificação (no lugar da tela do allauth): confiar neste
+computador por 30 dias. "Confiar" grava o cookie; "Agora não" entra sem gravar.
+{% endcomment %}
+{% block head_title %}Confiar neste computador?{% endblock %}
+{% block content %}
+  <div class="text-center">
+    <h1>Confiar neste computador?</h1>
+    <p class="mt-1 text-sm text-texto-2">Neste computador, o código do celular só será pedido de novo daqui a 30 dias. Use só no computador da loja ou no seu, nunca em computador emprestado ou público.</p>
+  </div>
+  <form method="post" action="{% url 'mfa_trust' %}" class="mt-5">
+    {% csrf_token %}
+    <button type="submit" name="action" value="trust" class="btn-pri w-full">Confiar neste computador</button>
+    <button type="submit" name="action" value="skip" class="btn-sec mt-3 w-full">Agora não</button>
+  </form>
+{% endblock %}

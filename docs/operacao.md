@@ -327,9 +327,11 @@ Depois, `exit`.
 3. Menu **Funcionários** → **+ Novo funcionário**: nome, e-mail e perfil **Administrador**. O sistema mostra uma senha temporária uma única vez; repasse pessoalmente.
 4. O segundo administrador faz o próprio primeiro acesso, com o celular dele.
 
+**Confiar neste computador:** depois de digitar o código, o login pergunta se o computador é de confiança. Com **Confiar neste computador**, o código só é pedido de novo daqui a 30 dias; nos outros dias, basta e-mail e senha. Com **Agora não**, o código é pedido em todo login. **Redefinir senha** e **Zerar 2FA** cancelam essa confiança (e a troca da própria senha também): o próximo login volta a pedir o código.
+
 Os dois administradores cobrem um ao outro: se um perder o celular, o outro usa **Zerar 2FA** na tela do funcionário; se um esquecer a senha, o outro usa **Redefinir senha**.
 
-**Celular perdido ou roubado:** use **Zerar 2FA** e também **Redefinir senha**. O Zerar 2FA encerra na hora as sessões abertas, inclusive a do celular, mas a senha pode estar salva no navegador dele.
+**Celular perdido ou roubado:** use **Zerar 2FA** e também **Redefinir senha**. O Zerar 2FA encerra na hora as sessões abertas, inclusive a do celular, mas a senha pode estar salva no navegador dele. **Redefinir senha** também cancela a confiança gravada no navegador do aparelho roubado, que deixa de entrar só com a senha.
 
 ### Painel de manutenção
 

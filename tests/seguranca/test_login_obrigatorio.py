@@ -23,6 +23,7 @@ ROTAS_LIVRES = {
     "core:saude",  # monitoramento: não toca em usuário, sessão nem banco
     "account_login",  # a tela de login
     "mfa_authenticate",  # segunda etapa do login: a pessoa ainda não entrou
+    "mfa_trust",  # pergunta "confiar neste computador?": só para quem já passou pelo código
     "account_inactive",  # aviso para quem tentou entrar com um acesso desativado
     # Login próprio do painel do Django: sem login, só leva ao login do sistema (com 2FA);
     # quem não é superusuário recebe 403 (config/urls.py).
