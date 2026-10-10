@@ -302,7 +302,7 @@ pg_restore --clean --if-exists --single-transaction --no-owner --no-privileges -
 
 - **Backup** (`backup.yml`): todo dia às 03:00 de Brasília e quando rodado à mão.
 - **Backup antes de publicar:** dentro do Publicar.
-- **Teste de restauração** (`teste-restauracao.yml`): todo dia 1º, às 06:00 de Brasília. Baixa o último backup bem-sucedido do workflow Backup, decifra, restaura num PostgreSQL 18 vazio e conta pedidos, clientes e produtos. Se falhar, o GitHub avisa por e-mail.
+- **Teste de restauração** (`teste-restauracao.yml`): todo dia 1º, às 06:00 de Brasília. Baixa o último backup bem-sucedido do workflow Backup, decifra, restaura num PostgreSQL 18 vazio, confere se todas as migrações do código estão registradas (`migrate --check`) e conta pedidos, clientes e produtos. Se falhar, o GitHub avisa por e-mail. Se a falha for nas migrações logo depois de uma publicação com migração nova, o backup é anterior a ela: rode o teste de novo depois do backup da noite.
 - Os artefatos somem depois de 30 dias.
 - Os agendamentos só valem a partir da branch `main`. O GitHub pode atrasar execuções agendadas em horários de muito uso.
 
@@ -328,6 +328,8 @@ Depois, `exit`.
 4. O segundo administrador faz o próprio primeiro acesso, com o celular dele.
 
 Os dois administradores cobrem um ao outro: se um perder o celular, o outro usa **Zerar 2FA** na tela do funcionário; se um esquecer a senha, o outro usa **Redefinir senha**.
+
+**Celular perdido ou roubado:** use **Zerar 2FA** e também **Redefinir senha**. O Zerar 2FA encerra na hora as sessões abertas, inclusive a do celular, mas a senha pode estar salva no navegador dele.
 
 ### Painel de manutenção
 
@@ -370,6 +372,25 @@ exit()
 ```
 
 Use só a linha necessária. No próximo login, o sistema pede o primeiro acesso de novo. As duas ações ficam no histórico, e o acesso ao painel não muda.
+
+### Reativar um funcionário
+
+A tela Funcionários desativa, mas não reativa. Para devolver o acesso a quem foi desativado (por engano, ou o superusuário desativado por outro Administrador):
+
+- **Pelo painel de manutenção**, se um superusuário consegue entrar: **Contas → Usuários** → o funcionário → marque **Ativo** → **Salvar**.
+- **Pelo terminal de produção** (seção 1), com `uv run python manage.py shell`:
+
+```python
+from apps.contas.models import Usuario
+u = Usuario.objects.get(email="<e-mail, em minúsculas>")
+u.is_active = True
+u._change_reason = "Funcionário reativado pelo terminal"
+u.save(update_fields=["is_active"])
+print(u.nome, u.is_active)   # esperado: <nome> True
+exit()
+```
+
+As sessões antigas não voltam: o funcionário entra de novo com a senha dele. Se ela também se perdeu, use **Redefinir senha** depois de reativar.
 
 ## 5. Como trocar segredos
 
