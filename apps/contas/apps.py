@@ -7,3 +7,6 @@ class ContasConfig(AppConfig):
 
     def ready(self):
         from . import sinais  # noqa: F401  (liga os receptores do registro de acessos)
+        from .totp import instalar
+
+        instalar()

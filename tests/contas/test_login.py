@@ -1,5 +1,11 @@
+import time
+from datetime import UTC, datetime
+
 import pytest
+from allauth.mfa.adapter import get_adapter as get_mfa_adapter
 from allauth.mfa.models import Authenticator
+from allauth.mfa.totp.internal.auth import hotp_value
+from django.core.cache.backends import db as cache_db
 from django.db import connection
 from django.test import override_settings
 
@@ -211,3 +217,29 @@ def test_erros_na_reautenticacao_nao_entram_no_registro_de_acessos(client_vended
     r = client_vendedor.post("/contas/2fa/reauthenticate/", {"code": "000000"})
     assert r.status_code == 200 and r.context["form"].errors
     assert not RegistroAcesso.objects.filter(sucesso=False).exists()
+
+
+def test_codigo_2fa_usado_nao_vale_de_novo_dentro_da_tolerancia(db, monkeypatch):
+    # Rodada residual (R39): com MFA_TOTP_TOLERANCE = 1 o código vale por 90 s, mas o allauth só
+    # lembrava dele por 30 s (cache.add com timeout=TOTP_PERIOD). RFC 6238 §5.2: não aceitar duas
+    # vezes. Se o allauth mudar _mark_code_used ou a chave, este teste acusa.
+    u = criar_usuario(email="carla@helptoner.com.br")
+    segredo = get_mfa_adapter().decrypt(
+        Authenticator.objects.get(user=u, type=Authenticator.Type.TOTP).data["secret"]
+    )
+    inicio = (1_800_000_000 // 30) * 30 + 1  # 1 s depois do começo de um passo
+    agora = [float(inicio)]
+    monkeypatch.setattr(time, "time", lambda: agora[0])  # o allauth calcula o passo com time.time
+    # O cache do projeto está no banco (DatabaseCache) e confere a validade com o relógio do Django.
+    monkeypatch.setattr(
+        cache_db, "tz_now", lambda: datetime.fromtimestamp(agora[0], tz=UTC), raising=True
+    )
+    passo = inicio // 30
+    totp = Authenticator.objects.get(user=u, type=Authenticator.Type.TOTP).wrap()
+
+    codigo = f"{hotp_value(segredo, passo):06d}"
+    assert totp.validate_code(codigo) is True
+    agora[0] += 31  # um passo depois: o código ainda está na janela de tolerância
+    assert totp.validate_code(codigo) is False
+    novo = f"{hotp_value(segredo, passo + 1):06d}"
+    assert totp.validate_code(novo) is True

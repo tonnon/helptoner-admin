@@ -160,7 +160,8 @@ MFA_TOTP_ISSUER = "Helptoner Pedidos"
 MFA_RECOVERY_CODE_COUNT = 10
 # Aceita também o código do passo de 30 s anterior e do seguinte (prática da RFC 6238): um código
 # lido no fim do passo ainda vale depois de digitado, e cada código recusado conta para o
-# bloqueio da conta (ACCOUNT_RATE_LIMITS). O allauth recusa o mesmo código nos 30 s seguintes.
+# bloqueio da conta (ACCOUNT_RATE_LIMITS). O código usado fica recusado por toda a janela de 90 s:
+# o allauth só o lembraria por 30 s, e apps/contas/totp.py amplia isso.
 MFA_TOTP_TOLERANCE = 1
 # O sistema não verifica e-mails (quem cadastra é o Administrador) e não cria EmailAddress do
 # allauth. Se um aparecer não verificado (pelo painel, por exemplo), o allauth recusaria ativar o
