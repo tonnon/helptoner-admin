@@ -6,6 +6,7 @@ from django.http import QueryDict
 from django.middleware.clickjacking import XFrameOptionsMiddleware
 from django.middleware.csp import ContentSecurityPolicyMiddleware
 from django.shortcuts import resolve_url
+from django.utils.cache import add_never_cache_headers, patch_vary_headers
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from .htmx import eh_htmx, redirecionar
@@ -49,6 +50,31 @@ class RecusarNuloMiddleware:
                 resposta = middleware.process_response(request, resposta)
             return resposta
         return self.get_response(request)
+
+
+class CabecalhosDeCacheMiddleware:
+    """Cabeçalhos de cache que valem para o sistema todo.
+
+    - `Vary: HX-Request` em toda resposta: as listas (padrão P18) devolvem a página inteira ou só
+      o pedaço HTMX na mesma URL. Sem ele, o cache do navegador guarda o pedaço com a URL, e o
+      botão Voltar pode mostrar só a tabela, sem menu e sem estilo. Fica acima do login
+      obrigatório e do primeiro acesso, que também respondem diferente ao HTMX.
+    - `no-store` nas telas do allauth que mostram segredos (a ativação do autenticador, com o
+      segredo e o QR code, e os códigos de recuperação), como a tela da senha temporária.
+    """
+
+    ROTAS_COM_SEGREDO = frozenset({"mfa_activate_totp", "mfa_view_recovery_codes"})
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        resposta = self.get_response(request)
+        patch_vary_headers(resposta, ("HX-Request",))
+        rota = getattr(request, "resolver_match", None)
+        if rota is not None and rota.view_name in self.ROTAS_COM_SEGREDO:
+            add_never_cache_headers(resposta)
+        return resposta
 
 
 class LoginObrigatorioMiddleware(LoginRequiredMiddleware):

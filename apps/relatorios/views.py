@@ -17,7 +17,6 @@ from django.urls import reverse
 from django.utils.cache import add_never_cache_headers, patch_cache_control
 from django.utils.http import content_disposition_header
 from django.views.decorators.http import require_GET
-from django.views.decorators.vary import vary_on_headers
 
 from apps.contas.models import Usuario
 from apps.core.datas import hoje
@@ -208,7 +207,6 @@ def _dias_da_aba(aba: str, dados) -> tuple[int, list[str]]:
 
 @requer_administrador
 @require_GET
-@vary_on_headers("HX-Request")
 def relatorio(request, aba: str = "resumo"):
     """Uma aba dos relatórios (padrão P18). Aba desconhecida dá 404."""
     if aba not in ABAS:

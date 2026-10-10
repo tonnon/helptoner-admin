@@ -32,6 +32,8 @@ MIDDLEWARE = [
     # Caractere nulo no GET ou no POST: 400 antes de tudo, sem sessão e sem banco (Ruling R25).
     "apps.core.middleware.RecusarNuloMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    # Vary: HX-Request em toda resposta e no-store nas telas com segredos (revisão final).
+    "apps.core.middleware.CabecalhosDeCacheMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -135,6 +137,9 @@ CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.db.DatabaseCache",
         "LOCATION": "cache_django",
+        # O padrão (300) é pouco: uma enxurrada de logins errados tiraria do cache os contadores
+        # de tentativas, inclusive o bloqueio por conta. As linhas são pequenas.
+        "OPTIONS": {"MAX_ENTRIES": 10000},
     }
 }
 
