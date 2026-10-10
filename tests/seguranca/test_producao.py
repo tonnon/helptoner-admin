@@ -6,6 +6,8 @@ import sys
 from pathlib import Path
 from unittest.mock import Mock, patch
 
+import pytest
+
 from apps.core.sentry import limpar_evento
 from scripts.vercel_build import main
 
@@ -42,6 +44,7 @@ def test_configuracao_de_producao():
         cwd=BASE_DIR,
         check=False,
     )
+    assert r.returncode == 0, r.stderr
     c = json.loads(r.stdout)
     assert set(c["hosts"]) == {
         "helptoner-abc.vercel.app",
@@ -55,17 +58,89 @@ def test_configuracao_de_producao():
     assert c["armazenamento"] == "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
-def test_producao_sem_sentry_dsn_sobe():
-    env = {k: v for k, v in ENV_VERCEL.items() if k != "SENTRY_DSN"}
-    r = subprocess.run(
-        [sys.executable, "-c", "import django; django.setup()"],
+def _rodar_python(codigo, env):
+    return subprocess.run(
+        [sys.executable, "-W", "error::UserWarning", "-c", codigo],
         env=os.environ | env,
         capture_output=True,
         text=True,
         cwd=BASE_DIR,
         check=False,
     )
+
+
+def test_producao_sem_sentry_dsn_sobe_sem_sentry():
+    env = {k: v for k, v in os.environ.items() if k != "SENTRY_DSN"}
+    env |= {k: v for k, v in ENV_VERCEL.items() if k != "SENTRY_DSN"}
+    codigo = "import django, sentry_sdk; django.setup(); print(sentry_sdk.get_client().is_active())"
+    r = subprocess.run(
+        [sys.executable, "-c", codigo],
+        env=env,
+        capture_output=True,
+        text=True,
+        cwd=BASE_DIR,
+        check=False,
+    )
     assert r.returncode == 0, r.stderr
+    assert r.stdout.strip() == "False"
+
+
+def test_producao_sem_staticfiles_nao_avisa_do_whitenoise(tmp_path):
+    # Executa fora da raiz do projeto não serve: o STATIC_ROOT é BASE_DIR/staticfiles.
+    assert not (BASE_DIR / "staticfiles").exists()
+    codigo = (
+        "import django; django.setup(); "
+        "from django.core.wsgi import get_wsgi_application; get_wsgi_application()"
+    )
+    r = _rodar_python(codigo, ENV_VERCEL)
+    assert r.returncode == 0, r.stderr
+
+
+@pytest.mark.parametrize(
+    ("env", "esperado"),
+    [
+        ({}, "x-vercel-forwarded-for"),
+        ({"CABECALHO_IP_CLIENTE": "x-forwarded-for"}, "x-forwarded-for"),
+        ({"CABECALHO_IP_CLIENTE": ""}, None),
+    ],
+)
+def test_cabecalho_do_ip_do_cliente_configuravel(env, esperado):
+    codigo = (
+        "import django; django.setup(); from django.conf import settings as s; "
+        "print(repr(s.ALLAUTH_TRUSTED_CLIENT_IP_HEADER))"
+    )
+    base = {k: v for k, v in os.environ.items() if k != "CABECALHO_IP_CLIENTE"}
+    r = subprocess.run(
+        [sys.executable, "-c", codigo],
+        env=base | ENV_VERCEL | env,
+        capture_output=True,
+        text=True,
+        cwd=BASE_DIR,
+        check=False,
+    )
+    assert r.returncode == 0, r.stderr
+    assert r.stdout.strip() == repr(esperado)
+
+
+def test_sentry_tira_dados_do_banco_das_mensagens_de_erro():
+    detalhe = "DETAIL:  Key (documento)=(12345678909) already exists."
+    texto = f'duplicate key value violates unique constraint "uq"\n{detalhe}'
+    evento = {
+        "exception": {"values": [{"type": "IntegrityError", "value": texto}]},
+        "logentry": {"message": texto, "formatted": texto},
+        "message": "falhou Key (documento)=(12345678909) já existe",
+    }
+    limpo = limpar_evento(evento, {})
+    saidas = [
+        limpo["exception"]["values"][0]["value"],
+        limpo["logentry"]["message"],
+        limpo["logentry"]["formatted"],
+        limpo["message"],
+    ]
+    for saida in saidas:
+        assert "12345678909" not in saida
+        assert "DETAIL" not in saida
+    assert "duplicate key value violates" in saidas[0]
 
 
 def test_sentry_nao_leva_dados_pessoais():
@@ -134,7 +209,10 @@ def test_erro_500_usa_o_id_do_evento_do_sentry(rf):
 def test_erro_500_sem_sentry_usa_codigo_local(rf):
     from apps.core.views import erro_500
 
-    with patch("apps.core.views.sentry_sdk.last_event_id", return_value=None):
+    with (
+        patch("apps.core.views.sentry_sdk.last_event_id", return_value=None),
+        patch("apps.core.views.secrets.token_hex", return_value="cafe1234"),
+    ):
         resposta = erro_500(rf.get("/"))
     assert resposta.status_code == 500
-    assert b"None" not in resposta.content
+    assert b"cafe1234" in resposta.content

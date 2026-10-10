@@ -43,16 +43,20 @@ SECURE_HSTS_PRELOAD = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
-# Atrás da Vercel o IP do cliente vem neste cabeçalho (usado pelo limite de tentativas do allauth).
-ALLAUTH_TRUSTED_CLIENT_IP_HEADER = "x-vercel-forwarded-for"
+# Atrás da Vercel o IP do cliente vem neste cabeçalho (limite de tentativas do allauth). No plano B
+# (Render), CABECALHO_IP_CLIENTE troca o cabeçalho; vazio usa o REMOTE_ADDR do Django.
+ALLAUTH_TRUSTED_CLIENT_IP_HEADER = (
+    os.environ.get("CABECALHO_IP_CLIENTE", "x-vercel-forwarded-for") or None
+)
 
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
 }
 # Na Vercel, os arquivos estáticos saem da CDN, depois do collectstatic automático do build; a
-# pasta staticfiles/ pode não existir na função, e o WhiteNoise avisaria "No directory at".
-warnings.filterwarnings("ignore", message="No directory at", module="whitenoise")
+# pasta staticfiles/ pode não existir na função, e o WhiteNoise avisaria "No directory at". O aviso
+# é atribuído a django.core.handlers (stacklevel=3), por isso o filtro não limita o módulo.
+warnings.filterwarnings("ignore", message="No directory at")
 
 LOGGING = {
     "version": 1,

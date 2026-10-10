@@ -5,6 +5,7 @@ import os
 import subprocess
 import sys
 from collections.abc import Mapping
+from pathlib import Path
 
 
 def main(env: Mapping[str, str], rodar=subprocess.run) -> None:
@@ -13,7 +14,12 @@ def main(env: Mapping[str, str], rodar=subprocess.run) -> None:
     ambiente = dict(env)
     # O migrate usa a conexão direta (sem pooler), se houver.
     ambiente["DATABASE_URL"] = env.get("DATABASE_URL_DIRETA") or env["DATABASE_URL"]
-    rodar([sys.executable, "manage.py", "migrate", "--noinput"], env=ambiente, check=True)
+    rodar(
+        [sys.executable, "manage.py", "migrate", "--noinput"],
+        env=ambiente,
+        check=True,
+        cwd=Path(__file__).resolve().parents[1],
+    )
 
 
 if __name__ == "__main__":
