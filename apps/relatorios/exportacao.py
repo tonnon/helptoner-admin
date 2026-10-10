@@ -9,10 +9,10 @@ from openpyxl.utils import get_column_letter
 
 from apps.contas.models import Usuario
 from apps.core.formatacao import brl, data_br, inteiro_br, percentual
-from apps.core.pdf import DocumentoPDF
+from apps.core.pdf import CORPO, FONTE, DocumentoPDF
 
 from .consultas import Relatorio
-from .periodos import Agrupamento, Filtros
+from .periodos import NOMES_DO_AGRUPAMENTO, Filtros
 from .tabelas import Coluna, Tabela
 
 FORMATO_DO_EXCEL = {
@@ -21,13 +21,9 @@ FORMATO_DO_EXCEL = {
     "data": "dd/mm/yyyy",
     "inteiro": "#,##0",
 }
-NOMES_DO_AGRUPAMENTO = {
-    Agrupamento.DIA: "dia",
-    Agrupamento.SEMANA: "semana",
-    Agrupamento.MES: "mês",
-}
 MAXIMO_NOME_DA_PLANILHA = 31
-LARGURA_DA_PAGINA = 267  # mm: A4 em paisagem menos as margens
+FOLGA_DA_CELULA = 3  # mm: o padding da célula do PDF (1 mm de cada lado) e um respiro
+MINIMO_DO_TEXTO = 30  # mm
 VAZIO_DA_TABELA = "Nada para mostrar com estes filtros."
 
 
@@ -119,13 +115,45 @@ def _texto(coluna: Coluna, valor: object) -> str:
     return data_br(valor)
 
 
-def _larguras(colunas: list[Coluna], linhas: list[list[str]]) -> list[float]:
-    """Divide a largura da página na proporção do maior texto de cada coluna."""
-    pesos = [
-        min(max([len(coluna.rotulo)] + [len(linha[j]) for linha in linhas]), 45) + 2
-        for j, coluna in enumerate(colunas)
+def _largura_do_texto(pdf: DocumentoPDF, texto: str, negrito: bool = False) -> float:
+    pdf.set_font(FONTE, "B" if negrito else "", CORPO)
+    return pdf.get_string_width(texto)
+
+
+def _larguras(pdf: DocumentoPDF, colunas: list[Coluna], linhas: list[list[str]]) -> list[float]:
+    """Larguras em mm, medidas na fonte do PDF.
+
+    Colunas de número, dinheiro e data nunca ficam menores que o maior texto delas (o valor não
+    quebra no meio); o resto da página vai para as colunas de texto, na proporção do que
+    precisam. Se nem os números couberem, eles encolhem juntos, nunca abaixo do cabeçalho.
+    """
+    cabecalho = [_largura_do_texto(pdf, c.rotulo, negrito=True) + FOLGA_DA_CELULA for c in colunas]
+    desejada = [
+        max(
+            [cabecalho[j]]
+            + [_largura_do_texto(pdf, linha[j]) + FOLGA_DA_CELULA for linha in linhas]
+        )
+        for j in range(len(colunas))
     ]
-    return [LARGURA_DA_PAGINA * peso / sum(pesos) for peso in pesos]
+    texto = [j for j, c in enumerate(colunas) if c.tipo == "texto"]
+    numeros = [j for j, c in enumerate(colunas) if c.tipo != "texto"]
+    disponivel = pdf.epw
+    if not texto:
+        return [d * disponivel / sum(desejada) for d in desejada]
+    larguras = list(desejada)
+    minimo_texto = {j: min(desejada[j], MINIMO_DO_TEXTO) for j in texto}
+    sobra = disponivel - sum(desejada[j] for j in numeros)
+    if sobra < sum(minimo_texto.values()):
+        fator = max(disponivel - sum(minimo_texto.values()), 0) / sum(desejada[j] for j in numeros)
+        for j in numeros:
+            larguras[j] = max(desejada[j] * fator, cabecalho[j])
+        for j in texto:
+            larguras[j] = minimo_texto[j]
+        return larguras
+    peso = sum(desejada[j] for j in texto)
+    for j in texto:
+        larguras[j] = sobra * desejada[j] / peso
+    return larguras
 
 
 def para_pdf(rel: Relatorio, f: Filtros) -> bytes:
@@ -141,7 +169,7 @@ def para_pdf(rel: Relatorio, f: Filtros) -> bytes:
             [_texto(c, v) for c, v in zip(tabela.colunas, linha, strict=True)]
             for linha in tabela.linhas
         ]
-        larguras = _larguras(tabela.colunas, linhas)
+        larguras = _larguras(pdf, tabela.colunas, linhas)
         pdf.tabela(
             [
                 (c.rotulo, largura, "L" if c.tipo == "texto" else "R")

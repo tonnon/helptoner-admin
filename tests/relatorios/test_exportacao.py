@@ -7,8 +7,11 @@ import pytest
 from openpyxl import load_workbook
 
 from apps.core.datas import hoje
+from apps.core.formatacao import brl
+from apps.core.pdf import CORPO, FONTE, DocumentoPDF
 from apps.relatorios.consultas import montar_aba
-from apps.relatorios.exportacao import para_excel, para_pdf
+from apps.relatorios.exportacao import _larguras, _nome_da_planilha, para_excel, para_pdf
+from apps.relatorios.tabelas import Coluna
 from tests.apoio import F, criar_cliente, montar_pedido_confirmado, texto_do_pdf
 
 SET = F(date(2026, 9, 1), date(2026, 9, 30))
@@ -149,3 +152,21 @@ def test_links_de_exportacao_usam_a_rota_real(client_admin):
 def test_link_de_exportacao_da_aba_clientes_leva_os_dias(client_admin):
     html = client_admin.get("/relatorios/clientes/?atalho=3m&dias=45").content.decode()
     assert "/relatorios/clientes/excel/?atalho=3m&amp;agrupamento=mes&amp;dias=45" in html
+
+
+def test_colunas_de_dinheiro_cabem_o_maior_valor():
+    colunas = [Coluna("Descrição", "texto")] + [Coluna(f"Valor {i}", "dinheiro") for i in range(7)]
+    valor = brl(Decimal("1234567.89"))
+    linhas = [["x" * 60] + [valor] * 7]
+    pdf = DocumentoPDF("t", orientacao="L")
+    larguras = _larguras(pdf, colunas, linhas)
+    pdf.set_font(FONTE, "", CORPO)
+    assert all(w >= pdf.get_string_width(valor) for w in larguras[1:])
+    assert sum(larguras) <= pdf.epw + 0.001
+
+
+def test_nomes_de_planilha_unicos_com_ate_31_caracteres():
+    usados: set[str] = set()
+    titulo = "Clientes sem comprar há mais de 60 dias"
+    nomes = [_nome_da_planilha(titulo, usados) for _ in range(3)]
+    assert len(set(nomes)) == 3 and all(len(n) <= 31 for n in nomes)

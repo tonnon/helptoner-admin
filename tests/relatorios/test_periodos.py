@@ -61,7 +61,6 @@ def test_descricao_comparacao():
     assert descricao_comparacao(f(Atalho.ANO, date(2026, 1, 1), HOJE)) == "vs mesmo período de 2025"
     assert descricao_comparacao(f(Atalho.DATAS, date(2026, 10, 1), HOJE)) == "vs 3 dias anteriores"
     assert descricao_comparacao(f(Atalho.DATAS, HOJE, HOJE)) == "vs 1 dia anterior"
-    assert descricao_comparacao(f(Atalho.DATAS, HOJE, HOJE)) == "vs 1 dia anterior"
 
 
 def test_padrao_e_erros():

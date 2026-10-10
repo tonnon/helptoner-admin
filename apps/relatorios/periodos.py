@@ -27,6 +27,13 @@ class Agrupamento(StrEnum):
     MES = "mes"
 
 
+NOMES_DO_AGRUPAMENTO = {
+    Agrupamento.DIA: "dia",
+    Agrupamento.SEMANA: "semana",
+    Agrupamento.MES: "mês",
+}
+
+
 @dataclass(frozen=True)
 class Filtros:
     inicio: date

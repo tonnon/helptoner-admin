@@ -29,6 +29,7 @@ from .consultas import ABAS, Comparacao, montar_aba
 from .exportacao import para_excel, para_pdf
 from .periodos import (
     DIAS_SEM_COMPRAR,
+    NOMES_DO_AGRUPAMENTO,
     Agrupamento,
     Atalho,
     Filtros,
@@ -42,11 +43,6 @@ log_exportacao = logging.getLogger("helptoner.relatorios")
 COR_FATURAMENTO = "#0200FF"
 COR_LUCRO = "#eb6834"
 
-NOMES_DO_AGRUPAMENTO = {
-    Agrupamento.DIA: "dia",
-    Agrupamento.SEMANA: "semana",
-    Agrupamento.MES: "mês",
-}
 EXPORTACOES = (("excel", "⤓ Excel"), ("pdf", "⤓ PDF"))
 
 
