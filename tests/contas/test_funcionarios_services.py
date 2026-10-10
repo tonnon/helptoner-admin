@@ -1,8 +1,10 @@
+import math
 import re
 
 import pytest
 from allauth.account.models import EmailAddress
 from allauth.mfa.models import Authenticator
+from django.contrib.auth.password_validation import validate_password
 from django.contrib.sessions.models import Session
 from django.core.exceptions import PermissionDenied
 from django.test import Client
@@ -19,7 +21,7 @@ from apps.contas.services import (
 from apps.core.erros import RegraDeNegocio
 from tests.apoio import criar_usuario
 
-ALFABETO = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789"
+ALFABETO = "abcdefghjkmnpqrstuvwxyz23456789"
 SEM_PAINEL = " e acesso ao painel removido"
 
 
@@ -39,6 +41,19 @@ def test_senha_temporaria_tem_16_caracteres_em_4_grupos():
     grupo = f"[{ALFABETO}]{{4}}"
     assert re.fullmatch(f"{grupo}-{grupo}-{grupo}-{grupo}", senha)
     assert len({gerar_senha_temporaria() for _ in range(20)}) == 20
+
+
+def test_senha_temporaria_so_tem_minusculas_e_digitos_sem_ambiguos():
+    # Fácil de ditar por telefone: nada de maiúscula parecida com minúscula, nem 0/o, 1/l/i.
+    amostra = "".join(gerar_senha_temporaria() for _ in range(200)).replace("-", "")
+    assert set(amostra) <= set(ALFABETO)
+    assert not set(amostra) & set("ABCDEFGHIJKLMNOPQRSTUVWXYZ01ilo")
+    assert math.log2(len(set(ALFABETO))) * 16 >= 75  # entropia mínima
+
+
+def test_senha_temporaria_passa_nos_validadores_de_senha(administrador):
+    for _ in range(50):
+        validate_password(gerar_senha_temporaria(), user=administrador)
 
 
 def test_criar_funcionario_gera_senha_temporaria(administrador):

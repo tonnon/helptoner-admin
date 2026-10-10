@@ -42,13 +42,14 @@ def etapa_do_primeiro_acesso(usuario) -> int | None:
 # Cada ação grava só os campos que muda (update_fields): assim nunca desfaz uma desativação
 # feita ao mesmo tempo por outro administrador (§4.2: o acesso acaba na hora).
 
-ALFABETO_DA_SENHA = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789"
+# Só minúsculas e dígitos, sem i/l/o nem 0/1: fácil de ditar (31 símbolos x 16 = 79 bits).
+ALFABETO_DA_SENHA = "abcdefghjkmnpqrstuvwxyz23456789"
 EMAIL_REPETIDO = "Já existe um funcionário com este e-mail."
 SEM_PAINEL = " e acesso ao painel removido"
 
 
 def gerar_senha_temporaria() -> str:
-    """16 caracteres sorteados, em 4 grupos (ex.: "Kq7m-Xa2c-9pTw-hE4n"), sem 0/O nem 1/l/I."""
+    """16 caracteres em 4 grupos ("kq7m-xa2c-9ptw-he4n"): minúsculas e dígitos, sem 0/o/1/l/i."""
     caracteres = "".join(secrets.choice(ALFABETO_DA_SENHA) for _ in range(16))
     return "-".join(caracteres[i : i + 4] for i in range(0, 16, 4))
 
