@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Data do backup
         id: data
         run: echo "dia=$(date +%F)" >> "$GITHUB_OUTPUT"
