@@ -1,0 +1,22 @@
+{% extends "mfa/base_entrance.html" %}
+{% comment %}
+Segunda etapa do login (no lugar da tela do allauth), com o visual de docs/esbocos/telas.html.
+O mesmo campo aceita o código de 6 dígitos do aplicativo e um código de recuperação.
+{% endcomment %}
+{% block head_title %}Verificação em duas etapas{% endblock %}
+{% block content %}
+  <div class="text-center">
+    <h1>Verificação em duas etapas</h1>
+    <p class="mt-1 text-sm text-texto-2">Digite o código do app autenticador.</p>
+  </div>
+  <form method="post" action="{% url 'mfa_authenticate' %}" class="mt-5">
+    {% csrf_token %}
+    {% include "componentes/erros_do_formulario.html" %}
+    {% include "componentes/campo_codigo.html" with campo=form.code autofoco=True recuperacao=True %}
+    <button type="submit" class="btn-pri mt-6 w-full">Verificar</button>
+  </form>
+  <details class="dica mt-5 text-center">
+    <summary>Perdeu o celular? Use um código de recuperação</summary>
+    <p>Digite no campo acima um dos códigos de recuperação de 8 dígitos que você guardou. Cada código vale uma vez só.</p>
+  </details>
+{% endblock %}

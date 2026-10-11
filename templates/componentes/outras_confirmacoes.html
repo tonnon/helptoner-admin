@@ -1,0 +1,7 @@
+{% comment %}
+Nas telas de confirmação do allauth ("Confirme que é você"), os links para confirmar de outro
+jeito: com a senha ou com o código do aplicativo. Usa reauthentication_alternatives do allauth.
+{% endcomment %}
+{% for alternativa in reauthentication_alternatives %}
+  <a href="{{ alternativa.url }}" class="mt-5 block text-center text-sm font-semibold text-azul hover:underline">{% if alternativa.id == "mfa_reauthenticate" %}Prefiro usar o código do aplicativo{% else %}Prefiro usar a senha{% endif %}</a>
+{% endfor %}

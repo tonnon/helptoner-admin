@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% comment %}
+Funcionários (só o Administrador), como em docs/esbocos/telas.html. Padrão P18: a página abre
+com o esqueleto e o HTMX busca o pedaço "resultados" na mesma URL.
+{% endcomment %}
+{% block titulo %}Funcionários - Helptoner Pedidos{% endblock %}
+{% block conteudo %}
+  <div class="fx flex flex-wrap items-center justify-between gap-3">
+    <h1>Funcionários</h1>
+    <a href="{% url 'contas:funcionario_novo' %}" class="btn-pri">+ Novo funcionário</a>
+  </div>
+  <div id="resultados" class="mt-4" hx-get="{{ request.get_full_path }}" hx-trigger="load">
+    {% include "componentes/esqueleto_linhas.html" with linhas=4 %}
+  </div>
+{% endblock %}
+
+{% partialdef resultados %}
+<div class="cartao fx">
+  <table class="tabela-responsiva">
+    <thead>
+      <tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>2FA</th><th>Situação</th></tr>
+    </thead>
+    <tbody>
+      {% for funcionario in funcionarios %}
+        <tr>
+          <td data-rotulo="Nome"><a href="{% url 'contas:funcionario_editar' funcionario.pk %}" class="font-semibold hover:text-azul hover:underline">{{ funcionario.nome }}</a></td>
+          <td data-rotulo="E-mail" class="break-all">{{ funcionario.email }}</td>
+          <td data-rotulo="Perfil"><span class="{% if funcionario.eh_administrador %}etiqueta-vermelho{% else %}etiqueta-azul{% endif %}">{{ funcionario.perfil }}</span></td>
+          <td data-rotulo="2FA">{% if funcionario.codigos_recuperacao_entregues %}<span class="etiqueta-verde">Ativo</span>{% else %}<span class="etiqueta-ambar">Pendente</span>{% endif %}</td>
+          <td data-rotulo="Situação">{% if funcionario.is_active %}<span class="etiqueta-verde">Ativo</span>{% else %}<span class="etiqueta-cinza">Desativado</span>{% endif %}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endpartialdef %}

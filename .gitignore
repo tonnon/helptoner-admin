@@ -13,3 +13,10 @@ __pycache__/
 
 # Vercel
 .vercel/
+
+# Ferramentas e artefatos locais
+.ferramentas/
+staticfiles/
+.pytest_cache/
+.ruff_cache/
+test-results/

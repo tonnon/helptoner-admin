@@ -1,0 +1,8 @@
+{% extends "base_publica.html" %}
+{% comment %}
+Layout de todas as telas do allauth (login, verificação em duas etapas, sair...): o logo e o
+cartão central de base_publica.html. Os blocos extra_head e extra_body do allauth ficam de fora
+de propósito, porque neles entrariam scripts inline, que a CSP recusa.
+{% endcomment %}
+{% block titulo %}{% block head_title %}{% endblock %} - Helptoner Pedidos{% endblock %}
+{% block conteudo %}{% block content %}{% endblock %}{% endblock %}

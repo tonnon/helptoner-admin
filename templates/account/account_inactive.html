@@ -1,0 +1,7 @@
+{% extends "account/base_entrance.html" %}
+{% block head_title %}Acesso desativado{% endblock %}
+{% block content %}
+  <h1>Acesso desativado</h1>
+  <p class="mt-2 text-texto-2">Este acesso foi desativado. Se precisar entrar, fale com um administrador.</p>
+  <a href="{% url 'account_login' %}" class="btn-sec mt-5">Voltar ao login</a>
+{% endblock %}

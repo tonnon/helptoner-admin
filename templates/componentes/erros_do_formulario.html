@@ -1,0 +1,7 @@
+{% comment %}
+Erros do formulário inteiro, que não são de um campo só (ex.: "E-mail ou senha incorretos.").
+Parâmetro: form. Ex.: {% include "componentes/erros_do_formulario.html" %}
+{% endcomment %}
+{% if form.non_field_errors %}
+  <div class="alerta-erro" role="alert">{% for erro in form.non_field_errors %}<p>{{ erro }}</p>{% endfor %}</div>
+{% endif %}

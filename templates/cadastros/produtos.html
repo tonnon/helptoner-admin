@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load formato %}
+{% comment %}
+Produtos (todos os perfis), como em docs/esbocos/telas.html. Padrão P18: a página abre com o
+esqueleto e o HTMX busca o pedaço "resultados" na mesma URL. O custo médio só é desenhado para o
+Administrador (o Vendedor não recebe esse dado no HTML).
+{% endcomment %}
+{% block titulo %}Produtos - Helptoner Pedidos{% endblock %}
+{% block conteudo %}
+  <div class="fx flex flex-wrap items-center justify-between gap-3">
+    <h1>Produtos</h1>
+    {% if request.user.eh_administrador %}<a href="{% url 'cadastros:produto_novo' %}" class="btn-pri">+ Novo produto</a>{% endif %}
+  </div>
+  <form method="get" action="{% url 'cadastros:produtos' %}" class="fx fx-1 mt-4 flex flex-wrap items-center gap-x-5 gap-y-2" role="search"
+        hx-get="{% url 'cadastros:produtos' %}" hx-trigger="input changed delay:300ms from:find input[name=q], change from:find select[name=marca], change from:find input[name=inativos], submit" hx-target="#resultados" hx-push-url="true">
+    <div class="campo w-full sm:max-w-sm">
+      <input type="search" name="q" value="{{ request.GET.q }}" maxlength="100" placeholder="Código, nome ou marca" aria-label="Buscar produto por código, nome ou marca" autocomplete="off">
+    </div>
+    <div class="campo">
+      <select name="marca" aria-label="Filtrar por marca">
+        <option value="">Marca: todas</option>
+        {% for m in marcas %}<option value="{{ m }}"{% if request.GET.marca == m %} selected{% endif %}>{{ m }}</option>{% endfor %}
+      </select>
+    </div>
+    <label class="flex items-center gap-2 text-sm text-texto-2">
+      <input type="checkbox" name="inativos" value="1"{% if request.GET.inativos == "1" %} checked{% endif %}>
+      Mostrar inativos
+    </label>
+  </form>
+  <div id="resultados" class="mt-4" hx-get="{{ request.get_full_path }}" hx-trigger="load">
+    {% include "componentes/esqueleto_linhas.html" with linhas=5 %}
+  </div>
+{% endblock %}
+
+{% partialdef resultados %}
+{% if pagina.paginator.count %}
+  <div class="cartao fx">
+    <table class="tabela-responsiva">
+      <thead>
+        <tr><th>Código</th><th>Produto</th><th>Marca</th><th class="num">Preço</th>{% if request.user.eh_administrador %}<th class="num">Custo médio</th>{% endif %}<th>Estoque</th>{% if inativos %}<th>Situação</th>{% endif %}</tr>
+      </thead>
+      <tbody>
+        {% for produto in pagina %}
+          <tr>
+            <td data-rotulo="Código"><a href="{% url 'cadastros:produto_editar' produto.pk %}" class="font-semibold hover:text-azul hover:underline">{{ produto.codigo }}</a></td>
+            <td data-rotulo="Produto">{{ produto.descricao }}</td>
+            <td data-rotulo="Marca">{{ produto.marca }}</td>
+            <td data-rotulo="Preço" class="num">{{ produto.preco|brl }}</td>
+            {% if request.user.eh_administrador %}<td data-rotulo="Custo médio" class="num">{{ produto.custo_medio|brl }}</td>{% endif %}
+            <td data-rotulo="Estoque"><span class="{% if produto.estoque == 0 %}etiqueta-vermelho{% elif produto.estoque <= 3 %}etiqueta-ambar{% else %}etiqueta-verde{% endif %}">{{ produto.estoque|inteiro }}</span></td>
+            {% if inativos %}<td data-rotulo="Situação">{% if produto.ativo %}<span class="etiqueta-verde">Ativo</span>{% else %}<span class="etiqueta-cinza">Inativo</span>{% endif %}</td>{% endif %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "componentes/paginacao.html" %}
+{% elif not sem_produtos %}
+  <div class="cartao fx">{% include "componentes/vazio.html" with mensagem="Nenhum produto encontrado." %}</div>
+{% else %}
+  <div class="cartao fx">{% if request.user.eh_administrador %}{% url 'cadastros:produto_novo' as url_novo %}{% include "componentes/vazio.html" with mensagem="Nenhum produto ainda. Cadastre o primeiro." acao_url=url_novo acao_texto="Novo produto" %}{% else %}{% include "componentes/vazio.html" with mensagem="Nenhum produto ainda." %}{% endif %}</div>
+{% endif %}
+{% endpartialdef %}

@@ -1,0 +1,1169 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual de uso — Helptoner Pedidos</title>
+<style>
+@font-face {
+  font-family: "Inter";
+  src: url("../../static/fontes/InterVariable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+}
+:root {
+  --azul: #0200FF;
+  --vermelho: #FF0000;
+  --vermelho-escuro: #D60000;
+  --tinta: #0E1024;
+  --cinza: #555a70;
+  --linha: #d9dbe7;
+  --fundo-azul: #f0f1ff;
+  --fundo-vermelho: #fff1f1;
+  --verde: #0B8A5E;
+  --ambar: #A15C07;
+}
+@page { size: A4; margin: 17mm 20mm 19mm 20mm; }
+* { box-sizing: border-box; }
+html { font-size: 13.5pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body {
+  margin: 0;
+  background: #fff;
+  color: var(--tinta);
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  line-height: 1.55;
+}
+@media screen {
+  body { background: #e9eaf2; }
+  main { max-width: 190mm; margin: 0 auto; padding: 14mm 12mm; background: #fff; }
+  .capa { min-height: 260mm; }
+  h2.secao { margin-top: 18mm; padding-top: 6mm; border-top: 1px solid var(--linha); }
+}
+p { margin: 0.55em 0; orphans: 3; widows: 3; }
+b, strong { font-weight: 700; }
+a { color: var(--azul); }
+
+/* ---------- capa ---------- */
+.capa {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; height: 255mm; break-after: page;
+}
+.capa .faixa { width: 100%; height: 6px; border-radius: 3px; background: linear-gradient(90deg, #FF0000, #0200FF); margin-bottom: 26mm; }
+.capa img { width: 105mm; height: auto; }
+.capa h1 { font-size: 30pt; line-height: 1.15; margin: 16mm 0 4mm; color: var(--tinta); }
+.capa h1 span { color: var(--azul); display: block; }
+.capa .sub { font-size: 15pt; color: var(--cinza); margin: 0; }
+.capa .rodape-capa { margin-top: 30mm; font-size: 12pt; color: var(--cinza); }
+.capa .faixa.baixo { margin: 22mm 0 0; }
+
+/* ---------- títulos ---------- */
+h2 { font-size: 23pt; line-height: 1.2; color: var(--azul); margin: 0 0 0.4em; }
+h2.secao { break-before: page; }
+.rotulo-cap { display: block; font-size: 10pt; font-weight: 700; letter-spacing: 0.12em; color: var(--vermelho-escuro); margin-bottom: 1.5mm; }
+h3 { font-size: 16pt; line-height: 1.25; margin: 1.3em 0 0.4em; color: var(--tinta); break-after: avoid; }
+h3::before { content: ""; display: inline-block; width: 4px; height: 0.9em; background: var(--azul); border-radius: 2px; margin-right: 8px; vertical-align: -0.08em; }
+h4 { font-size: 13.5pt; margin: 1em 0 0.3em; break-after: avoid; }
+.intro { font-size: 14pt; color: var(--cinza); margin-bottom: 1em; }
+
+/* ---------- passos ---------- */
+ol.passos { list-style: none; counter-reset: passo; padding: 0; margin: 0.6em 0 1em; }
+ol.passos > li { counter-increment: passo; position: relative; padding-left: 2.35em; margin: 0 0 0.75em; break-inside: avoid; }
+ol.passos > li::before {
+  content: counter(passo); position: absolute; left: 0; top: 0.02em;
+  width: 1.6em; height: 1.6em; border-radius: 50%; background: var(--azul); color: #fff;
+  font-weight: 700; font-size: 0.9em; line-height: 1.6em; text-align: center;
+}
+ul.lista { margin: 0.5em 0 0.9em; padding-left: 1.3em; }
+ul.lista li { margin: 0.25em 0; }
+.n {
+  display: inline-block; min-width: 1.45em; height: 1.45em; padding: 0 0.2em; border-radius: 0.75em;
+  background: var(--vermelho); color: #fff; font-weight: 700; font-size: 0.85em; line-height: 1.45em;
+  text-align: center; vertical-align: 0.05em;
+}
+kbd {
+  font-family: inherit; font-size: 0.85em; font-weight: 700; padding: 0.05em 0.45em; border-radius: 5px;
+  border: 1px solid #b9bccd; border-bottom-width: 2px; background: #fafbff;
+}
+.tela { font-weight: 700; color: var(--azul); }
+
+/* ---------- fotos ---------- */
+figure.foto { margin: 0.5em 0 1.1em; text-align: center; break-inside: avoid; }
+figure.foto img { display: inline-block; max-width: 100%; height: auto; border: 1px solid var(--linha); border-radius: 7px; box-shadow: 0 1px 4px rgb(14 16 36 / 0.08); }
+figure.foto figcaption { font-size: 10.5pt; color: var(--cinza); margin-top: 0.3em; }
+.dupla { display: flex; gap: 7mm; justify-content: center; align-items: flex-start; break-inside: avoid; margin: 0.5em 0 1.1em; }
+.dupla figure.foto { margin: 0; }
+.dupla .legenda { font-size: 10.5pt; color: var(--cinza); text-align: center; margin-top: 0.3em; }
+.bloco { break-inside: avoid; }
+/* ---------- ilustrações (telas do celular desenhadas, em SVG, com 55 mm de largura) ---------- */
+figure.ilus { margin: 0.6em 0 1.1em; text-align: center; break-inside: avoid; }
+figure.ilus img { display: block; width: 55mm; height: auto; margin: 0 auto; }
+figure.ilus figcaption, .tira .legenda { font-size: 10.5pt; color: var(--cinza); margin: 0.35em 0 0; text-align: center; }
+.nota-ilus { font-size: 11.5pt; color: var(--cinza); border-left: 4px solid #8a8fa6; background: #f6f7fa; border-radius: 6px; padding: 0.45em 0.9em; margin: 0.5em 0 0.9em; }
+/* Passos em tira: o texto curto de cada passo fica em cima do seu celular, dois por linha. */
+.tira { display: grid; grid-template-columns: 1fr 1fr; column-gap: 10mm; margin: 0.7em 0 1em; break-inside: avoid; }
+.tira .passo { display: flex; flex-direction: column; }
+.tira .passo p { position: relative; padding-left: 2.35em; margin: 0 0 0.5em; }
+.tira .num {
+  position: absolute; left: 0; top: 0.02em; width: 1.6em; height: 1.6em; border-radius: 50%;
+  background: var(--azul); color: #fff; font-weight: 700; font-size: 0.9em; line-height: 1.6em; text-align: center;
+}
+.tira .passo img { display: block; width: 55mm; height: auto; margin: auto auto 0; }
+.tira .legenda { grid-column: 1 / -1; }
+/* Texto e celular lado a lado (capítulo 1). */
+.lado { display: flex; gap: 8mm; align-items: flex-start; break-inside: avoid; }
+.lado > .texto { flex: 1 1 auto; }
+.lado > .texto > h4:first-child { margin-top: 0.2em; }
+.lado > figure.ilus { flex: 0 0 55mm; margin: 0.4em 0 0; }
+/* O texto que apresenta uma foto não fica sozinho no fim da página. */
+p:has(+ figure.foto), p:has(+ .dupla), p:has(+ figure.ilus), p:has(+ .tira), h3 + p, h4 + p, h3 + figure.foto, h3 + .aviso, h3 + .nota-ilus, h3 + .lado { break-after: avoid; }
+/* Explicação de uma tira anterior: não precisa ir junto com a tira seguinte. */
+p.solto:has(+ .tira) { break-after: auto; }
+/* Frase que apresenta uma lista curta: fica junto da lista. */
+p.junto { break-after: avoid; }
+h3, h4 { break-after: avoid; }
+
+/* ---------- avisos ---------- */
+.aviso { border-left: 5px solid; border-radius: 7px; padding: 0.65em 1em 0.7em; margin: 0.9em 0 1.1em; break-inside: avoid; }
+.aviso > b:first-child { display: block; margin-bottom: 0.15em; font-size: 12.5pt; letter-spacing: 0.02em; }
+.aviso p { margin: 0.3em 0; }
+.atencao { border-color: var(--vermelho-escuro); background: var(--fundo-vermelho); }
+.atencao > b:first-child { color: var(--vermelho-escuro); }
+.dica { border-color: var(--azul); background: var(--fundo-azul); }
+.dica > b:first-child { color: var(--azul); }
+.exemplo { border-color: #8a8fa6; background: #f6f7fa; }
+
+/* ---------- tabelas ---------- */
+table.simples { width: 100%; border-collapse: collapse; margin: 0.6em 0 1.1em; font-size: 12pt; break-inside: avoid; }
+table.simples th, table.simples td { border: 1px solid var(--linha); padding: 0.4em 0.6em; text-align: left; vertical-align: top; }
+table.simples th { background: var(--fundo-azul); color: var(--tinta); }
+table.simples td.c, table.simples th.c { text-align: center; }
+.sim { color: var(--verde); font-weight: 700; }
+.nao { color: var(--vermelho-escuro); font-weight: 700; }
+
+/* ---------- sumário ---------- */
+.sumario { list-style: none; padding: 0; margin: 0.4em 0 1em; }
+.sumario li { display: flex; align-items: baseline; gap: 0.4em; padding: 0.24em 0; font-size: 13pt; }
+.sumario .num { width: 1.8em; font-weight: 700; color: var(--azul); }
+.sumario .t { flex: 0 1 auto; }
+.sumario .pontos { flex: 1 1 auto; border-bottom: 1.5px dotted #a5a9bd; transform: translateY(-0.3em); min-width: 1em; }
+.sumario .pg { font-weight: 700; min-width: 1.6em; text-align: right; }
+
+/* ---------- perguntas ---------- */
+/* inline-block: o Chrome nunca parte uma caixa assim entre duas páginas. */
+.pergunta { display: inline-block; width: 100%; vertical-align: top; break-inside: avoid; margin: 0 0 1em; padding: 0.7em 1em; border: 1px solid var(--linha); border-radius: 8px; }
+.pergunta p { break-after: auto; }
+.pergunta h4 { margin: 0 0 0.3em; color: var(--azul); }
+.pergunta p { margin: 0.3em 0; }
+
+.linha-telefone { display: inline-block; min-width: 80mm; border-bottom: 1.5px solid var(--tinta); height: 1.4em; vertical-align: bottom; }
+.cartao-contato { border: 2px solid var(--azul); border-radius: 12px; padding: 1.2em 1.4em; margin: 1em 0; }
+.cartao-contato p { font-size: 15pt; margin: 0.6em 0; }
+</style>
+</head>
+<body>
+<main>
+
+<!-- ======================= CAPA ======================= -->
+<section class="capa">
+  <div class="faixa"></div>
+  <img src="../assets/logo-helptoner.png" alt="Logo Helptoner">
+  <h1>Manual de uso <span>Helptoner Pedidos</span></h1>
+  <p class="sub">Passo a passo de todas as telas, do primeiro acesso aos relatórios</p>
+  <p class="rodape-capa">Para o Administrador do sistema<br>Versão de outubro de 2026</p>
+  <div class="faixa baixo"></div>
+</section>
+
+<!-- ======================= SUMÁRIO ======================= -->
+<section>
+  <h2>Sumário</h2>
+  <ol class="sumario">
+    <li><span class="num">1</span><span class="t">Antes de começar</span><span class="pontos"></span><span class="pg">4</span></li>
+    <li><span class="num">2</span><span class="t">Primeiro acesso (uma vez só)</span><span class="pontos"></span><span class="pg">7</span></li>
+    <li><span class="num">3</span><span class="t">Entrar no dia a dia</span><span class="pontos"></span><span class="pg">19</span></li>
+    <li><span class="num">4</span><span class="t">A tela Início</span><span class="pontos"></span><span class="pg">23</span></li>
+    <li><span class="num">5</span><span class="t">Fazer um pedido</span><span class="pontos"></span><span class="pg">25</span></li>
+    <li><span class="num">6</span><span class="t">Pedidos: procurar, ver, repetir e cancelar</span><span class="pontos"></span><span class="pg">39</span></li>
+    <li><span class="num">7</span><span class="t">Clientes</span><span class="pontos"></span><span class="pg">46</span></li>
+    <li><span class="num">8</span><span class="t">Produtos</span><span class="pontos"></span><span class="pg">52</span></li>
+    <li><span class="num">9</span><span class="t">Estoque</span><span class="pontos"></span><span class="pg">57</span></li>
+    <li><span class="num">10</span><span class="t">Relatórios</span><span class="pontos"></span><span class="pg">63</span></li>
+    <li><span class="num">11</span><span class="t">Funcionários</span><span class="pontos"></span><span class="pg">73</span></li>
+    <li><span class="num">12</span><span class="t">Histórico de alterações</span><span class="pontos"></span><span class="pg">81</span></li>
+    <li><span class="num">13</span><span class="t">Minha conta</span><span class="pontos"></span><span class="pg">83</span></li>
+    <li><span class="num">14</span><span class="t">Usar no celular</span><span class="pontos"></span><span class="pg">87</span></li>
+    <li><span class="num">15</span><span class="t">Deu problema, e agora?</span><span class="pontos"></span><span class="pg">90</span></li>
+    <li><span class="num">16</span><span class="t">Contatos</span><span class="pontos"></span><span class="pg">96</span></li>
+  </ol>
+
+  <h3>Como ler este manual</h3>
+  <ul class="lista">
+    <li>Cada tarefa vem em <b>passos numerados</b>. Faça um passo de cada vez, na ordem.</li>
+    <li>Os nomes de botões e campos aparecem em <b>negrito</b>, escritos igual à tela.</li>
+    <li>Nas fotos, o que você deve olhar ou clicar está dentro de um <b>contorno vermelho</b>. Quando há várias coisas, cada uma tem um número, como <span class="n">1</span> <span class="n">2</span> <span class="n">3</span>, e o texto explica cada número.</li>
+    <li>As caixas <b style="color:var(--vermelho-escuro)">Atenção</b> mostram onde é fácil errar. As caixas <b style="color:var(--azul)">Dica</b> mostram atalhos e conselhos.</li>
+  </ul>
+  <div class="aviso exemplo">
+    <b>Sobre as fotos</b>
+    <p>As fotos deste manual usam dados de exemplo. No seu sistema aparecem os seus clientes, produtos e o seu nome. Nas fotos, o Administrador se chama Roberto Almeida e a vendedora, Juliana Martins.</p>
+    <p>As telas do aplicativo autenticador no celular (capítulo 1 e itens 2.4 e 2.5) são desenhos, não fotos: no seu celular elas podem ser um pouco diferentes.</p>
+  </div>
+  <div class="aviso dica">
+    <b>Quem cuida da parte técnica</b>
+    <p>A manutenção técnica do sistema (atualizações, cópias de segurança e o endereço na internet) é com o Lucas. Você só precisa usar as telas descritas aqui.</p>
+  </div>
+</section>
+
+<!-- ======================= 1 ======================= -->
+<h2 class="secao" id="s1"><span class="rotulo-cap">CAPÍTULO 1</span>Antes de começar</h2>
+<p class="intro">O Helptoner Pedidos funciona no navegador de internet (Google Chrome, Microsoft Edge ou outro). Não é preciso instalar nada no computador. Para entrar pela primeira vez, separe estas quatro coisas:</p>
+
+<table class="simples">
+  <tr><th style="width:34%">O que</th><th>Onde conseguir</th></tr>
+  <tr><td><b>O endereço do sistema</b></td><td>O endereço que o Lucas passar, por exemplo <b>https://helptoner-pedidos.vercel.app</b>. Escreva aqui o endereço certo: <span class="linha-telefone" style="min-width:60mm"></span></td></tr>
+  <tr><td><b>Seu e-mail e a senha temporária</b></td><td>O Lucas cadastra você e passa uma senha temporária. Ela só serve para a primeira entrada: logo depois você cria a sua.</td></tr>
+  <tr><td><b>Um celular com aplicativo autenticador</b></td><td><b>Google Authenticator</b> (o mais simples) ou Microsoft Authenticator. Veja abaixo como instalar.</td></tr>
+  <tr><td><b>Papel e caneta</b></td><td>Para anotar os códigos de recuperação (explicados no capítulo 2).</td></tr>
+</table>
+
+<div class="aviso dica">
+  <b>Dica: guarde o endereço nos favoritos</b>
+  <p>Com o sistema aberto no navegador, aperte <kbd>Ctrl</kbd> + <kbd>D</kbd> e clique em <b>Concluído</b>. Nas próximas vezes, é só clicar na estrela dos favoritos.</p>
+</div>
+
+<h3>O que é o aplicativo autenticador</h3>
+<p>É um aplicativo gratuito do celular que mostra um número de 6 dígitos que muda a cada 30 segundos. Ao entrar no sistema, além da senha, você digita esse número. Assim, mesmo que alguém descubra a sua senha, não consegue entrar sem o seu celular. O sistema chama isso de <b>verificação em duas etapas</b> (às vezes aparece só <b>2FA</b>).</p>
+
+<h3>Qual aplicativo usar</h3>
+<p>Se ainda não tem nenhum, instale o <b>Google Authenticator</b> — é o mais simples. Se você já usa o <b>Microsoft Authenticator</b> no celular, pode usar ele mesmo: os dois funcionam com o sistema. Use só um dos dois para o Helptoner Pedidos.</p>
+
+<h3>Instalar o aplicativo no celular</h3>
+<div class="lado">
+  <div class="texto">
+    <h4>Celular Android (Samsung, Motorola, Xiaomi e outros)</h4>
+    <ol class="passos">
+      <li>Abra a <b>Play Store</b> (o ícone de triângulo colorido).</li>
+      <li>Toque na busca, escreva <b>Google Authenticator</b> e toque no aplicativo do Google LLC.</li>
+      <li>Toque em <b>Instalar</b> <span class="n">1</span> e espere terminar.</li>
+    </ol>
+  </div>
+  <figure class="ilus"><img src="imagens/ilus-loja-instalar.svg" alt="Desenho da loja de aplicativos com o Google Authenticator encontrado na busca e o botão Instalar marcado com o número 1"><figcaption>Ilustração — a tela do seu celular pode ser um pouco diferente.</figcaption></figure>
+</div>
+<h4>iPhone</h4>
+<ol class="passos">
+  <li>Abra a <b>App Store</b> (o ícone azul com um “A”).</li>
+  <li>Toque em <b>Buscar</b>, escreva <b>Google Authenticator</b> e toque no aplicativo do Google LLC.</li>
+  <li>Toque em <b>Obter</b> (no iPhone, é o botão de instalar) e confirme com o Face ID ou a senha da Apple.</li>
+</ol>
+<p>Vai usar o <b>Microsoft Authenticator</b>? Instale do mesmo jeito, buscando <b>Microsoft Authenticator</b> (da Microsoft Corporation).</p>
+<p>Por enquanto, não precisa mexer no aplicativo. Ele é configurado no primeiro acesso, com o computador mostrando o QR code (itens 2.3 a 2.5).</p>
+
+<div class="aviso atencao">
+  <b>Atenção: o relógio do celular</b>
+  <p>Os números do aplicativo dependem do horário. Deixe o celular com <b>data e hora automáticas</b> (em <b>Configurações → Data e hora</b>). Com o relógio errado, o sistema recusa o código.</p>
+</div>
+
+<h3>Abrir o sistema</h3>
+<p>Digite o endereço na barra do navegador e aperte <kbd>Enter</kbd>. Aparece a tela <span class="tela">Entrar</span>:</p>
+<figure class="foto "><img src="imagens/01-entrar-tela.jpg" alt="Tela Entrar, com os campos E-mail e Senha e o botão Entrar" style="width:102.1mm"></figure>
+
+<!-- ======================= 2 ======================= -->
+<h2 class="secao" id="s2"><span class="rotulo-cap">CAPÍTULO 2</span>Primeiro acesso (uma vez só)</h2>
+<p class="intro">Na primeira vez, o sistema pede três coisas, nesta ordem: <b>trocar a senha</b>, <b>ligar o aplicativo do celular</b> e <b>guardar os códigos de recuperação</b>. Leva uns 10 minutos. Faça com calma, com o celular na mão. Só depois disso o sistema libera as outras telas.</p>
+
+<h3>2.1 Entrar com a senha temporária</h3>
+<ol class="passos">
+  <li>No campo <b>E-mail</b> <span class="n">1</span>, digite o seu e-mail.</li>
+  <li>No campo <b>Senha</b> <span class="n">2</span>, digite a senha temporária que o Lucas passou, exatamente como está. Ela tem 16 letras minúsculas e números em quatro grupos separados por tracinhos (no formato <b>w3gb-2jrz-mvd3-vtce</b>); digite os tracinhos também.</li>
+  <li>Clique em <b>Entrar</b> <span class="n">3</span>.
+  <figure class="foto "><img src="imagens/02-entrar-preenchido.jpg" alt="Tela Entrar preenchida, com o e-mail, a senha e o botão Entrar numerados" style="width:104.7mm"></figure></li>
+</ol>
+
+<h3>2.2 Criar a sua senha</h3>
+<p>Aparece a tela <span class="tela">Primeiro acesso</span>. No alto, <span class="n">1</span> mostra em que etapa você está: <b>1 · Nova senha</b>, <b>2 · Autenticador</b> e <b>3 · Códigos de recuperação</b>.</p>
+<ol class="passos">
+  <li>Em <b>Nova senha</b> <span class="n">2</span>, digite a senha que você quer usar daqui para a frente.</li>
+  <li>Em <b>Confirme a nova senha</b> <span class="n">3</span>, digite a mesma senha de novo.</li>
+  <li>Clique em <b>Salvar e continuar</b> <span class="n">4</span>.
+  <figure class="foto "><img src="imagens/03-primeiro-acesso-senha.jpg" alt="Etapa 1 do primeiro acesso: campos Nova senha e Confirme a nova senha" style="width:102.1mm"></figure></li>
+</ol>
+
+<div class="aviso dica">
+  <b>Como fazer uma senha boa e fácil de lembrar</b>
+  <p>A senha precisa ter <b>pelo menos 12 caracteres</b>, não pode ser uma senha comum (como “12345678” ou “senha123”), não pode ser só números, não pode parecer com o seu nome ou e-mail e precisa ser <b>diferente da temporária</b>.</p>
+  <p>Um jeito fácil: junte três ou quatro palavras que só você ligaria, com tracinhos e um número. Por exemplo, no estilo <b>Goiaba-Varanda-Trator-58</b>. Não use este exemplo: invente a sua.</p>
+</div>
+
+<p>Se a senha não servir, o sistema explica o motivo em vermelho, embaixo do campo, e nada é gravado. Corrija e clique de novo em <b>Salvar e continuar</b>.</p>
+<figure class="foto "><img src="imagens/04-primeiro-acesso-senha-fraca.jpg" alt="Mensagem em vermelho: Esta senha é muito curta. Ela precisa conter pelo menos 12 caracteres." style="width:102.1mm"></figure>
+
+<div class="aviso atencao">
+  <b>Atenção: não anote a senha junto do computador</b>
+  <p>Se precisar anotar, guarde num lugar só seu. Nunca passe a sua senha para ninguém, nem para o Lucas: se for preciso, ele cria uma senha nova para você.</p>
+</div>
+
+<h3>2.3 Ligar o aplicativo do celular</h3>
+<p>Na etapa <b>2 · Autenticador</b>, o sistema mostra um quadrado de pontinhos pretos, o <b>QR code</b> <span class="n">1</span>. O celular vai “fotografar” esse quadrado. Embaixo dele ficam a chave em letras e números <span class="n">2</span> (só para quando a câmera não consegue ler), o campo <b>Código de 6 dígitos</b> <span class="n">3</span> e o botão <b>Ativar e continuar</b> <span class="n">4</span>.</p>
+<figure class="foto media"><img src="imagens/05-primeiro-acesso-autenticador.jpg" alt="Etapa 2: QR code, chave de texto, campo Código de 6 dígitos e botão Ativar e continuar" style="width:90.0mm"></figure>
+<p class="junto">Deixe essa tela aberta no computador e pegue o celular. O que fazer no celular depende do aplicativo que você instalou (capítulo 1):</p>
+<ul class="lista">
+  <li><b>Google Authenticator</b>: siga o item <b>2.4</b>, logo a seguir.</li>
+  <li><b>Microsoft Authenticator</b>: pule para o item <b>2.5</b>.</li>
+</ul>
+<p>Nos dois casos, o fim é igual: o celular mostra <b>6 números</b>, você digita esses números no campo <b>Código de 6 dígitos</b> <span class="n">3</span> e clica em <b>Ativar e continuar</b> <span class="n">4</span>.</p>
+
+<div class="aviso atencao">
+  <b>Atenção: o número muda a cada 30 segundos</b>
+  <p>No celular, ao lado do número, há um pequeno círculo que vai se esvaziando, como um relógio. Se estiver quase no fim, espere o próximo número aparecer e digite o novo. Um número que já passou não vale mais.</p>
+</div>
+
+<h3>2.4 No Google Authenticator</h3>
+<p class="nota-ilus">As telas abaixo são desenhos. Os nomes dos botões podem mudar um pouco conforme a versão do aplicativo e do celular. Procure o que tiver o mesmo sentido.</p>
+<div class="tira">
+  <div class="passo"><p><span class="num">1</span>Abra o <b>Google Authenticator</b> e toque em <b>Começar</b> <span class="n">1</span>.</p><img src="imagens/ilus-google-1-comecar.svg" alt="Desenho da tela de boas-vindas do Google Authenticator com o botão Começar marcado com o número 1"></div>
+  <div class="passo"><p><span class="num">2</span>Toque em <b>Usar sem uma conta</b> <span class="n">2</span>: é o mais simples.</p><img src="imagens/ilus-google-2-sem-conta.svg" alt="Desenho da pergunta sobre entrar com a Conta do Google, com Usar sem uma conta marcado com o número 2"></div>
+  <p class="legenda">Ilustração — a tela do seu celular pode ser um pouco diferente.</p>
+</div>
+<p class="solto">Sem conta, os números ficam só neste celular. Não tem problema: se um dia perder o celular, os códigos de recuperação (item 2.6) e o outro Administrador resolvem.</p>
+<div class="aviso dica">
+  <b>Já usou o Google Authenticator antes?</b>
+  <p>Então as telas dos passos 1 e 2 não aparecem: o aplicativo abre direto na lista de contas. Toque no botão <b>+</b>, no canto de baixo, à direita, e siga do passo 3. Se na lista houver uma <b>Helptoner Pedidos</b> antiga (por exemplo, depois de um <b>Zerar 2FA</b>), apague a antiga depois (veja “Tem mais de uma Helptoner Pedidos no aplicativo”, no capítulo 15).</p>
+</div>
+<div class="tira">
+  <div class="passo"><p><span class="num">3</span>Toque em <b>Ler um código QR</b> <span class="n">3</span>.</p><img src="imagens/ilus-google-3-ler-qr.svg" alt="Desenho da tela Configure a sua primeira conta, com Ler um código QR marcado com o número 3 e Inserir uma chave de configuração embaixo"></div>
+  <div class="passo"><p><span class="num">4</span>Se pedir a câmera, toque em <b>Durante o uso do app</b> <span class="n">4</span>. No iPhone: <b>OK</b>.</p><img src="imagens/ilus-camera-permitir.svg" alt="Desenho da pergunta do celular para usar a câmera, com Durante o uso do app marcado com o número 4"></div>
+  <p class="legenda">Ilustração — a tela do seu celular pode ser um pouco diferente.</p>
+</div>
+<div class="tira">
+  <div class="passo"><p><span class="num">5</span>Aponte a câmera para o QR code do computador, dentro da moldura <span class="n">5</span>.</p><img src="imagens/ilus-google-5-apontar.svg" alt="Desenho da câmera do celular apontada para o monitor do computador, com o QR code dentro da moldura marcada com o número 5"></div>
+  <div class="passo"><p><span class="num">6</span>Aparece <b>Helptoner Pedidos</b> com <b>6 números</b> e um pequeno círculo <span class="n">6</span>.</p><img src="imagens/ilus-google-6-codigo.svg" alt="Desenho da lista do Google Authenticator com a conta Helptoner Pedidos, o e-mail, o código 492 817 e o círculo do tempo, marcados com o número 6"></div>
+  <p class="legenda">Ilustração — a tela do seu celular pode ser um pouco diferente.</p>
+</div>
+<p>O aplicativo lê o QR code sozinho: não precisa apertar nada. Embaixo de <b>Helptoner Pedidos</b> aparece o seu e-mail. O círculo vai se esvaziando; quando acaba, aparecem 6 números novos.</p>
+<ol class="passos" style="counter-reset: passo 6">
+  <li>No computador, digite os 6 números no campo <b>Código de 6 dígitos</b>, sem espaço, antes de o círculo acabar. Clique em <b>Ativar e continuar</b>.</li>
+</ol>
+<p>Pronto: o celular está ligado ao sistema. Pule o item 2.5 e siga para o <b>2.6</b>.</p>
+<div class="aviso dica">
+  <b>Dica: se a câmera não ler o QR code</b>
+  <p>No lugar de <b>Ler um código QR</b>, toque em <b>Inserir uma chave de configuração</b>. Em <b>Conta</b>, escreva <b>Helptoner</b>. Em <b>Chave</b>, digite as letras e números que aparecem no computador embaixo de “Não consegue ler o QR? Digite esta chave no aplicativo” (<span class="n">2</span> na foto do item 2.3). Deixe o tipo <b>Baseada no horário</b> e toque em <b>Adicionar</b>.</p>
+</div>
+
+<h3>2.5 No Microsoft Authenticator</h3>
+<p class="nota-ilus">As telas abaixo são desenhos. Os nomes dos botões podem mudar um pouco conforme a versão do aplicativo e do celular. Procure o que tiver o mesmo sentido.</p>
+<div class="tira">
+  <div class="passo"><p><span class="num">1</span>Abra o <b>Microsoft Authenticator</b> e toque em <b>Aceitar</b> <span class="n">1</span>. Se vier outro aviso, toque em <b>Continuar</b>.</p><img src="imagens/ilus-microsoft-1-aceitar.svg" alt="Desenho do aviso de privacidade do Microsoft Authenticator com o botão Aceitar marcado com o número 1"></div>
+  <div class="passo"><p><span class="num">2</span>Na tela de início, toque em <b>Digitalizar um código QR</b> <span class="n">2</span>. Depois, pule o passo 3.</p><img src="imagens/ilus-microsoft-2-inicio.svg" alt="Desenho da tela de início do Microsoft Authenticator com Digitalizar um código QR marcado com o número 2"></div>
+  <p class="legenda">Ilustração — a tela do seu celular pode ser um pouco diferente.</p>
+</div>
+<div class="tira">
+  <div class="passo"><p><span class="num">3</span>Só se a tela do passo 2 não aparecer: toque no <b>+</b>, no alto, e em <b>Outra conta (Google, Facebook etc.)</b> <span class="n">3</span>.</p><img src="imagens/ilus-microsoft-3-outra-conta.svg" alt="Desenho da tela Adicionar conta com Outra conta (Google, Facebook etc.) marcado com o número 3"></div>
+  <div class="passo"><p><span class="num">4</span>Se pedir a câmera, toque em <b>Durante o uso do app</b> <span class="n">4</span>. No iPhone: <b>OK</b>.</p><img src="imagens/ilus-camera-permitir.svg" alt="Desenho da pergunta do celular para usar a câmera, com Durante o uso do app marcado com o número 4"></div>
+  <p class="legenda">Ilustração — a tela do seu celular pode ser um pouco diferente.</p>
+</div>
+<div class="tira">
+  <div class="passo"><p><span class="num">5</span>Aponte a câmera para o QR code do computador, dentro da moldura <span class="n">5</span>.</p><img src="imagens/ilus-microsoft-5-apontar.svg" alt="Desenho da câmera do Microsoft Authenticator apontada para o monitor do computador, com o QR code dentro da moldura marcada com o número 5"></div>
+  <div class="passo"><p><span class="num">6</span>A lista mostra <b>Helptoner Pedidos</b>. <b>Toque na conta</b> <span class="n">6</span> para ver o número.</p><img src="imagens/ilus-microsoft-6-lista.svg" alt="Desenho da lista do Microsoft Authenticator com a conta Helptoner Pedidos marcada com o número 6"></div>
+  <p class="legenda">Ilustração — a tela do seu celular pode ser um pouco diferente.</p>
+</div>
+<div class="tira">
+  <div class="passo"><p><span class="num">7</span>Aparecem os <b>6 números</b> e um círculo com os segundos que faltam <span class="n">7</span>.</p><img src="imagens/ilus-microsoft-7-codigo.svg" alt="Desenho da conta Helptoner Pedidos aberta, com o código 492 817 e o círculo dos segundos marcados com o número 7"></div>
+  <div class="passo"><p><span class="num">8</span>No computador, digite os 6 números no campo <b>Código de 6 dígitos</b>, sem espaço, antes de o tempo acabar. Clique em <b>Ativar e continuar</b>.</p></div>
+  <p class="legenda">Ilustração — a tela do seu celular pode ser um pouco diferente.</p>
+</div>
+<p>Pronto: o celular está ligado ao sistema. Siga para o item <b>2.6</b>.</p>
+<div class="aviso dica">
+  <b>Dica: se a câmera não ler o QR code</b>
+  <p>Na tela da câmera, toque em <b>Ou inserir código manualmente</b>. Em <b>Nome da conta</b>, escreva <b>Helptoner</b>. Em <b>Chave secreta</b>, digite as letras e números que aparecem no computador embaixo de “Não consegue ler o QR? Digite esta chave no aplicativo” (<span class="n">2</span> na foto do item 2.3). Toque em <b>Concluir</b>.</p>
+</div>
+
+<h3>2.6 Guardar os códigos de recuperação</h3>
+<p>Na etapa <b>3 · Códigos de recuperação</b>, o sistema mostra <b>10 códigos de 8 números</b> <span class="n">1</span>. Eles são a “chave reserva” da sua conta: se um dia você perder o celular ou ele quebrar, você entra com um desses códigos no lugar do número do aplicativo. <b>Cada código vale uma vez só.</b></p>
+<figure class="foto "><img src="imagens/06-primeiro-acesso-codigos.jpg" alt="Etapa 3: lista de códigos de recuperação, botão Baixar e botão Guardei os códigos, continuar" style="width:102.1mm"></figure>
+<ol class="passos">
+  <li>Anote os 10 códigos no papel, com calma, conferindo número por número.</li>
+  <li>Se quiser, clique também em <b>Baixar</b> <span class="n">2</span> para salvar os códigos num arquivo no computador.</li>
+  <li>Guarde o papel num lugar seguro, <b>longe do celular</b> (por exemplo, numa gaveta em casa).</li>
+  <li>Clique em <b>Guardei os códigos, continuar</b> <span class="n">3</span>.</li>
+</ol>
+
+<div class="aviso atencao">
+  <b>Atenção: guarde bem os códigos de recuperação</b>
+  <p>Não guarde o papel na capinha do celular nem na carteira junto com ele: se perder um, perde o outro. Não mande os códigos por WhatsApp nem por e-mail. Se acabar perdendo os códigos, dá para gerar novos em <b>Minha conta</b> (capítulo 13).</p>
+</div>
+
+<p>Pronto! O sistema mostra o aviso <b>“Tudo pronto! Seu acesso está configurado.”</b> e abre a tela <span class="tela">Início</span>. Você não vai precisar repetir este capítulo.</p>
+<figure class="foto "><img src="imagens/07-primeiro-acesso-pronto.jpg" alt="Tela Início com o aviso Tudo pronto! Seu acesso está configurado." style="width:170.0mm"></figure>
+
+<!-- ======================= 3 ======================= -->
+<h2 class="secao" id="s3"><span class="rotulo-cap">CAPÍTULO 3</span>Entrar no dia a dia</h2>
+<p class="intro">Depois do primeiro acesso, entrar é sempre igual: e-mail e senha, depois o número do aplicativo do celular.</p>
+
+<h3>3.1 E-mail, senha e o código do celular</h3>
+<ol class="passos">
+  <li>Abra o endereço do sistema. Aparece a tela <span class="tela">Entrar</span>.</li>
+  <li>Digite o seu <b>E-mail</b> e a sua <b>Senha</b> e clique em <b>Entrar</b>.</li>
+  <li>Aparece a tela <span class="tela">Verificação em duas etapas</span>. Abra o aplicativo no celular e veja o número de <b>Helptoner Pedidos</b>:
+    <ul class="lista">
+      <li>no <b>Google Authenticator</b>, o número aparece direto na lista;</li>
+      <li>no <b>Microsoft Authenticator</b>, toque na conta <b>Helptoner Pedidos</b> para ver o número.</li>
+    </ul></li>
+  <li>Digite o número no campo <b>Código</b> <span class="n">1</span> e clique em <b>Verificar</b> <span class="n">2</span>. Embaixo do campo, o sistema lembra o que vale ali: “Os 6 números do aplicativo ou um código de recuperação.”
+  <figure class="foto "><img src="imagens/09-entrar-codigo.jpg" alt="Tela Verificação em duas etapas, com o campo Código, a ajuda embaixo dele, o botão Verificar e o link do código de recuperação" style="width:102.1mm"></figure></li>
+</ol>
+
+<h3>3.2 “Confiar neste computador?”</h3>
+<p>Logo depois do código, o sistema pergunta se pode confiar neste computador.</p>
+<figure class="foto "><img src="imagens/11-confiar-computador.jpg" alt="Tela Confiar neste computador? com os botões Confiar neste computador e Agora não" style="width:102.1mm"></figure>
+<ul class="lista">
+  <li><span class="n">1</span> <b>Confiar neste computador</b>: escolha no computador da loja ou no seu computador de casa. Nos próximos 30 dias, nesse computador, você entra só com e-mail e senha, sem o código do celular. Depois de 30 dias, o sistema pede o código uma vez e pergunta de novo.</li>
+  <li><span class="n">2</span> <b>Agora não</b>: escolha em computador emprestado, de outra pessoa ou público (lan house, hotel, banco). O código vai ser pedido em toda entrada.</li>
+</ul>
+<p>A confiança é de cada pessoa: se você e o Lucas confiarem no computador da loja, cada um entra ali só com o próprio e-mail e senha. Por isso, nunca deixe a sua senha anotada perto desse computador.</p>
+<div class="aviso dica">
+  <b>Quando o sistema volta a pedir o código</b>
+  <p>Mesmo num computador de confiança, o código volta a ser pedido se a sua senha mudar (você trocou ou alguém redefiniu) ou se a verificação em duas etapas for zerada. É de propósito, para a sua segurança.</p>
+</div>
+
+<h3>3.3 Sem o celular: usar um código de recuperação</h3>
+<p>Se o celular ficou em casa, quebrou ou sumiu, use um dos códigos de recuperação que você anotou no papel.</p>
+<ol class="passos">
+  <li>Entre com e-mail e senha, como sempre.</li>
+  <li>Na tela <span class="tela">Verificação em duas etapas</span>, se quiser ler a explicação, clique em <b>Perdeu o celular? Use um código de recuperação</b> <span class="n">1</span>.</li>
+  <li>Digite um dos códigos de 8 números no campo <b>Código</b> <span class="n">2</span> e clique em <b>Verificar</b>.
+  <figure class="foto "><img src="imagens/12-entrar-codigo-recuperacao.jpg" alt="Código de recuperação de 8 dígitos digitado no campo do código" style="width:102.1mm"></figure></li>
+  <li>Risque no papel o código que você usou: ele não vale de novo.</li>
+</ol>
+<div class="aviso atencao">
+  <b>Atenção: perdeu o celular de verdade?</b>
+  <p>Depois de entrar, avise o Lucas (ou o outro administrador) no mesmo dia. Ele vai usar <b>Zerar 2FA</b> e <b>Redefinir senha</b> na sua conta, e você configura o aplicativo no celular novo. Veja o capítulo 11.</p>
+</div>
+
+<h3>3.4 Sair do sistema</h3>
+<p>No fim do dia, ou quando for deixar o computador, clique em <b>Sair</b> <span class="n">1</span>, no canto de baixo do menu, à esquerda.</p>
+<figure class="foto "><img src="imagens/08-sair.jpg" alt="Parte de baixo do menu, com o nome do usuário, Minha conta e o botão Sair" style="width:52.2mm"></figure>
+
+<h3>3.5 Ficou parado muito tempo?</h3>
+<p>Por segurança, o sistema <b>sai sozinho depois de 2 horas sem uso</b>. Quando você voltar a mexer, aparece a tela <span class="tela">Entrar</span>. Entre de novo: o sistema volta para a tela em que você estava.</p>
+<div class="aviso dica">
+  <b>Nada se perde</b>
+  <p>Os pedidos em montagem (rascunhos) são salvos a cada mudança. Se o sistema sair no meio de um pedido, depois de entrar é só abrir o rascunho de novo (veja o capítulo 5).</p>
+</div>
+
+<!-- ======================= 4 ======================= -->
+<h2 class="secao" id="s4"><span class="rotulo-cap">CAPÍTULO 4</span>A tela Início</h2>
+<p class="intro">É a primeira tela depois de entrar. Ela mostra um resumo do dia a dia e dá acesso a todo o resto pelo menu.</p>
+<figure class="foto "><img src="imagens/15-inicio.jpg" alt="Tela Início com cinco partes numeradas" style="width:170.0mm"></figure>
+<ul class="lista">
+  <li><span class="n">1</span> <b>+ Novo pedido</b>: começa um pedido novo (capítulo 5).</li>
+  <li><span class="n">2</span> <b>Números do mês</b>: quantos pedidos foram confirmados no mês e quanto foi vendido. Para o Administrador, são os números da empresa toda; o vendedor vê só os pedidos dele.</li>
+  <li><span class="n">3</span> <b>Rascunhos em aberto</b>: os pedidos que <b>você</b> começou e ainda não confirmou. Clique em <b>Continuar</b> para terminar um deles.</li>
+  <li><span class="n">4</span> <b>Últimos pedidos</b>: os 5 pedidos mais recentes da empresa. Clique no número (por exemplo, <b>nº 349</b>) para abrir o pedido.</li>
+  <li><span class="n">5</span> <b>Menu</b>: leva às outras telas. <b>Relatórios</b>, <b>Funcionários</b> e <b>Histórico</b> só aparecem para o Administrador.</li>
+</ul>
+<p>Embaixo do menu ficam o seu nome, o seu perfil (Administrador), <b>Minha conta</b> e <b>Sair</b>. A tela em que você está fica destacada em azul no menu.</p>
+<div class="aviso dica">
+  <b>Avisos que somem sozinhos</b>
+  <p>Depois de salvar ou confirmar alguma coisa, aparece um aviso escuro no canto de baixo, à direita (por exemplo, “Cliente salvo.”). Ele some sozinho depois de alguns segundos. Aviso com <b>X vermelho</b> indica que algo não deu certo.</p>
+</div>
+
+<!-- ======================= 5 ======================= -->
+<h2 class="secao" id="s5"><span class="rotulo-cap">CAPÍTULO 5</span>Fazer um pedido</h2>
+<p class="intro">Este é o coração do sistema. O pedido é montado aos poucos e fica guardado como <b>rascunho</b> enquanto você mexe. Ele só ganha número, baixa o estoque e vale de verdade quando você clica em <b>Confirmar pedido</b>.</p>
+
+<h3>5.1 Começar um pedido novo</h3>
+<ol class="passos">
+  <li>Na tela <span class="tela">Início</span> (ou na tela <span class="tela">Pedidos</span>), clique em <b>+ Novo pedido</b>.</li>
+  <li>Abre a tela <span class="tela">Novo pedido</span>, dividida em partes:
+  <figure class="foto "><img src="imagens/16-novo-pedido.jpg" alt="Tela Novo pedido vazia, com as partes Cliente, Itens do pedido, Resumo e o selo Rascunho numeradas" style="width:170.0mm"></figure>
+  <ul class="lista">
+    <li><span class="n">1</span> <b>Cliente</b>: para quem é o pedido.</li>
+    <li><span class="n">2</span> <b>Itens do pedido</b>: os produtos e as quantidades.</li>
+    <li><span class="n">3</span> <b>Resumo</b>: subtotal, desconto, total, observações e o botão de confirmar.</li>
+    <li><span class="n">4</span> O selo <b>Rascunho · salvo às 14:36</b> mostra que tudo está sendo salvo sozinho. Não existe botão de salvar.</li>
+  </ul></li>
+</ol>
+
+<h3>5.2 Escolher o cliente</h3>
+<ol class="passos">
+  <li>Clique no campo <b>Buscar cliente por nome, CPF ou CNPJ</b> <span class="n">1</span>.</li>
+  <li>Digite uma parte do nome (por exemplo, <b>papel</b>), ou do CPF, ou do CNPJ. Em menos de um segundo aparece a lista de clientes encontrados <span class="n">2</span>, com o pedaço digitado marcado em amarelo.
+  <figure class="foto "><img src="imagens/17-buscar-cliente.jpg" alt="Campo de busca de cliente com a palavra papel e a lista com Papelaria Central Ltda" style="width:170.0mm"></figure></li>
+  <li>Escolha o cliente de um destes jeitos:
+    <ul class="lista">
+      <li><b>com o mouse</b>: clique no nome dele na lista; ou</li>
+      <li><b>com o teclado</b>: o primeiro da lista já vem marcado; use as setas <kbd>↓</kbd> e <kbd>↑</kbd> para ir até o certo e aperte <kbd>Enter</kbd>.</li>
+    </ul></li>
+  <li>O cliente escolhido aparece num cartão <span class="n">1</span>, com o CPF ou CNPJ e a cidade. Confira se é o cliente certo. Se não for, clique em <b>Trocar</b> <span class="n">2</span> e busque de novo.
+  <figure class="foto "><img src="imagens/18-cliente-escolhido.jpg" alt="Cartão com o cliente escolhido e o botão Trocar" style="width:170.0mm"></figure></li>
+</ol>
+<div class="aviso dica">
+  <b>O cliente não aparece na busca?</b>
+  <p>Ele pode não estar cadastrado ou estar inativo. Cadastre (ou reative) em <b>Clientes</b> (capítulo 7). O rascunho fica salvo: depois é só voltar a ele pela tela Início, em <b>Rascunhos em aberto</b>.</p>
+</div>
+
+<h3>5.3 Adicionar produtos</h3>
+<ol class="passos">
+  <li>Clique no campo <b>Buscar produto por código ou nome</b> <span class="n">1</span> e digite parte do código ou do nome (por exemplo, <b>85a</b> ou <b>brother</b>).</li>
+  <li>Na lista <span class="n">2</span>, cada produto mostra o preço e quantos estão <b>disponíveis</b> no estoque. Produtos <b>Sem estoque</b> aparecem apagados e não podem ser escolhidos.
+  <figure class="foto "><img src="imagens/19-buscar-produto.jpg" alt="Busca de produto com 85a e a sugestão Toner HP 85A Preto, R$ 189,90, 32 disponíveis" style="width:170.0mm"></figure></li>
+  <li>Escolha o produto com o mouse ou com as setas e <kbd>Enter</kbd>, como no cliente.</li>
+  <li>Embaixo do campo aparece o preço e o estoque <span class="n">1</span> (por exemplo, “R$ 189,90 cada · 32 em estoque”). O cursor pula sozinho para a <b>quantidade</b> <span class="n">2</span>: digite quantas unidades o cliente quer.</li>
+  <li>Clique em <b>+ Adicionar</b> <span class="n">3</span> (ou aperte <kbd>Enter</kbd>).
+  <figure class="foto "><img src="imagens/20-quantidade.jpg" alt="Produto escolhido, linha com preço e estoque, campo de quantidade com 2 e botão Adicionar" style="width:170.0mm"></figure></li>
+  <li>O produto entra na tabela de itens. Repita os passos 1 a 5 para cada produto.</li>
+</ol>
+<div class="aviso dica">
+  <b>Mesmo produto duas vezes</b>
+  <p>Se você adicionar de novo um produto que já está no pedido, o sistema soma na mesma linha, em vez de criar outra.</p>
+</div>
+
+<h3>5.4 Mudar a quantidade ou tirar um item</h3>
+<figure class="foto "><img src="imagens/22-itens-do-pedido.jpg" alt="Tabela de itens com os botões menos e mais, o total da linha e o X para remover" style="width:170.0mm"></figure>
+<ul class="lista">
+  <li><span class="n">1</span> Clique em <b>+</b> para aumentar uma unidade, ou em <b>−</b> para diminuir uma unidade.</li>
+  <li><span class="n">2</span> Clique no <b>X</b> para tirar o produto do pedido.</li>
+  <li><span class="n">3</span> O total da linha e o resumo se atualizam na hora.</li>
+</ul>
+<p>O preço de cada produto vem do cadastro e não pode ser mudado dentro do pedido. Para dar um preço melhor ao cliente, use o desconto.</p>
+
+<h3>5.5 Quando não há estoque suficiente</h3>
+<p>Se você pedir mais do que existe no estoque, o sistema não deixa adicionar e explica embaixo do campo. Na foto, o cliente queria 5, mas só há 1 <span class="n">1</span>; a mensagem diz <b>“Estoque insuficiente: 1 em estoque.”</b> <span class="n">2</span>.</p>
+<figure class="foto "><img src="imagens/21-estoque-insuficiente-ao-adicionar.jpg" alt="Mensagem Estoque insuficiente: 1 em estoque, embaixo do campo do produto" style="width:170.0mm"></figure>
+<p><b>Como resolver:</b> diminua a quantidade para o que existe e clique em <b>+ Adicionar</b>, ou combine com o cliente outro produto. Se o produto acabou de chegar e ainda não foi lançado, lance a entrada em <b>Estoque</b> (capítulo 9) e volte ao rascunho.</p>
+
+<h3>5.6 Dar desconto</h3>
+<p>O desconto vale para o pedido inteiro e pode ser em <b>reais</b> ou em <b>porcentagem</b>.</p>
+<ol class="passos">
+  <li>No <b>Resumo</b>, clique no campo <b>Desconto</b> <span class="n">1</span> e digite o valor (por exemplo, <b>5</b> ou <b>12,50</b>).</li>
+  <li>Escolha o tipo ao lado <span class="n">2</span>: <b>R$</b> (reais) ou <b>%</b> (porcentagem). O tipo escolhido fica azul.</li>
+  <li>Confira o novo <b>Total</b> <span class="n">3</span>. A linha <b>Desconto</b> mostra quanto foi descontado em reais.
+  <figure class="foto "><img src="imagens/23-desconto.jpg" alt="Resumo com desconto de 5 por cento e o total recalculado" style="width:76.6mm"></figure></li>
+</ol>
+<p>Se o desconto não valer, o campo fica vermelho e o sistema explica embaixo. O total continua sem desconto até você corrigir.</p>
+<figure class="foto "><img src="imagens/24-desconto-invalido.jpg" alt="Desconto de R$ 5000 recusado: O desconto não pode passar do subtotal" style="width:76.6mm"></figure>
+<table class="simples">
+  <tr><th>Mensagem</th><th>O que fazer</th></tr>
+  <tr><td>O desconto não pode passar do subtotal.</td><td>Em R$, o desconto tem que ser menor ou igual ao subtotal. Confira se não queria escolher <b>%</b>.</td></tr>
+  <tr><td>O desconto não pode passar de 100%.</td><td>Em %, use um número de 0 a 100.</td></tr>
+  <tr><td>O desconto não pode ser negativo.</td><td>Tire o sinal de menos.</td></tr>
+  <tr><td>Informe um número. Ex.: 10 ou 10,5</td><td>Use só números e vírgula, sem “R$” nem “%”.</td></tr>
+</table>
+<p>Para tirar o desconto, apague o valor (ou digite <b>0</b>).</p>
+
+<h3>5.7 Observações</h3>
+<p>No campo <b>Observações</b> do resumo, escreva o que for útil para a entrega ou a cobrança (por exemplo, “Entregar na portaria”). Também é salvo sozinho. As observações aparecem no pedido e no PDF.</p>
+
+<h3>5.8 Conferir e confirmar</h3>
+<p>Assim fica um pedido pronto para confirmar:</p>
+<figure class="foto "><img src="imagens/25b-pedido-completo.jpg" alt="Pedido completo, com cliente, três itens, desconto, observações e o botão Confirmar pedido" style="width:170.0mm"></figure>
+<ol class="passos">
+  <li>Confira com atenção: o <b>cliente</b>, cada <b>produto</b> e <b>quantidade</b>, o <b>desconto</b> e o <b>Total</b>.</li>
+  <li>Se quiser, escreva as <b>Observações</b> <span class="n">1</span>.</li>
+  <li>Clique em <b>Confirmar pedido</b> <span class="n">2</span>. Na hora de confirmar, o sistema confere de novo o estoque e o total <span class="n">3</span>.
+  <figure class="foto "><img src="imagens/25-observacoes-confirmar.jpg" alt="Resumo com observações, botão Confirmar pedido e a frase Estoque e total conferidos ao confirmar" style="width:76.6mm"></figure></li>
+  <li>O pedido recebe o número e abre a tela do pedido, com o aviso <b>“Pedido nº 350 confirmado”</b> <span class="n">1</span>. O botão <b>PDF</b> <span class="n">2</span> gera o documento para o cliente (item 5.12).
+  <figure class="foto "><img src="imagens/26-pedido-confirmado.jpg" alt="Pedido nº 350 confirmado, com o aviso no canto e o botão PDF" style="width:170.0mm"></figure></li>
+</ol>
+<div class="aviso atencao">
+  <b>Atenção: confira antes de confirmar</b>
+  <p>Depois de confirmado, o pedido <b>não pode ser editado nem apagado</b>: o estoque já foi baixado e o número já foi usado. Se algo saiu errado, o Administrador cancela o pedido (capítulo 6) e faz outro.</p>
+</div>
+
+<h3>5.9 Quando o estoque acaba na hora de confirmar</h3>
+<p>Pode acontecer de outra pessoa vender o mesmo produto enquanto o seu rascunho estava aberto. Nesse caso, ao clicar em <b>Confirmar pedido</b>, nada é gravado e o sistema avisa:</p>
+<figure class="foto "><img src="imagens/30-confirmar-estoque-insuficiente.jpg" alt="Aviso Não foi possível confirmar: Estoque insuficiente para DR-3440: 3 em estoque, 4 no pedido" style="width:170.0mm"></figure>
+<ul class="lista">
+  <li><span class="n">1</span> No resumo: <b>“Não foi possível confirmar: Estoque insuficiente para DR-3440: 3 em estoque, 4 no pedido.”</b></li>
+  <li><span class="n">2</span> Na linha do produto: <b>“Só há 3 em estoque.”</b></li>
+</ul>
+<p><b>Como resolver:</b> diminua a quantidade com o botão <b>−</b> <span class="n">3</span> até caber no estoque (ou tire o produto com o <b>X</b>) e clique de novo em <b>Confirmar pedido</b>.</p>
+
+<h3>5.10 Outros avisos ao confirmar</h3>
+<table class="simples">
+  <tr><th>Aviso</th><th>O que aconteceu e o que fazer</th></tr>
+  <tr><td>Escolha o cliente antes de confirmar.</td><td>Falta o cliente. Escolha no alto da tela.</td></tr>
+  <tr><td>Adicione pelo menos um produto.</td><td>O pedido está sem itens.</td></tr>
+  <tr><td>Os preços de alguns produtos mudaram: … Confira o novo total e confirme de novo.</td><td>Alguém mudou o preço de um produto enquanto o rascunho estava aberto. O sistema já atualizou os preços e o total. Confira o novo total e clique de novo em <b>Confirmar pedido</b>.</td></tr>
+  <tr><td>O cliente … foi inativado. Escolha outro cliente.</td><td>O cliente foi inativado. Use <b>Trocar</b> ou reative o cliente (capítulo 7).</td></tr>
+  <tr><td>O produto … foi inativado. Remova-o do pedido.</td><td>Tire o produto com o <b>X</b>.</td></tr>
+</table>
+
+<h3>5.11 Rascunhos: parar no meio e continuar depois</h3>
+<p>Você pode sair do pedido a qualquer momento (clicar em outra tela, fechar o navegador): tudo o que foi feito fica salvo como rascunho. O rascunho não tem número e não mexe no estoque.</p>
+<ol class="passos">
+  <li>Para continuar, vá à tela <span class="tela">Início</span>.</li>
+  <li>Em <b>Rascunhos em aberto</b>, clique em <b>Continuar</b> <span class="n">1</span> ao lado do pedido.
+  <figure class="foto "><img src="imagens/28-rascunhos-no-inicio.jpg" alt="Quadro Rascunhos em aberto com o link Continuar" style="width:170.0mm"></figure></li>
+</ol>
+<p>Os rascunhos também aparecem na tela <span class="tela">Pedidos</span> com o status <b>Rascunho</b>. Como Administrador, você pode abrir e terminar o rascunho de qualquer pessoa.</p>
+<p><b>Para jogar fora um rascunho:</b> abra o rascunho, clique em <b>Excluir rascunho</b> (no alto, à direita) e, na pergunta “Excluir este rascunho?”, clique em <b>Excluir rascunho</b> <span class="n">2</span>. Se mudou de ideia, clique em <b>Voltar</b> <span class="n">1</span>.</p>
+<figure class="foto "><img src="imagens/29-excluir-rascunho.jpg" alt="Pergunta Excluir este rascunho? com os botões Voltar e Excluir rascunho" style="width:116.2mm"></figure>
+
+<h3>5.12 Gerar o PDF do pedido</h3>
+<ol class="passos">
+  <li>Abra o pedido confirmado (logo depois de confirmar ele já está aberto; ou procure na tela <span class="tela">Pedidos</span>).</li>
+  <li>Clique em <b>⤓ PDF</b>, no alto, à direita.</li>
+  <li>O navegador baixa o arquivo (por exemplo, <b>pedido-350.pdf</b>) para a pasta <b>Downloads</b>. Abra para imprimir ou para mandar ao cliente por e-mail ou WhatsApp.</li>
+</ol>
+<figure class="foto "><img src="imagens/26b-pdf-do-pedido.jpg" alt="PDF do pedido nº 350, com logo, cliente, itens, totais e observações" style="width:170.0mm"></figure>
+<p>Rascunhos não têm PDF: o PDF só existe depois de confirmar.</p>
+
+<!-- ======================= 6 ======================= -->
+<h2 class="secao" id="s6"><span class="rotulo-cap">CAPÍTULO 6</span>Pedidos: procurar, ver, repetir e cancelar</h2>
+<p class="intro">No menu, <b>Pedidos</b> mostra todos os pedidos da empresa, do mais novo para o mais antigo, 20 por página.</p>
+
+<h3>6.1 Procurar um pedido</h3>
+<figure class="foto "><img src="imagens/31-lista-pedidos.jpg" alt="Lista de pedidos com busca, filtros de status e mês e a coluna Emitido por" style="width:170.0mm"></figure>
+<ul class="lista">
+  <li><span class="n">1</span> <b>Busca</b>: digite o número do pedido (por exemplo, <b>350</b>) ou parte do nome do cliente. A lista muda enquanto você digita.</li>
+  <li><span class="n">2</span> <b>Status</b>: mostra só <b>Rascunho</b>, só <b>Confirmado</b> ou só <b>Cancelado</b>.</li>
+  <li><span class="n">3</span> <b>Mês</b>: mostra só os pedidos de um mês (os últimos 12 meses).</li>
+  <li><span class="n">4</span> <b>Emitido por</b>: quem fez cada pedido.</li>
+  <li><span class="n">5</span> Clique no <b>número</b> para abrir o pedido. Rascunhos aparecem com “—” no lugar do número.</li>
+</ul>
+<p>Os filtros podem ser usados juntos. Por exemplo, para ver só os cancelados:</p>
+<figure class="foto "><img src="imagens/32-lista-cancelados.jpg" alt="Filtro Status em Cancelado mostrando quatro pedidos cancelados" style="width:170.0mm"></figure>
+<p>Embaixo da lista, à direita, aparece quantos pedidos foram encontrados (por exemplo, “1–4 de 4”) e, quando há mais de uma página, os botões para ir às outras páginas. Para voltar a ver tudo, volte o filtro para <b>Status: todos</b> e <b>Mês: todos</b> e apague a busca.</p>
+
+<h3>6.2 A tela do pedido</h3>
+<figure class="foto "><img src="imagens/33-detalhe-pedido.jpg" alt="Tela do pedido nº 350 com os botões Repetir pedido, PDF e Cancelar pedido e o lucro bruto" style="width:170.0mm"></figure>
+<p>Mostra o cliente, quem emitiu e quando, quem confirmou, os itens, o subtotal, o desconto e o total.</p>
+<ul class="lista">
+  <li><span class="n">1</span> <b>Repetir pedido</b>: cria um rascunho igual (item 6.3).</li>
+  <li><span class="n">2</span> <b>⤓ PDF</b>: baixa o PDF do pedido.</li>
+  <li><span class="n">3</span> <b>Cancelar pedido</b>: só para o Administrador (item 6.4).</li>
+  <li><span class="n">4</span> <b>Lucro bruto e margem</b> do pedido: só o Administrador vê. Lucro bruto é o total menos o custo dos produtos; a margem é esse lucro em porcentagem do total.</li>
+</ul>
+
+<h3>6.3 Repetir pedido</h3>
+<p>Útil para o cliente que compra sempre os mesmos toners.</p>
+<ol class="passos">
+  <li>Abra um pedido confirmado ou cancelado e clique em <b>Repetir pedido</b>.</li>
+  <li>O sistema cria um rascunho novo com o mesmo cliente e os mesmos produtos e quantidades, e mostra o aviso “Novo rascunho com os itens do pedido nº …” <span class="n">1</span>.
+  <figure class="foto "><img src="imagens/36-repetir-pedido.jpg" alt="Rascunho criado por Repetir pedido, com o aviso e os itens copiados" style="width:170.0mm"></figure></li>
+  <li>Confira os itens <span class="n">2</span>, mude o que precisar e confirme como no capítulo 5.</li>
+</ol>
+<div class="aviso dica">
+  <b>O que muda ao repetir</b>
+  <p>Os preços são os <b>de hoje</b>, não os do pedido antigo. O desconto e as observações não são copiados: coloque de novo, se for o caso.</p>
+</div>
+<div class="aviso atencao">
+  <b>Atenção: cliente inativo</b>
+  <p>Se o cliente do pedido estiver inativo, o sistema não repete e avisa: “O cliente … está inativo. Reative o cliente antes de repetir o pedido.” Reative o cliente em <b>Clientes</b> (item 7.5) e clique de novo em <b>Repetir pedido</b>.</p>
+</div>
+<figure class="foto "><img src="imagens/36b-repetir-cliente-inativo.jpg" alt="Repetir pedido recusado com o aviso de que o cliente está inativo" style="width:170.0mm"></figure>
+
+<h3>6.4 Cancelar um pedido</h3>
+<p>Só o Administrador cancela pedidos, e só pedidos confirmados. Ao cancelar, <b>o estoque dos produtos volta</b> sozinho.</p>
+<ol class="passos">
+  <li>Abra o pedido e clique em <b>Cancelar pedido</b> (botão vermelho).</li>
+  <li>Na pergunta “Cancelar pedido nº …?”, escreva o <b>Motivo</b> <span class="n">1</span> (por exemplo, “Cliente desistiu da compra”). O motivo é obrigatório.</li>
+  <li>Clique em <b>Cancelar pedido</b> <span class="n">3</span>. Se mudou de ideia, clique em <b>Voltar</b> <span class="n">2</span>.
+  <figure class="foto "><img src="imagens/34-cancelar-pedido.jpg" alt="Pergunta Cancelar pedido nº 349? com o campo Motivo e os botões Voltar e Cancelar pedido" style="width:116.2mm"></figure></li>
+  <li>Aparece o aviso “Pedido nº 349 cancelado. O estoque voltou.” <span class="n">1</span>. O pedido fica marcado como <b>Cancelado</b> <span class="n">3</span>, com quem cancelou, quando e o motivo <span class="n">2</span>.
+  <figure class="foto "><img src="imagens/35-pedido-cancelado.jpg" alt="Pedido nº 349 cancelado, com o selo Cancelado e a linha Cancelado por Roberto, com o motivo" style="width:170.0mm"></figure></li>
+</ol>
+<div class="aviso atencao">
+  <b>Atenção: cancelar não tem volta</b>
+  <p>Um pedido cancelado não pode ser “descancelado”. O número continua existindo, marcado como cancelado. Se cancelou por engano, use <b>Repetir pedido</b> e confirme um pedido novo.</p>
+</div>
+
+<!-- ======================= 7 ======================= -->
+<h2 class="secao" id="s7"><span class="rotulo-cap">CAPÍTULO 7</span>Clientes</h2>
+<p class="intro">No menu, <b>Clientes</b> mostra todos os clientes em ordem alfabética.</p>
+
+<h3>7.1 Procurar um cliente</h3>
+<figure class="foto "><img src="imagens/37-clientes-lista.jpg" alt="Lista de clientes com o botão Novo cliente, a busca e a opção Mostrar inativos" style="width:170.0mm"></figure>
+<ul class="lista">
+  <li><span class="n">1</span> <b>+ Novo cliente</b>: cadastra um cliente (item 7.2).</li>
+  <li><span class="n">2</span> <b>Busca</b>: digite parte do nome, do CPF ou do CNPJ. A lista muda enquanto você digita.</li>
+  <li><span class="n">3</span> <b>Mostrar inativos</b>: marque para ver também os clientes inativados.</li>
+</ul>
+<figure class="foto "><img src="imagens/37c-clientes-inativos-cnpj-letras.jpg" alt="Lista com Mostrar inativos marcado, um cliente Inativo e um CNPJ com letras" style="width:170.0mm"></figure>
+<p>Com <b>Mostrar inativos</b> <span class="n">1</span> marcado, os inativos aparecem com a etiqueta cinza <b>Inativo</b> <span class="n">2</span>. Repare também em <span class="n">3</span>: é um <b>CNPJ novo, com letras</b>. A Receita Federal começou a dar CNPJs assim, e o sistema já aceita.</p>
+
+<h3>7.2 Cadastrar um cliente</h3>
+<ol class="passos">
+  <li>Clique em <b>+ Novo cliente</b>.</li>
+  <li>Em <b>Tipo</b> <span class="n">1</span>, escolha <b>Pessoa</b> (pessoa física, com CPF) ou <b>Empresa</b> (com CNPJ).</li>
+  <li>Em <b>CPF/CNPJ</b> <span class="n">2</span>, digite só os números (e as letras, se o CNPJ tiver). Os pontos, a barra e o tracinho aparecem sozinhos.</li>
+  <li>Em <b>Nome</b> <span class="n">3</span>, digite o nome da pessoa ou a razão social da empresa.</li>
+  <li>Os outros campos são opcionais, mas ajudam: <b>Telefone</b>, <b>E-mail</b> e o <b>Endereço</b> <span class="n">4</span> (CEP, Logradouro, Número, Complemento, Bairro, Cidade e UF) e <b>Observações</b>.</li>
+  <li>Clique em <b>Salvar</b> <span class="n">5</span>. Aparece o aviso “Cliente salvo.” e o sistema volta para a lista.
+  <figure class="foto "><img src="imagens/38-cliente-novo.jpg" alt="Formulário Novo cliente com Tipo, CPF/CNPJ, Nome, Endereço e Salvar numerados" style="width:149.6mm"></figure></li>
+</ol>
+<p>Assim fica o começo do formulário preenchido:</p>
+<figure class="foto "><img src="imagens/40-cliente-preenchido.jpg" alt="Formulário com CNPJ, Nome, Telefone e E-mail preenchidos" style="width:154.9mm"></figure>
+
+<h3>7.3 Se o sistema reclamar</h3>
+<p>Quando algo está errado, nada é gravado e a explicação aparece em vermelho, embaixo do campo:</p>
+<figure class="foto "><img src="imagens/39-cliente-erros.jpg" alt="Mensagens CNPJ inválido: confira os dígitos e Este campo é obrigatório" style="width:157.5mm"></figure>
+<table class="simples">
+  <tr><th>Mensagem</th><th>O que fazer</th></tr>
+  <tr><td>CPF inválido: confira os dígitos.<br>CNPJ inválido: confira os dígitos.</td><td>Algum número foi digitado errado. Confira com o documento do cliente. Veja também se o <b>Tipo</b> está certo (Pessoa para CPF, Empresa para CNPJ).</td></tr>
+  <tr><td>Já existe um cliente com este CPF/CNPJ: …</td><td>O cliente já está cadastrado (o nome dele aparece na mensagem). Procure-o na lista em vez de cadastrar de novo.</td></tr>
+  <tr><td>Este campo é obrigatório.</td><td>Preencha o campo marcado (CPF/CNPJ e Nome são obrigatórios).</td></tr>
+</table>
+
+<h3>7.4 Mudar os dados de um cliente</h3>
+<ol class="passos">
+  <li>Na lista de clientes, clique no <b>nome</b> do cliente.</li>
+  <li>Mude o que precisar e clique em <b>Salvar</b>.</li>
+</ol>
+
+<h3>7.5 Inativar e reativar</h3>
+<p>Clientes nunca são apagados (para não perder os pedidos antigos). Quando um cliente deixa de comprar, ou foi cadastrado por engano, ele é <b>inativado</b>: some da busca de novos pedidos, mas o histórico continua guardado.</p>
+<ol class="passos">
+  <li>Abra o cliente. No fim da página, no quadro <b>Situação</b>, clique em <b>Inativar</b> <span class="n">1</span>.
+  <figure class="foto "><img src="imagens/41-cliente-situacao.jpg" alt="Quadro Situação com o botão Inativar" style="width:156.6mm"></figure></li>
+  <li>Na pergunta “Inativar …?”, clique em <b>Inativar</b> <span class="n">1</span>.
+  <figure class="foto "><img src="imagens/42-cliente-inativar.jpg" alt="Pergunta Inativar Ótica Visão Clara? com o botão Inativar" style="width:116.2mm"></figure></li>
+  <li>O cliente ganha a etiqueta <b>Inativo</b>. Para voltar a vender para ele, abra o cliente (com <b>Mostrar inativos</b> marcado na lista) e clique em <b>Reativar</b> <span class="n">1</span>.
+  <figure class="foto "><img src="imagens/43-cliente-inativo-reativar.jpg" alt="Quadro Situação de um cliente inativo com o botão Reativar" style="width:156.6mm"></figure></li>
+</ol>
+
+<!-- ======================= 8 ======================= -->
+<h2 class="secao" id="s8"><span class="rotulo-cap">CAPÍTULO 8</span>Produtos</h2>
+<p class="intro">No menu, <b>Produtos</b> mostra os produtos em ordem de código, com preço, custo médio e estoque. Só o Administrador cadastra e muda produtos; o vendedor só consulta.</p>
+
+<h3>8.1 A lista de produtos</h3>
+<figure class="foto "><img src="imagens/44-produtos-lista.jpg" alt="Lista de produtos com Novo produto, busca, filtro de marca e as colunas Custo médio e Estoque" style="width:170.0mm"></figure>
+<ul class="lista">
+  <li><span class="n">1</span> <b>+ Novo produto</b>: cadastra um produto.</li>
+  <li><span class="n">2</span> <b>Busca</b>: por código, nome ou marca.</li>
+  <li><span class="n">3</span> <b>Marca</b>: mostra só uma marca. Ao lado fica <b>Mostrar inativos</b>.</li>
+  <li><span class="n">4</span> <b>Custo médio</b>: quanto, em média, a loja pagou por unidade. Só o Administrador vê esta coluna.</li>
+  <li><span class="n">5</span> <b>Estoque</b>: quantas unidades existem agora, numa etiqueta colorida.</li>
+</ul>
+<p>As cores do estoque ajudam a ver o que está acabando:</p>
+<figure class="foto "><img src="imagens/45-produtos-estoque-cores.jpg" alt="Produtos Brother com etiquetas de estoque vermelha, amarela e verde" style="width:170.0mm"></figure>
+<table class="simples">
+  <tr><th style="width:30%">Cor</th><th>Significado</th></tr>
+  <tr><td><span class="nao">Vermelho</span> <span class="n">2</span></td><td>Estoque <b>zerado</b>. Não dá para vender.</td></tr>
+  <tr><td><b style="color:var(--ambar)">Amarelo</b> <span class="n">3</span></td><td>Estoque <b>baixo</b>: 3 unidades ou menos. Hora de comprar.</td></tr>
+  <tr><td><span class="sim">Verde</span> <span class="n">4</span></td><td>Estoque normal: 4 ou mais.</td></tr>
+</table>
+
+<h3>8.2 Cadastrar um produto</h3>
+<ol class="passos">
+  <li>Clique em <b>+ Novo produto</b>.</li>
+  <li>Preencha <b>Código</b> <span class="n">1</span> (o código do fabricante, por exemplo <b>CF226X</b>; pode digitar em letras minúsculas, o sistema passa para maiúsculas), <b>Descrição</b> <span class="n">2</span>, <b>Marca</b> <span class="n">3</span> e <b>Preço (R$)</b> <span class="n">4</span>, com vírgula nos centavos (por exemplo, <b>459,90</b>).</li>
+  <li>Clique em <b>Salvar</b> <span class="n">5</span>. Aparece o aviso “Produto salvo.”.
+  <figure class="foto "><img src="imagens/46-produto-novo.jpg" alt="Formulário Novo produto com Código, Descrição, Marca, Preço e Salvar numerados" style="width:161.0mm"></figure></li>
+</ol>
+<div class="aviso atencao">
+  <b>Atenção: produto novo começa com estoque zero</b>
+  <p>O estoque e o custo não se digitam no cadastro. Depois de salvar, lance o <b>Estoque inicial</b> do produto na tela <b>Estoque</b> (capítulo 9). Sem isso, ele aparece como “Sem estoque” nos pedidos.</p>
+</div>
+<p>Mensagens comuns: <b>“Já existe um produto com este código.”</b> (o produto já está cadastrado) e <b>“Preço inválido: use o formato 189,90.”</b></p>
+
+<h3>8.3 Mudar um produto (por exemplo, o preço)</h3>
+<ol class="passos">
+  <li>Na lista, clique no <b>código</b> do produto.</li>
+  <li>Mude o que precisar, como o <b>Preço (R$)</b> <span class="n">1</span>, e clique em <b>Salvar</b>.
+  <figure class="foto "><img src="imagens/47-produto-editar.jpg" alt="Tela do produto CE285A com Preço, Estoque e Custo médio, a explicação e o botão Inativar" style="width:156.6mm"></figure></li>
+</ol>
+<ul class="lista">
+  <li><span class="n">2</span> <b>Estoque</b> e <b>Custo médio</b> só aparecem para leitura: eles mudam sozinhos com os movimentos de estoque <span class="n">3</span>.</li>
+  <li>O preço novo vale para os pedidos novos. Pedidos já confirmados não mudam. Se houver rascunhos abertos com esse produto, o sistema avisa na hora de confirmar e atualiza o preço.</li>
+  <li><span class="n">4</span> <b>Inativar</b>: para produtos que a loja deixou de vender. Funciona igual ao cliente (item 7.5): o produto some da busca de novos pedidos, e dá para <b>Reativar</b> depois.</li>
+</ul>
+<div class="aviso dica">
+  <b>O que é o custo médio</b>
+  <p>A cada compra, o sistema faz a média do que a loja pagou, levando em conta quantas unidades já havia. Por exemplo: havia 10 toners que custaram R$ 100 cada e chegaram 10 que custaram R$ 120; o custo médio passa a ser R$ 110. É com esse custo que o sistema calcula o lucro dos pedidos e dos relatórios.</p>
+</div>
+
+<!-- ======================= 9 ======================= -->
+<h2 class="secao" id="s9"><span class="rotulo-cap">CAPÍTULO 9</span>Estoque</h2>
+<p class="intro">O estoque de cada produto só muda por <b>movimentos</b>, e cada movimento fica registrado com data, hora e quem fez. As vendas e os cancelamentos mexem no estoque sozinhos. Você lança à mão só três coisas: <b>Estoque inicial</b>, <b>Entrada</b> e <b>Ajuste</b>.</p>
+
+<h3>9.1 O histórico do estoque</h3>
+<figure class="foto "><img src="imagens/48-estoque-historico.jpg" alt="Tela Estoque com os botões Estoque inicial, Ajuste e Entrada e os filtros" style="width:170.0mm"></figure>
+<ul class="lista">
+  <li><span class="n">1</span> <b>Estoque inicial</b>, <span class="n">2</span> <b>Ajuste</b> e <span class="n">3</span> <b>+ Entrada</b>: os três lançamentos manuais (veja abaixo).</li>
+  <li><span class="n">4</span> <b>Código do produto</b>: mostra só os movimentos de um produto.</li>
+  <li><span class="n">5</span> <b>Tipo</b>: Estoque inicial, Entrada, Saída por pedido, Devolução por cancelamento, Ajuste (+) ou Ajuste (−).</li>
+  <li><span class="n">6</span> <b>De … até …</b>: o período. Ao abrir, a tela mostra os últimos 30 dias.</li>
+</ul>
+<p>Cada linha mostra a data, o produto, o tipo (com a cor), a quantidade (<b>+</b> entrou, <b>−</b> saiu), o custo unitário (só o Administrador vê) e quem fez. As saídas e devoluções mostram o número do pedido.</p>
+
+<h3>9.2 Qual lançamento usar</h3>
+<table class="simples">
+  <tr><th style="width:22%">Lançamento</th><th style="width:40%">Quando usar</th><th>O que pede</th></tr>
+  <tr><td><b>Estoque inicial</b></td><td>Uma vez só por produto: quando ele começa a ser controlado no sistema (produto novo, ou a primeira contagem).</td><td>Código, quantidade e custo unitário.</td></tr>
+  <tr><td><b>+ Entrada</b></td><td>Sempre que chega mercadoria comprada do fornecedor.</td><td>Código, quantidade, custo unitário e observação (o número da nota).</td></tr>
+  <tr><td><b>Ajuste</b></td><td>Para corrigir: produto quebrado, perdido, com defeito, ou diferença na contagem.</td><td>Código, aumentar ou diminuir, quantidade e motivo.</td></tr>
+</table>
+
+<h3>9.3 Estoque inicial</h3>
+<ol class="passos">
+  <li>Em <span class="tela">Estoque</span>, clique em <b>Estoque inicial</b>.</li>
+  <li>Em <b>Código do produto</b> <span class="n">1</span>, comece a digitar e escolha o código na lista que aparece. Só aparecem produtos que ainda não têm nenhum movimento.</li>
+  <li>Em <b>Quantidade</b> <span class="n">2</span>, digite quantas unidades existem.</li>
+  <li>Em <b>Custo unitário</b> <span class="n">3</span>, digite quanto a loja pagou por unidade (por exemplo, <b>275,40</b>).</li>
+  <li>Clique em <b>Registrar</b> <span class="n">4</span>. Aparece o aviso “Estoque inicial registrado: CF226X, 10 un.”.
+  <figure class="foto "><img src="imagens/49-estoque-inicial.jpg" alt="Formulário Estoque inicial com Código do produto, Quantidade, Custo unitário e Registrar" style="width:156.6mm"></figure></li>
+</ol>
+<p>Se o produto já tiver movimentos, o sistema responde <b>“Este produto já tem movimentos. Use Entrada.”</b></p>
+
+<h3>9.4 Entrada (compra do fornecedor)</h3>
+<ol class="passos">
+  <li>Em <span class="tela">Estoque</span>, clique em <b>+ Entrada</b>.</li>
+  <li>Preencha <b>Código do produto</b> <span class="n">1</span>, <b>Quantidade</b> <span class="n">2</span> e <b>Custo unitário</b> <span class="n">3</span> (o preço de compra de <b>uma</b> unidade, como está na nota).</li>
+  <li>Em <b>Observação</b> <span class="n">4</span>, escreva o número da nota fiscal (por exemplo, <b>NF 18877</b>). É obrigatório.</li>
+  <li>Clique em <b>Registrar</b> <span class="n">5</span>. Aparece o aviso “Entrada registrada: CE285A, 24 un.” e o custo médio do produto é recalculado.
+  <figure class="foto "><img src="imagens/50-entrada.jpg" alt="Formulário Entrada de estoque com Código, Quantidade, Custo unitário, Observação e Registrar" style="width:156.6mm"></figure></li>
+</ol>
+<div class="aviso atencao">
+  <b>Atenção: custo de uma unidade, não da nota inteira</b>
+  <p>Se a nota diz 24 toners por R$ 2.844,00, o custo unitário é R$ 2.844,00 ÷ 24 = <b>118,50</b>. Um custo errado deixa o lucro dos relatórios errado.</p>
+</div>
+
+<h3>9.5 Ajuste</h3>
+<ol class="passos">
+  <li>Em <span class="tela">Estoque</span>, clique em <b>Ajuste</b>.</li>
+  <li>Preencha <b>Código do produto</b> <span class="n">1</span>.</li>
+  <li>Em <b>Sentido</b> <span class="n">2</span>, escolha <b>Diminuir (−)</b> (quebrou, perdeu, defeito, a contagem deu menos) ou <b>Aumentar (+)</b> (a contagem deu mais).</li>
+  <li>Digite a <b>Quantidade</b> <span class="n">3</span> e o <b>Motivo</b> <span class="n">4</span> (por exemplo, “Caixa danificada no depósito”). Clique em <b>Registrar</b> <span class="n">5</span>.
+  <figure class="foto "><img src="imagens/51-ajuste.jpg" alt="Formulário Ajuste de estoque com Código, Sentido, Quantidade, Motivo e Registrar" style="width:156.6mm"></figure></li>
+  <li>O sistema mostra, num quadro amarelo, um resumo para você conferir <span class="n">1</span>, por exemplo “Confirme o ajuste: −1 em TK-1175 (motivo: …)”. Se estiver certo, clique em <b>Registrar</b> <span class="n">2</span>; se não, em <b>Voltar</b> <span class="n">3</span>.
+  <figure class="foto "><img src="imagens/52-ajuste-confirmar.jpg" alt="Resumo Confirme o ajuste com os botões Registrar e Voltar" style="width:156.6mm"></figure></li>
+</ol>
+<div class="aviso dica">
+  <b>Regras do ajuste</b>
+  <p>O ajuste não muda o custo médio. O estoque nunca fica negativo (“o ajuste deixaria o estoque negativo”). Só dá para aumentar um produto que já teve estoque inicial ou entrada (“Este produto ainda não tem custo…”).</p>
+</div>
+
+<h3>9.6 Conferir o estoque de um produto</h3>
+<p>Para ver tudo o que aconteceu com um produto, digite o código no filtro <b>Código do produto</b> <span class="n">1</span> e ajuste as datas, se precisar:</p>
+<figure class="foto "><img src="imagens/53-estoque-filtro-produto.jpg" alt="Histórico filtrado pelo código CE285A, com entrada, saídas e quem fez cada uma" style="width:170.0mm"></figure>
+
+<!-- ======================= 10 ======================= -->
+<h2 class="secao" id="s10"><span class="rotulo-cap">CAPÍTULO 10</span>Relatórios</h2>
+<p class="intro">No menu, <b>Relatórios</b> mostra como vão as vendas, o lucro, os clientes e o estoque. Só o Administrador vê esta tela. Os relatórios contam só pedidos <b>confirmados</b>; os cancelados têm uma aba própria.</p>
+
+<h3>10.1 Os filtros</h3>
+<p>Os filtros ficam numa linha no alto e valem para a aba que estiver aberta. Ao mudar um filtro, os números se atualizam sozinhos.</p>
+<figure class="foto "><img src="imagens/54-relatorios-filtros.jpg" alt="Abas e filtros dos relatórios: Período, Agrupar por, Funcionário e os botões Excel e PDF" style="width:170.0mm"></figure>
+<ul class="lista">
+  <li><span class="n">1</span> <b>Abas</b>: Resumo, Vendas por período, Clientes, Produtos e marcas, Funcionários, Estoque e Cancelamentos.</li>
+  <li><span class="n">2</span> <b>Período</b>: <b>Últimos 3 meses</b>, <b>2026 até agora</b>, <b>Últimos 12 meses</b> ou <b>Escolher datas…</b>. Os atalhos começam no dia 1º de um mês e vão até hoje, contando o mês atual. Embaixo dos filtros aparece o período exato (por exemplo, “De 01/11/2025 a 10/10/2026”).</li>
+  <li><span class="n">3</span> <b>Agrupar por</b>: <b>Dia</b>, <b>Semana</b> ou <b>Mês</b>. Muda como os números são somados no gráfico e na aba Vendas por período. Para agrupar por dia, o período pode ter até 366 dias.</li>
+  <li><span class="n">4</span> <b>Funcionário</b>: <b>Todos</b> ou só os pedidos de uma pessoa.</li>
+  <li><span class="n">5</span> <b>⤓ Excel</b> e <b>⤓ PDF</b>: baixam o relatório (item 10.5).</li>
+</ul>
+<p>Com <b>Escolher datas…</b> <span class="n">1</span>, aparecem os campos <b>De</b> e <b>até</b> <span class="n">2</span>. Clique em cada um e escolha o dia no calendário.</p>
+<figure class="foto "><img src="imagens/54b-filtro-datas.jpg" alt="Período em Escolher datas, com os campos De e até" style="width:170.0mm"></figure>
+
+<h3>10.2 A aba Resumo</h3>
+<p>Responde à pergunta: <b>“Como estão as vendas?”</b> No alto ficam cinco números do período:</p>
+<figure class="foto "><img src="imagens/55-resumo-indicadores.jpg" alt="Indicadores: Faturamento líquido, Lucro bruto, Margem bruta, Pedidos confirmados e Valor médio por pedido" style="width:170.0mm"></figure>
+<ul class="lista">
+  <li><b>Faturamento líquido</b> <span class="n">1</span>: quanto foi vendido, já descontados os descontos.</li>
+  <li><b>Lucro bruto</b>: faturamento menos o custo dos produtos vendidos.</li>
+  <li><b>Margem bruta</b>: o lucro em porcentagem do faturamento.</li>
+  <li><b>Pedidos confirmados</b> e <b>Valor médio por pedido</b>.</li>
+</ul>
+<p>Embaixo de cada número <span class="n">2</span>, a comparação com o período anterior do mesmo tamanho: <b style="color:var(--verde)">▲ subiu</b> em verde, <b style="color:var(--vermelho-escuro)">▼ caiu</b> em vermelho. “p.p.” quer dizer pontos percentuais (por exemplo, a margem foi de 38,5% para 36,0%: caiu 2,5 p.p.).</p>
+
+<h4>O gráfico e a caixa de valores</h4>
+<p>O gráfico mostra o faturamento líquido (linha azul) e o lucro bruto (linha laranja) em cada mês, semana ou dia. As cores estão explicadas na legenda <span class="n">2</span>.</p>
+<figure class="foto "><img src="imagens/56-grafico-mouse.jpg" alt="Gráfico de faturamento e lucro com a caixa de valores de julho aberta" style="width:170.0mm"></figure>
+<ol class="passos">
+  <li>Passe o mouse por cima do gráfico, sem clicar. Aparece uma linha vertical e uma <b>caixa de valores</b> <span class="n">1</span> com o mês, o faturamento, o lucro, a margem e o número de pedidos daquele ponto.</li>
+  <li>Mova o mouse para os lados para ver os outros meses. Também dá para clicar no gráfico e usar as setas <kbd>←</kbd> e <kbd>→</kbd> do teclado.</li>
+  <li>Prefere ver os números em lista? Clique em <b>Tabela</b> <span class="n">3</span>. Para voltar, clique em <b>Gráfico</b>.</li>
+</ol>
+<figure class="foto "><img src="imagens/56b-grafico-como-tabela.jpg" alt="O mesmo gráfico mostrado como tabela" style="width:170.0mm"></figure>
+<p>Mais embaixo ficam os <b>Produtos que mais faturaram</b> (passe o mouse nas barras para ver o lucro e a margem de cada um) e os <b>Clientes sem comprar há mais de 60 dias</b> (só os clientes ativos), bons candidatos para oferecer toner de novo. O botão <b>Repetir pedido</b> cria na hora um rascunho com a última compra do cliente.</p>
+<figure class="foto "><img src="imagens/57-resumo-produtos-clientes.jpg" alt="Produtos que mais faturaram e Clientes sem comprar há mais de 60 dias" style="width:170.0mm"></figure>
+
+<h3>10.3 As outras abas</h3>
+<p>Para abrir uma aba, clique no nome dela. Os filtros continuam valendo.</p>
+
+<h4>Vendas por período</h4>
+<p>Responde: <b>“Quanto vendemos em cada mês (ou semana, ou dia)?”</b> Para cada período: pedidos, valor bruto, descontos, líquido, lucro, margem e valor médio.</p>
+<figure class="foto "><img src="imagens/58-aba-vendas.jpg" alt="Aba Vendas por período com uma linha por mês" style="width:170.0mm"></figure>
+
+<h4>Clientes</h4>
+<p>Responde: <b>“Quem são os melhores clientes e quem sumiu?”</b> O <b>Ranking de clientes</b> ordena pelo valor comprado, com o número de pedidos, o lucro e a data do último pedido. Embaixo, os clientes sem comprar: escolha quantos dias em <b>Sem comprar há mais de … dias</b> <span class="n">2</span>. Clientes inativos não entram nesta lista.</p>
+<figure class="foto "><img src="imagens/59-aba-clientes.jpg" alt="Aba Clientes com o ranking e o campo Sem comprar há mais de 60 dias" style="width:170.0mm"></figure>
+<figure class="foto "><img src="imagens/59b-clientes-sem-comprar.jpg" alt="Clientes sem comprar há mais de 90 dias, com o botão Repetir pedido" style="width:170.0mm"></figure>
+
+<h4>Produtos e marcas</h4>
+<p>Responde: <b>“O que mais vende e o que dá mais lucro?”</b> Por produto e por marca: quantidade vendida, faturamento, lucro, margem e participação no total.</p>
+<figure class="foto "><img src="imagens/60-aba-produtos.jpg" alt="Aba Produtos e marcas, tabela por produto" style="width:170.0mm"></figure>
+
+<h4>Funcionários</h4>
+<p>Responde: <b>“Quanto cada um vendeu?”</b> Pedidos, valor, lucro e o desconto médio que cada pessoa deu. Quem foi desativado aparece com “(inativo)” depois do nome.</p>
+<figure class="foto "><img src="imagens/61-aba-funcionarios.jpg" alt="Aba Funcionários com pedidos, valor, lucro e desconto médio de cada pessoa" style="width:170.0mm"></figure>
+
+<h4>Estoque</h4>
+<p>Responde: <b>“Quanto dinheiro está parado no estoque e o que acabou?”</b> Estoque atual de cada produto com o custo médio e o valor em estoque, o valor total, os produtos zerados e o total de entradas, saídas e ajustes do período.</p>
+<figure class="foto "><img src="imagens/62-aba-estoque.jpg" alt="Aba Estoque com o estoque atual e o valor em estoque de cada produto" style="width:170.0mm"></figure>
+
+<h4>Cancelamentos</h4>
+<p>Responde: <b>“O que foi cancelado, por quê e por quem?”</b> Número do pedido, cliente, valor, motivo, quem cancelou, a data e quem tinha emitido.</p>
+<figure class="foto "><img src="imagens/63-aba-cancelamentos.jpg" alt="Aba Cancelamentos com o motivo e quem cancelou cada pedido" style="width:170.0mm"></figure>
+
+<h3>10.4 Ver só uma pessoa ou outro período</h3>
+<p>Escolha o funcionário em <b>Funcionário</b>, ou mude o <b>Período</b>, e a aba se atualiza. Para voltar ao normal, escolha <b>Todos</b> e <b>Últimos 12 meses</b> (ou o atalho que preferir).</p>
+
+<h3>10.5 Baixar em Excel ou PDF</h3>
+<ol class="passos">
+  <li>Abra a aba que quer baixar e acerte os filtros.</li>
+  <li>Clique em <b>⤓ Excel</b> (planilha, para fazer contas) ou <b>⤓ PDF</b> (para ler ou imprimir), no canto direito dos filtros.</li>
+  <li>O arquivo vai para a pasta <b>Downloads</b>, com o nome da aba e o período, por exemplo <b>relatorio-resumo-2025-11-01-a-2026-10-10.pdf</b>.</li>
+</ol>
+<p>O arquivo sai com os mesmos filtros da tela.</p>
+
+<!-- ======================= 11 ======================= -->
+<h2 class="secao" id="s11"><span class="rotulo-cap">CAPÍTULO 11</span>Funcionários</h2>
+<p class="intro">No menu, <b>Funcionários</b> é onde o Administrador cadastra quem usa o sistema, troca senhas esquecidas e cuida de celulares perdidos. Não existe cadastro pela internet: toda pessoa nova entra por aqui.</p>
+
+<h3>11.1 Vendedor ou Administrador?</h3>
+<table class="simples">
+  <tr><th>O que a pessoa pode fazer</th><th class="c">Vendedor</th><th class="c">Administrador</th></tr>
+  <tr><td>Cadastrar e mudar clientes</td><td class="c sim">Sim</td><td class="c sim">Sim</td></tr>
+  <tr><td>Fazer, confirmar e repetir pedidos</td><td class="c sim">Sim</td><td class="c sim">Sim</td></tr>
+  <tr><td>Ver todos os pedidos e gerar o PDF</td><td class="c sim">Sim</td><td class="c sim">Sim</td></tr>
+  <tr><td>Consultar produtos e estoque (sem ver custos)</td><td class="c sim">Sim</td><td class="c sim">Sim</td></tr>
+  <tr><td>Cadastrar produtos e mudar preços</td><td class="c nao">Não</td><td class="c sim">Sim</td></tr>
+  <tr><td>Lançar estoque inicial, entrada e ajuste</td><td class="c nao">Não</td><td class="c sim">Sim</td></tr>
+  <tr><td>Cancelar pedidos</td><td class="c nao">Não</td><td class="c sim">Sim</td></tr>
+  <tr><td>Ver custo, lucro e margem</td><td class="c nao">Não</td><td class="c sim">Sim</td></tr>
+  <tr><td>Relatórios</td><td class="c nao">Não</td><td class="c sim">Sim</td></tr>
+  <tr><td>Funcionários e Histórico</td><td class="c nao">Não</td><td class="c sim">Sim</td></tr>
+</table>
+<div class="dupla">
+  <figure class="foto estreita"><img src="imagens/79-menu-vendedor.jpg" alt="Menu do Vendedor, só com Início, Pedidos, Clientes, Produtos e Estoque" style="width:44.0mm"></figure>
+  <div style="max-width:95mm">
+    <p>Ao lado, o menu de uma vendedora: só aparecem <b>Início</b>, <b>Pedidos</b>, <b>Clientes</b>, <b>Produtos</b> e <b>Estoque</b> <span class="n">1</span>. Na tela de pedidos, ela também não vê o botão <b>Cancelar pedido</b> nem o lucro.</p>
+    <p>Na dúvida, cadastre como <b>Vendedor</b>. Dá para mudar o perfil depois.</p>
+  </div>
+</div>
+
+<h3>11.2 A lista de funcionários</h3>
+<figure class="foto "><img src="imagens/64-funcionarios-lista.jpg" alt="Lista de funcionários com Perfil, 2FA e Situação" style="width:170.0mm"></figure>
+<ul class="lista">
+  <li><span class="n">1</span> <b>+ Novo funcionário</b>: cadastra uma pessoa.</li>
+  <li><span class="n">2</span> <b>Perfil</b>: Administrador (vermelho) ou Vendedor (azul).</li>
+  <li><span class="n">3</span> <b>2FA</b> (verificação em duas etapas): <b>Ativo</b> quando a pessoa já ligou o aplicativo do celular; <b>Pendente</b> quando ainda não fez o primeiro acesso.</li>
+  <li><span class="n">4</span> <b>Situação</b>: <b>Ativo</b> ou <b>Desativado</b>.</li>
+</ul>
+
+<h3>11.3 Cadastrar um funcionário</h3>
+<ol class="passos">
+  <li>Clique em <b>+ Novo funcionário</b>.</li>
+  <li>Preencha <b>Nome</b> <span class="n">1</span> e <b>E-mail</b> <span class="n">2</span> (o e-mail é o que a pessoa vai usar para entrar) e escolha o <b>Perfil</b> <span class="n">3</span>.</li>
+  <li>Clique em <b>Criar funcionário</b> <span class="n">4</span>.
+  <figure class="foto "><img src="imagens/65-funcionario-novo.jpg" alt="Formulário Novo funcionário com Nome, E-mail, Perfil e Criar funcionário" style="width:161.0mm"></figure></li>
+  <li>O sistema mostra a <b>senha temporária</b> <span class="n">1</span> da pessoa. Ela aparece <b>uma vez só</b> <span class="n">2</span>: anote ou passe agora.
+  <figure class="foto "><img src="imagens/66-senha-temporaria.jpg" alt="Tela Funcionário criado com a senha temporária em destaque" style="width:170.0mm"></figure></li>
+  <li>Clique em <b>Voltar para Funcionários</b> <span class="n">3</span>.</li>
+</ol>
+<div class="aviso atencao">
+  <b>Atenção: como passar a senha temporária com segurança</b>
+  <p>Passe <b>pessoalmente</b> ou por <b>ligação</b>, soletrando. A senha tem só letras minúsculas e números, em quatro grupos de quatro separados por tracinhos (por exemplo, <b>w3gb-2jrz-mvd3-vtce</b>), e não usa letras que se confundem com números, como “o” e “0”. Os tracinhos fazem parte dela. Não mande em grupo de WhatsApp nem deixe anotada à vista. No primeiro acesso, a pessoa troca a senha e liga o aplicativo do celular, como no capítulo 2.</p>
+  <p>Se a senha se perder antes do primeiro acesso, use <b>Redefinir senha</b> (item 11.5) para gerar outra.</p>
+</div>
+<p>Se o e-mail já estiver em uso, o sistema avisa: <b>“Já existe um funcionário com este e-mail.”</b></p>
+
+<h3>11.4 A tela do funcionário</h3>
+<p>Na lista, clique no <b>nome</b> da pessoa. Em <b>Dados</b>, dá para mudar o nome e o <b>Perfil</b> <span class="n">1</span> e clicar em <b>Salvar</b>. O e-mail não muda por aqui. Você não pode mudar o seu próprio perfil.</p>
+<figure class="foto "><img src="imagens/67-funcionario-acesso.jpg" alt="Tela do funcionário com Perfil e o quadro Acesso: Redefinir senha, Zerar 2FA e Desativar" style="width:161.0mm"></figure>
+<p>No quadro <b>Acesso</b> ficam as três ações: <span class="n">2</span> <b>Redefinir senha</b>, <span class="n">3</span> <b>Zerar 2FA</b> e <span class="n">4</span> <b>Desativar</b>. Todas pedem confirmação antes.</p>
+
+<h3>11.5 Redefinir senha (a pessoa esqueceu a senha)</h3>
+<ol class="passos">
+  <li>Abra o funcionário e clique em <b>Redefinir senha</b>.</li>
+  <li>Na pergunta, clique em <b>Redefinir senha</b> <span class="n">1</span>.
+  <figure class="foto "><img src="imagens/68-dialogo-redefinir-senha.jpg" alt="Pergunta Redefinir a senha de Marcos Lima? com o botão Redefinir senha" style="width:116.2mm"></figure></li>
+  <li>Aparece a tela <b>Senha redefinida</b>, com uma senha temporária nova <span class="n">1</span>. Passe para a pessoa do mesmo jeito seguro do item 11.3.
+  <figure class="foto "><img src="imagens/68b-senha-redefinida.jpg" alt="Tela Senha redefinida com a nova senha temporária" style="width:170.0mm"></figure></li>
+</ol>
+<p>A pessoa sai do sistema na hora (em todos os aparelhos) e, no próximo acesso, entra com a senha temporária e cria uma nova. O aplicativo do celular dela continua valendo.</p>
+
+<h3>11.6 Zerar 2FA (celular perdido, trocado ou quebrado)</h3>
+<ol class="passos">
+  <li>Abra o funcionário e clique em <b>Zerar 2FA</b>.</li>
+  <li>Leia a pergunta e clique em <b>Zerar 2FA</b> <span class="n">1</span>.
+  <figure class="foto "><img src="imagens/69-dialogo-zerar-2fa.jpg" alt="Pergunta Zerar a verificação em duas etapas? com o botão Zerar 2FA" style="width:116.2mm"></figure></li>
+  <li>Aparece o aviso “Verificação em duas etapas zerada.”. O aplicativo antigo e os códigos de recuperação da pessoa deixam de valer, e ela sai do sistema na hora.</li>
+  <li>No próximo acesso, a pessoa entra com e-mail e senha e liga o aplicativo no celular novo (etapas 2 e 3 do capítulo 2, itens 2.3 a 2.6).</li>
+</ol>
+<div class="aviso atencao">
+  <b>Atenção: celular perdido ou roubado? Faça as duas coisas</b>
+  <p>Use <b>Zerar 2FA</b> <u>e também</u> <b>Redefinir senha</b>. A senha pode estar salva no navegador do celular perdido; com a senha nova, quem estiver com o aparelho não entra mais. Depois, passe a senha temporária nova para a pessoa.</p>
+  <p>Se quem perdeu o celular foi <b>você</b>, peça ao Lucas (o outro Administrador) para fazer isso na sua conta. Os dois administradores cobrem um ao outro.</p>
+</div>
+
+<h3>11.7 Desativar (a pessoa saiu da empresa)</h3>
+<ol class="passos">
+  <li>Abra o funcionário e clique em <b>Desativar</b> (botão vermelho).</li>
+  <li>Na pergunta, clique em <b>Desativar</b> <span class="n">1</span>.
+  <figure class="foto "><img src="imagens/70-dialogo-desativar.jpg" alt="Pergunta Desativar Marcos Lima? com o botão Desativar" style="width:116.2mm"></figure></li>
+</ol>
+<p>A pessoa perde o acesso na hora. Os pedidos e o histórico dela continuam guardados e aparecem nos relatórios. Ninguém consegue desativar a si mesmo. Para <b>reativar</b> alguém desativado por engano, fale com o Lucas: isso é feito na parte técnica.</p>
+
+<!-- ======================= 12 ======================= -->
+<h2 class="secao" id="s12"><span class="rotulo-cap">CAPÍTULO 12</span>Histórico de alterações</h2>
+<p class="intro">No menu, <b>Histórico</b> responde: <b>“Quem mudou o quê, e quando?”</b> Registra os cadastros e mudanças de clientes, produtos e funcionários e todas as entradas no sistema, inclusive as que deram errado. Só o Administrador vê.</p>
+<figure class="foto "><img src="imagens/71-historico.jpg" alt="Tela Histórico com o filtro de tipo, as datas e uma linha de alteração de funcionário" style="width:170.0mm"></figure>
+<ul class="lista">
+  <li><span class="n">1</span> <b>Tipo</b>: <b>Tudo</b>, <b>Clientes</b>, <b>Produtos</b>, <b>Funcionários</b> ou <b>Logins</b> (entradas no sistema).</li>
+  <li><span class="n">2</span> <b>De … até …</b>: o período. Ao abrir, mostra os últimos 30 dias.</li>
+  <li><span class="n">3</span> Cada linha diz <b>quando</b>, <b>quem</b> fez e <b>o quê</b>. Nas mudanças de cadastro, aparece o valor antigo e o novo (por exemplo, a mudança de um preço).</li>
+</ul>
+<h3>As entradas no sistema</h3>
+<p>Com o tipo <b>Logins</b> <span class="n">1</span>, aparecem só as entradas: <b>Login</b> em verde (deu certo, com o navegador usado, como “Edge no Windows”) e <b>Login recusado</b> em vermelho <span class="n">2</span>, com o e-mail tentado e o motivo (senha errada, código errado, bloqueio por excesso de tentativas, acesso desativado).</p>
+<figure class="foto "><img src="imagens/72-historico-logins.jpg" alt="Histórico filtrado por Logins, com entradas aceitas e recusadas" style="width:170.0mm"></figure>
+<div class="aviso dica">
+  <b>Para que serve</b>
+  <p>Muitas entradas recusadas seguidas para o mesmo e-mail podem ser alguém tentando adivinhar a senha. Se você vir isso para um e-mail da empresa, avise o Lucas. Os pedidos e o estoque têm o histórico próprio: veja a tela do pedido e a tela Estoque.</p>
+</div>
+
+<!-- ======================= 13 ======================= -->
+<h2 class="secao" id="s13"><span class="rotulo-cap">CAPÍTULO 13</span>Minha conta</h2>
+<p class="intro">Embaixo do menu, <b>Minha conta</b> mostra os seus dados e deixa trocar a sua senha e gerar novos códigos de recuperação.</p>
+<figure class="foto "><img src="imagens/73-minha-conta.jpg" alt="Tela Minha conta com os botões Trocar senha e Gerar novos códigos de recuperação" style="width:170.0mm"></figure>
+
+<h3>13.1 Trocar a sua senha</h3>
+<ol class="passos">
+  <li>Em <b>Minha conta</b>, clique em <b>Trocar senha</b> <span class="n">1</span>.</li>
+  <li>Digite a <b>Senha atual</b> <span class="n">1</span>, a <b>Nova senha</b> <span class="n">2</span> e repita em <b>Confirme a nova senha</b> <span class="n">3</span>. As regras são as mesmas do primeiro acesso (capítulo 2).</li>
+  <li>Clique em <b>Salvar nova senha</b> <span class="n">4</span>. O sistema volta para <b>Minha conta</b>.
+  <figure class="foto "><img src="imagens/74-trocar-senha.jpg" alt="Tela Trocar senha com Senha atual, Nova senha, Confirme a nova senha e Salvar nova senha" style="width:98.6mm"></figure></li>
+</ol>
+<p>Depois de trocar a senha, o próximo login pede de novo o código do celular, mesmo num computador de confiança.</p>
+
+<h3>13.2 Gerar novos códigos de recuperação</h3>
+<p>Faça isso quando usar vários códigos, perder o papel ou achar que alguém viu os códigos.</p>
+<ol class="passos">
+  <li>Em <b>Minha conta</b>, clique em <b>Gerar novos códigos de recuperação</b> <span class="n">2</span>.</li>
+  <li>Se você entrou há mais de alguns minutos, o sistema pede <span class="tela">Confirme que é você</span>: digite a sua <b>Senha</b> <span class="n">1</span> e clique em <b>Confirmar</b> <span class="n">2</span>. (Se preferir, clique em <b>Prefiro usar o código do aplicativo</b>.)
+  <figure class="foto "><img src="imagens/75-confirme-que-e-voce.jpg" alt="Tela Confirme que é você, pedindo a senha" style="width:104.7mm"></figure></li>
+  <li>Na tela <b>Gerar novos códigos de recuperação</b>, clique em <b>Gerar novos códigos</b> <span class="n">1</span>.
+  <figure class="foto "><img src="imagens/76-gerar-codigos.jpg" alt="Tela Gerar novos códigos de recuperação com o botão Gerar novos códigos" style="width:98.6mm"></figure></li>
+  <li>Aparecem 10 códigos novos <span class="n">1</span>. Anote no papel (ou clique em <b>Baixar</b> <span class="n">2</span>), guarde como no capítulo 2 e clique em <b>Voltar para Minha conta</b>.
+  <figure class="foto "><img src="imagens/77-novos-codigos.jpg" alt="Lista com os 10 códigos novos e o botão Baixar" style="width:98.6mm"></figure></li>
+</ol>
+<div class="aviso atencao">
+  <b>Atenção: os códigos antigos param de valer</b>
+  <p>Assim que você gera os novos, os do papel antigo não funcionam mais. Jogue o papel antigo fora (rasgado) e guarde o novo.</p>
+</div>
+<p>Para mudar o seu nome, e-mail ou perfil, fale com o outro Administrador (o Lucas).</p>
+
+<!-- ======================= 14 ======================= -->
+<h2 class="secao" id="s14"><span class="rotulo-cap">CAPÍTULO 14</span>Usar no celular</h2>
+<p class="intro">O sistema também funciona no navegador do celular (Chrome no Android, Safari no iPhone), com o mesmo endereço, o mesmo e-mail e a mesma senha. As telas se ajeitam ao tamanho do celular.</p>
+<div class="dupla">
+  <div><figure class="foto celular"><img src="imagens/82-celular-inicio.jpg" alt="Tela Início no celular, com o botão do menu no alto" style="width:78.0mm"></figure><p class="legenda">O menu fica escondido no botão <span class="n">1</span>.</p></div>
+  <div><figure class="foto celular"><img src="imagens/83-celular-menu-aberto.jpg" alt="Menu aberto no celular" style="width:78.0mm"></figure><p class="legenda">Tocando nele, o menu abre.</p></div>
+</div>
+<ul class="lista">
+  <li>O <b>menu</b> fica no botão de três tracinhos, no canto de cima à esquerda <span class="n">1</span>. Toque nele para abrir e escolha a tela. Toque de novo para fechar.</li>
+  <li>As <b>tabelas viram cartões</b>: cada pedido, cliente ou produto aparece num cartão, um embaixo do outro. Role a tela com o dedo.</li>
+  <li>No <b>pedido</b>, o total e o botão <b>Confirmar</b> ficam numa barra fixa embaixo da tela <span class="n">1</span>, sempre à vista.</li>
+</ul>
+<div class="dupla">
+  <div><figure class="foto celular"><img src="imagens/84-celular-pedidos.jpg" alt="Lista de pedidos no celular em forma de cartões" style="width:78.0mm"></figure><p class="legenda">Pedidos em cartões.</p></div>
+  <div><figure class="foto celular"><img src="imagens/85-celular-pedido.jpg" alt="Pedido no celular com a barra de Total e Confirmar embaixo" style="width:78.0mm"></figure><p class="legenda">Barra com o total e o botão Confirmar.</p></div>
+</div>
+<div class="aviso dica">
+  <b>Dica</b>
+  <p>No celular, o aplicativo autenticador e o sistema ficam no mesmo aparelho: abra o autenticador, veja o número, volte ao navegador e digite. No celular, escolha <b>Confiar neste computador</b> só se o celular for seu e tiver senha de bloqueio.</p>
+</div>
+
+<!-- ======================= 15 ======================= -->
+<h2 class="secao" id="s15"><span class="rotulo-cap">CAPÍTULO 15</span>Deu problema, e agora?</h2>
+<p class="intro">Respostas curtas para as situações mais comuns. Se nada resolver, fale com o Lucas (capítulo 16).</p>
+
+<div class="pergunta">
+  <h4>Esqueci a minha senha</h4>
+  <p>Na tela Entrar não existe “esqueci a senha”. Peça ao Lucas (ou ao outro Administrador) para usar <b>Redefinir senha</b> na sua conta (capítulo 11). Ele passa uma senha temporária, e você cria uma nova ao entrar.</p>
+</div>
+<div class="pergunta">
+  <h4>Perdi o celular (ou troquei de celular)</h4>
+  <p>Para entrar agora, use um <b>código de recuperação</b> do papel (item 3.3). Depois, peça ao Lucas para fazer <b>Zerar 2FA</b> e <b>Redefinir senha</b> na sua conta, e ligue o aplicativo no celular novo (capítulo 2). Celular trocado, mas com o antigo em mãos? Basta o Zerar 2FA.</p>
+</div>
+<div class="pergunta">
+  <h4>O código do celular não é aceito (“Código incorreto.”)</h4>
+  <p>Confira se o celular está com <b>data e hora automáticas</b>. Digite o número que está aparecendo <b>agora</b> e, se o círculo do aplicativo estiver quase acabando, espere o próximo. Cada número só vale uma vez.</p>
+  <p>Confira se está olhando a conta <b>Helptoner Pedidos</b> no aplicativo (no Microsoft Authenticator, toque nela para ver o número). Se houver mais de uma, veja a próxima pergunta.</p>
+  <figure class="foto pequena"><img src="imagens/10-codigo-incorreto.jpg" alt="Mensagem Código incorreto, embaixo do campo do código" style="width:78.0mm"></figure>
+</div>
+<div class="pergunta">
+  <h4>Tem mais de uma Helptoner Pedidos no aplicativo</h4>
+  <p>Isso acontece quando o aplicativo foi ligado de novo (por exemplo, depois de um Zerar 2FA). Só a mais nova vale. Experimente o número de uma de cada vez: a que o sistema aceitar é a certa. Depois, apague as outras, para não confundir na próxima vez:</p>
+  <ul class="lista">
+    <li><b>Google Authenticator</b>: deslize a conta antiga para o lado (ou toque e segure nela), toque na lixeira ou em <b>Excluir</b> e confirme.</li>
+    <li><b>Microsoft Authenticator</b>: toque na conta antiga, depois na engrenagem, no alto, à direita, e em <b>Remover conta</b>. Confirme.</li>
+  </ul>
+  <p>Na dúvida, não apague nada e fale com o Lucas.</p>
+</div>
+<div class="pergunta">
+  <h4>“E-mail ou senha incorretos.”</h4>
+  <p>Confira o e-mail (sem espaço no fim) e a senha: veja se o <b>Caps Lock</b> (letra maiúscula) não está ligado. Depois de algumas tentativas erradas, o sistema bloqueia por um tempo (veja a próxima pergunta).</p>
+  <figure class="foto pequena"><img src="imagens/13-senha-incorreta.jpg" alt="Mensagem E-mail ou senha incorretos na tela Entrar" style="width:78.0mm"></figure>
+</div>
+<div class="pergunta">
+  <h4>“Muitas tentativas erradas… bloqueado por alguns minutos”</h4>
+  <p>É uma proteção: depois de várias tentativas erradas seguidas, o sistema bloqueia aquele e-mail por uns minutos, para ninguém ficar tentando adivinhar a senha. <b>Espere uns 5 minutos</b> e tente de novo com calma. Se não lembrar a senha, peça para redefinir. A tela “Muitas tentativas” pede para esperar um minuto.</p>
+  <figure class="foto pequena"><img src="imagens/14-muitas-tentativas.jpg" alt="Mensagem Muitas tentativas erradas, o acesso ficou bloqueado por alguns minutos" style="width:78.0mm"></figure>
+</div>
+<div class="pergunta">
+  <h4>Apareceu a tela Entrar no meio do trabalho</h4>
+  <p>A sessão expirou: o sistema sai sozinho depois de 2 horas sem uso. Entre de novo; ele volta para a tela em que você estava. Rascunhos de pedido não se perdem.</p>
+  <p>Se aparecer <b>“Sua sessão foi renovada. Recarregue a página e tente de novo.”</b>, aperte <kbd>F5</kbd> (ou o botão de recarregar do navegador) e repita o que estava fazendo.</p>
+</div>
+<div class="pergunta">
+  <h4>“Acesso negado”</h4>
+  <p>A tela que você tentou abrir não é do seu perfil (por exemplo, um vendedor abrindo Relatórios). Clique em <b>Voltar ao início</b>. Se você acha que deveria ter acesso, fale com o Lucas.</p>
+  <figure class="foto pequena"><img src="imagens/78-erro-403.jpg" alt="Página Acesso negado com o botão Voltar ao início" style="width:78.0mm"></figure>
+</div>
+<div class="pergunta">
+  <h4>“Página não encontrada”</h4>
+  <p>O endereço está errado ou é de algo que não existe mais (por exemplo, um link antigo). Clique em <b>Voltar ao início</b> e chegue à tela pelo menu.</p>
+  <figure class="foto pequena"><img src="imagens/80-erro-404.jpg" alt="Página não encontrada com o botão Voltar ao início" style="width:78.0mm"></figure>
+</div>
+<div class="pergunta">
+  <h4>“Algo deu errado”</h4>
+  <p>Foi um erro do sistema, não seu. Espere um pouco e tente de novo. Se continuar, <b>anote o Código de referência</b> que aparece na tela e passe para o Lucas, junto com o que você estava fazendo: com esse código ele acha o problema.</p>
+  <figure class="foto pequena"><img src="imagens/81-erro-500.jpg" alt="Página Algo deu errado com o código de referência" style="width:78.0mm"></figure>
+</div>
+<div class="pergunta">
+  <h4>Apareceu “Não foi possível concluir. Tente de novo.”</h4>
+  <p>A internet pode ter caído por um instante. Confira a conexão e repita o último clique. O mesmo vale para “Não foi possível gerar o PDF” ou “Não foi possível gerar o arquivo”.</p>
+</div>
+<div class="pergunta">
+  <h4>O estoque de um produto parece errado</h4>
+  <p>Abra <b>Estoque</b>, digite o código no filtro <b>Código do produto</b> e aumente o período em <b>De</b>. Ali aparece cada entrada, venda, cancelamento e ajuste, com quem fez (item 9.6). Se a contagem física for diferente, corrija com um <b>Ajuste</b> e escreva o motivo.</p>
+</div>
+<div class="pergunta">
+  <h4>Não acho um cliente ou produto na hora do pedido</h4>
+  <p>Ele pode estar <b>inativo</b> ou não estar cadastrado. Procure em <b>Clientes</b> ou <b>Produtos</b> com <b>Mostrar inativos</b> marcado, e reative ou cadastre.</p>
+</div>
+
+<!-- ======================= 16 ======================= -->
+<h2 class="secao" id="s16"><span class="rotulo-cap">CAPÍTULO 16</span>Contatos</h2>
+<div class="cartao-contato">
+  <p><b>Em caso de dúvida, fale com o Lucas.</b></p>
+  <p>Telefone / WhatsApp: <span class="linha-telefone"></span></p>
+  <p>E-mail: <span class="linha-telefone"></span></p>
+</div>
+<h3>Para anotar</h3>
+<table class="simples">
+  <tr><td style="width:45%">Endereço do sistema</td><td></td></tr>
+  <tr><td>Meu e-mail de entrada</td><td></td></tr>
+  <tr><td>Onde guardei os códigos de recuperação</td><td></td></tr>
+  <tr><td>Data em que gerei os códigos atuais</td><td></td></tr>
+</table>
+<div class="aviso atencao">
+  <b>Atenção</b>
+  <p>Não anote aqui a sua senha nem os códigos de recuperação. Este manual pode ficar à vista de outras pessoas.</p>
+</div>
+
+</main>
+</body>
+</html>

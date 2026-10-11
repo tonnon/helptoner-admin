@@ -1,0 +1,20 @@
+name: Backup
+on:
+  schedule:
+    - cron: "0 6 * * *" # 03:00 em Brasília
+  workflow_dispatch: {}
+permissions: { contents: read }
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Data do backup
+        id: data
+        run: echo "dia=$(date +%F)" >> "$GITHUB_OUTPUT"
+      - uses: ./.github/actions/backup
+        with:
+          nome: backup-${{ steps.data.outputs.dia }}
+          database-url: ${{ secrets.DATABASE_URL_DIRETA }}
+          senha: ${{ secrets.BACKUP_SENHA }}

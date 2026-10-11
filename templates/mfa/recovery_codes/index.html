@@ -1,0 +1,31 @@
+{% extends "mfa/base_manage.html" %}
+{% comment %}
+Códigos de recuperação (no lugar da tela do allauth). No primeiro acesso, é a etapa 3 e termina
+com "Guardei os códigos, continuar"; depois, aparece quando a pessoa gera códigos novos em
+"Minha conta".
+{% endcomment %}
+{% block head_title %}{% if user.codigos_recuperacao_entregues %}Códigos de recuperação{% else %}Primeiro acesso{% endif %}{% endblock %}
+{% block content %}
+  {% if user.codigos_recuperacao_entregues %}
+    <h1>Códigos de recuperação</h1>
+  {% else %}
+    {% include "contas/cabecalho_primeiro_acesso.html" with etapa=3 %}
+  {% endif %}
+  <p class="mt-4 text-sm text-texto-2">Guarde estes códigos num lugar seguro: anote no papel ou baixe o arquivo. Se perder o celular, use um deles no lugar do código do aplicativo. Cada código vale uma vez só.</p>
+  <ul class="mt-4 grid grid-cols-2 gap-2" aria-label="Códigos de recuperação">
+    {% for codigo in unused_codes %}
+      <li class="rounded-lg bg-fundo px-3 py-2 text-center font-mono text-[15px] font-semibold tracking-wider">{{ codigo }}</li>
+    {% endfor %}
+  </ul>
+  {% if can_download_codes %}
+    <a href="{% url 'mfa_download_recovery_codes' %}" class="btn-sec mt-4 w-full">Baixar</a>
+  {% endif %}
+  {% if user.codigos_recuperacao_entregues %}
+    <a href="{% url 'contas:minha_conta' %}" class="btn-pri mt-3 w-full">Voltar para Minha conta</a>
+  {% else %}
+    <form method="post" action="{% url 'contas:primeiro_acesso_concluir' %}" class="mt-3">
+      {% csrf_token %}
+      <button type="submit" class="btn-pri w-full">Guardei os códigos, continuar</button>
+    </form>
+  {% endif %}
+{% endblock %}

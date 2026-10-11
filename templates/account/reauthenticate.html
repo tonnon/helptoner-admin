@@ -1,0 +1,18 @@
+{% extends "account/base_entrance.html" %}
+{% comment %}
+Confirmação com a senha (no lugar da tela do allauth), pedida antes de ativar o autenticador e
+de ver ou gerar códigos de recuperação quando o login não é recente.
+{% endcomment %}
+{% block head_title %}Confirme que é você{% endblock %}
+{% block content %}
+  <h1>Confirme que é você</h1>
+  <p class="mt-2 text-sm text-texto-2">Por segurança, digite sua senha de novo para continuar.</p>
+  <form method="post" action="{% url 'account_reauthenticate' %}" class="mt-5">
+    {% csrf_token %}
+    {% include "componentes/erros_do_formulario.html" %}
+    {% include "componentes/campo.html" with campo=form.password rotulo="Senha" %}
+    {{ redirect_field }}
+    <button type="submit" class="btn-pri mt-6 w-full">Confirmar</button>
+  </form>
+  {% include "componentes/outras_confirmacoes.html" %}
+{% endblock %}

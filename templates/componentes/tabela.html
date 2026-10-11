@@ -1,0 +1,36 @@
+{% load formato %}{% comment %}
+Desenha uma Tabela dos relatórios (apps/relatorios/tabelas.py), formatando cada célula pelo tipo da
+coluna: dinheiro (brl), inteiro, percentual (pct), data (data_br) ou texto. No celular, cada linha
+vira um cartão (tabela-responsiva). Com tabela.pedidos_a_repetir, cada linha ganha o botão
+"Repetir pedido" (POST para pedidos:repetir).
+Parâmetros: tabela; vazio (mensagem quando não há linhas, opcional).
+{% endcomment %}
+{% if tabela.linhas %}
+<table class="tabela-responsiva">
+  <thead>
+    <tr>
+      {% for coluna in tabela.colunas %}<th scope="col"{% if coluna.tipo != "texto" %} class="num"{% endif %}>{{ coluna.rotulo }}</th>{% endfor %}
+      {% if tabela.pedidos_a_repetir %}<th scope="col"><span class="sr-only">Ações</span></th>{% endif %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for celulas, pedido in tabela.linhas_da_tela %}
+      <tr>
+        {% for coluna, valor in celulas %}
+          {% if coluna.tipo == "texto" %}<td data-rotulo="{{ coluna.rotulo }}">{{ valor|default:"—" }}</td>{% else %}<td data-rotulo="{{ coluna.rotulo }}" class="num">{% if coluna.tipo == "dinheiro" %}{{ valor|brl }}{% elif coluna.tipo == "inteiro" %}{{ valor|inteiro }}{% elif coluna.tipo == "percentual" %}{{ valor|pct }}{% else %}{{ valor|data_br }}{% endif %}</td>{% endif %}
+        {% endfor %}
+        {% if pedido %}
+          <td data-rotulo="" class="num">
+            <form method="post" action="{% url 'pedidos:repetir' pedido %}">
+              {% csrf_token %}
+              <button type="submit" class="link-acao">Repetir pedido</button>
+            </form>
+          </td>
+        {% endif %}
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+{% include "componentes/vazio.html" with mensagem=vazio|default:"Nada para mostrar com estes filtros." %}
+{% endif %}

@@ -1,0 +1,52 @@
+[project]
+name = "helptoner-pedidos"
+version = "0.1.0"
+requires-python = ">=3.14,<3.15"
+dependencies = [
+    "django>=6.1,<6.2",
+    "psycopg[binary]>=3.3",
+    "dj-database-url>=3.1",
+    "argon2-cffi>=25.1.0",
+    "django-simple-history>=3.13.0",
+    "whitenoise>=6.12.0",
+    "django-allauth[mfa]>=65.19.7",
+    "fpdf2>=2.8.9",
+    "openpyxl>=3.1.5",
+    "sentry-sdk[django]>=2.71.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "pytest-django>=4.14",
+    "ruff>=0.16",
+    "python-dotenv>=1.1",
+    "pytest-playwright>=0.9.0",
+    "pypdf>=6.19.0",
+    "pip-audit>=2.10.1",
+]
+
+[tool.uv]
+package = false
+
+[tool.vercel.scripts]
+build = "python scripts/vercel_build.py"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.teste"
+addopts = "-m 'not e2e'"
+markers = ["e2e: testes no navegador (Playwright)"]
+testpaths = ["tests"]
+
+[tool.ruff]
+extend-exclude = ["docs"]
+line-length = 100
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "DJ", "S", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106", "S311", "S603", "S607"]
+"**/migrations/*.py" = ["E501"]
+"scripts/**" = ["S603", "S607", "S310"]

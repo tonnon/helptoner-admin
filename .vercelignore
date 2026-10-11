@@ -1,0 +1,13 @@
+tests/
+docs/
+tailwind/
+.github/
+.ferramentas/
+test-results/
+.superpowers/
+staticfiles/
+.env*
+*.dump
+*.gpg
+backup*
+restauracao/

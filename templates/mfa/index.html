@@ -1,0 +1,11 @@
+{% extends "mfa/base_manage.html" %}
+{% comment %}
+A tela padrão do allauth para o 2FA não é usada: trocar a senha e gerar códigos novos ficam em
+"Minha conta", e o autenticador não pode ser desligado.
+{% endcomment %}
+{% block head_title %}Verificação em duas etapas{% endblock %}
+{% block content %}
+  <h1>Verificação em duas etapas</h1>
+  <p class="mt-2 text-sm text-texto-2">Para trocar a senha ou gerar novos códigos de recuperação, use a tela Minha conta.</p>
+  <a href="{% url 'contas:minha_conta' %}" class="btn-pri mt-5 w-full">Ir para Minha conta</a>
+{% endblock %}

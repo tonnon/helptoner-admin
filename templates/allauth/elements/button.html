@@ -1,0 +1,4 @@
+{% load allauth %}{% comment %}
+Botão ou link com cara de botão. Pelas "tags" do allauth: danger vira btn-perigo; outline, link,
+secondary e cancel viram btn-sec; o resto, btn-pri.
+{% endcomment %}<{% if attrs.href %}a href="{{ attrs.href }}"{% else %}button{% endif %} class="{% if 'danger' in attrs.tags %}btn-perigo{% elif 'outline' in attrs.tags or 'link' in attrs.tags or 'secondary' in attrs.tags or 'cancel' in attrs.tags %}btn-sec{% else %}btn-pri{% endif %}"{% if attrs.form %} form="{{ attrs.form }}"{% endif %}{% if attrs.id %} id="{{ attrs.id }}"{% endif %}{% if attrs.name %} name="{{ attrs.name }}"{% endif %}{% if attrs.value %} value="{{ attrs.value }}"{% endif %}{% if attrs.type %} type="{{ attrs.type }}"{% endif %}>{% slot %}{% endslot %}</{% if attrs.href %}a{% else %}button{% endif %}>

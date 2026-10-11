@@ -1,0 +1,11 @@
+{% extends "base_publica.html" %}
+{% comment %}
+Renderizada sem o request (apps.core.views.erro_400 e RecusarNuloMiddleware): não depende da
+sessão nem do banco.
+{% endcomment %}
+{% block titulo %}Requisição inválida - Helptoner Pedidos{% endblock %}
+{% block conteudo %}
+  <h1>Requisição inválida.</h1>
+  <p class="mt-2 text-texto-2">O endereço ou os dados enviados têm algo que o sistema não aceita.</p>
+  <a href="/" class="btn-pri mt-5">Voltar ao início</a>
+{% endblock %}

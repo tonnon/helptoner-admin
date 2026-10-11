@@ -1,0 +1,17 @@
+name: Cliente PostgreSQL 18
+description: >-
+  Instala o postgresql-client-18 (repositório PGDG) e o coloca à frente no PATH,
+  porque o pg_dump/pg_restore 16 do runner não lê arquivos do PostgreSQL 18.
+runs:
+  using: composite
+  steps:
+    - name: Instalar postgresql-client-18
+      shell: bash
+      run: |
+        set -euo pipefail
+        sudo apt-get update
+        sudo apt-get install -y postgresql-common
+        sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+        sudo apt-get install -y postgresql-client-18
+        echo "/usr/lib/postgresql/18/bin" >> "$GITHUB_PATH"
+        /usr/lib/postgresql/18/bin/pg_dump --version

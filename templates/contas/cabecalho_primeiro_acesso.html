@@ -1,0 +1,17 @@
+{% comment %}
+Título e etapas do primeiro acesso (docs/esbocos/telas.html), com o botão de sair.
+Parâmetro: etapa (1, 2 ou 3).
+Ex.: {% include "contas/cabecalho_primeiro_acesso.html" with etapa=2 %}
+{% endcomment %}
+<div class="flex items-start justify-between gap-3">
+  <h1>Primeiro acesso</h1>
+  <form method="post" action="{% url 'account_logout' %}">
+    {% csrf_token %}
+    <button type="submit" class="text-sm font-semibold text-texto-2 hover:text-azul">Sair</button>
+  </form>
+</div>
+<ol class="mt-3 flex flex-wrap gap-1.5" aria-label="Etapas do primeiro acesso">
+  <li class="passo {% if etapa > 1 %}passo-feito{% else %}passo-atual{% endif %}"{% if etapa == 1 %} aria-current="step"{% endif %}>1 · Nova senha{% if etapa > 1 %} ✓{% endif %}</li>
+  <li class="passo {% if etapa > 2 %}passo-feito{% elif etapa == 2 %}passo-atual{% endif %}"{% if etapa == 2 %} aria-current="step"{% endif %}>2 · Autenticador{% if etapa > 2 %} ✓{% endif %}</li>
+  <li class="passo {% if etapa == 3 %}passo-atual{% endif %}"{% if etapa == 3 %} aria-current="step"{% endif %}>3 · Códigos de recuperação</li>
+</ol>

@@ -1,0 +1,3 @@
+{% include "componentes/erros_do_formulario.html" with form=attrs.form %}
+{% for campo in attrs.form.hidden_fields %}{{ campo }}{% endfor %}
+{% for campo in attrs.form.visible_fields %}{% include "componentes/campo.html" %}{% endfor %}
