@@ -1,5 +1,5 @@
 version = 1
-revision = 5
+revision = 3
 requires-python = "==3.14.*"
 
 [[package]]
@@ -474,7 +474,7 @@ requires-dist = [
     { name = "django-simple-history", specifier = ">=3.13.0" },
     { name = "fpdf2", specifier = ">=2.8.9" },
     { name = "openpyxl", specifier = ">=3.1.5" },
-    { name = "psycopg", extras = ["binary"], specifier = ">=3.3" },
+    { name = "psycopg", extras = ["binary"], specifier = ">=3.3.6" },
     { name = "sentry-sdk", extras = ["django"], specifier = ">=2.71.0" },
     { name = "whitenoise", specifier = ">=6.12.0" },
 ]
